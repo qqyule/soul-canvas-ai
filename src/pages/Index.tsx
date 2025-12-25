@@ -29,10 +29,23 @@ const Index = () => {
 	const [showHistory, setShowHistory] = useState(false)
 
 	const { toast } = useToast()
-	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } =
-		useDailyLimit()
+	const {
+		remainingCount,
+		dailyLimit,
+		isLimitReached,
+		consumeGeneration,
+		upgradeQuota,
+	} = useDailyLimit()
 	const { history, addToHistory, deleteFromHistory, clearAllHistory } =
 		useHistory()
+
+	const handleUpgrade = useCallback(() => {
+		upgradeQuota()
+		toast({
+			title: '权益升级成功！🎉',
+			description: `感谢您的支持，您已获得每日 ${dailyLimit} -> 1000 次生成次数`,
+		})
+	}, [upgradeQuota, dailyLimit, toast])
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
@@ -246,6 +259,8 @@ const Index = () => {
 			<LimitExceededDialog
 				open={showLimitDialog}
 				onClose={() => setShowLimitDialog(false)}
+				dailyLimit={dailyLimit}
+				onUpgrade={handleUpgrade}
 			/>
 
 			{/* 历史记录面板 */}
