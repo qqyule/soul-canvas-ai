@@ -9,7 +9,7 @@ port = 8787
 # 环境变量（非敏感信息）
 [vars]
 # 允许的来源域名，生产环境需要更新为你的 GitHub Pages 域名
-ALLOWED_ORIGINS = "http://localhost:8080,http://localhost:5173,http://127.0.0.1:5173"
+ALLOWED_ORIGINS = "http://localhost:8080,http://localhost:5173,http://127.0.0.1:5173,http://soul-canvas-ai.qqyule.top"
 
 # 注意：OPENROUTER_API_KEY 应该使用 wrangler secret put 命令设置
 # 不要在这里直接写入 API Key
