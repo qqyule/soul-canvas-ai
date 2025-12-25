@@ -25,7 +25,8 @@ const getApiProxyUrl = (): string => {
 /** 获取图像生成模型 */
 const getImageModel = (): string => {
 	return (
-		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL || 'google/gemini-2.0-flash-exp' // 使用支持图像输出的模型
+		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL ||
+		'google/gemini-3-pro-image-preview' // 使用支持图像输出的模型
 	)
 }
 

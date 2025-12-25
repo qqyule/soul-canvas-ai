@@ -231,6 +231,12 @@ const Index = () => {
 				</div>
 			</main>
 
+			<footer className="py-6 text-center">
+				<p className="text-sm text-muted-foreground/60">
+					大模型版本：Google Nano Banana Pro
+				</p>
+			</footer>
+
 			{/* Generation Result Modal */}
 			<GenerationResultView
 				result={result}
