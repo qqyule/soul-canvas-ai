@@ -14,6 +14,13 @@ import {
 	type GenerationResult,
 	type GenerationStatus,
 } from '@/types/canvas'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { STARRED_DAILY_LIMIT } from '@/lib/storage'
 import { useToast } from '@/hooks/use-toast'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useHistory } from '@/hooks/use-history'
@@ -161,22 +168,36 @@ const Index = () => {
 
 								<div className="flex items-center gap-3">
 									{/* 剩余次数显示 */}
-									<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/50 text-sm">
-										<Sparkles className="h-4 w-4 text-primary" />
-										<span className="text-muted-foreground">
-											今日剩余{' '}
-											<span
-												className={
-													remainingCount <= 5
-														? 'text-amber-500 font-medium'
-														: 'text-foreground font-medium'
-												}
-											>
-												{remainingCount}
-											</span>
-											/{dailyLimit} 次
-										</span>
-									</div>
+									{/* 剩余次数显示 */}
+									<TooltipProvider delayDuration={0}>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/50 text-sm cursor-help hover:bg-muted/50 transition-colors">
+													<Sparkles className="h-4 w-4 text-primary" />
+													<span className="text-muted-foreground">
+														今日剩余{' '}
+														<span
+															className={
+																remainingCount <= 5
+																	? 'text-amber-500 font-medium'
+																	: 'text-foreground font-medium'
+															}
+														>
+															{remainingCount}
+														</span>
+														/{dailyLimit} 次
+													</span>
+												</div>
+											</TooltipTrigger>
+											{dailyLimit < STARRED_DAILY_LIMIT && (
+												<TooltipContent>
+													<p>
+														点击 Star 即可升级至 {STARRED_DAILY_LIMIT} 次/日 ✨
+													</p>
+												</TooltipContent>
+											)}
+										</Tooltip>
+									</TooltipProvider>
 
 									{/* 历史记录按钮 */}
 									<Button
