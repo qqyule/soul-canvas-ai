@@ -168,7 +168,6 @@ const Index = () => {
 
 								<div className="flex items-center gap-3">
 									{/* 剩余次数显示 */}
-									{/* 剩余次数显示 */}
 									<TooltipProvider delayDuration={0}>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -192,7 +191,8 @@ const Index = () => {
 											{dailyLimit < STARRED_DAILY_LIMIT && (
 												<TooltipContent>
 													<p>
-														点击 Star 即可升级至 {STARRED_DAILY_LIMIT} 次/日 ✨
+														前往右上角 GitHub 点个 Star ⭐️
+														支持一下，解锁更多生成次数！
 													</p>
 												</TooltipContent>
 											)}
