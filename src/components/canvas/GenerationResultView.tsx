@@ -37,7 +37,7 @@ const GenerationResultView = ({
 			document.body.removeChild(a)
 			URL.revokeObjectURL(url)
 		} catch (error) {
-			console.error('Download failed:', error)
+			// Ignore error
 		}
 	}
 

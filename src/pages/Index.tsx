@@ -81,8 +81,6 @@ const Index = () => {
 					description: errorMessage,
 					variant: 'destructive',
 				})
-
-				console.error('[Index] 生成失败:', error)
 			}
 		},
 		[selectedStyle, toast, isLimitReached, consumeGeneration, addToHistory]

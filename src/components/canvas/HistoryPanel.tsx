@@ -57,7 +57,7 @@ const handleDownload = async (url: string, filename: string) => {
 		document.body.removeChild(a)
 		URL.revokeObjectURL(blobUrl)
 	} catch (error) {
-		console.error('Download failed:', error)
+		// Ignore error
 	}
 }
 

@@ -54,7 +54,7 @@ export const useHistory = (): UseHistoryReturn => {
 			setHistory(items)
 			prevHistoryRef.current = items
 		} catch (error) {
-			console.error('Failed to load history:', error)
+			// Ignore error
 		} finally {
 			setIsLoading(false)
 		}

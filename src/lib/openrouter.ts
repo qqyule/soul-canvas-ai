@@ -26,7 +26,7 @@ const getApiProxyUrl = (): string => {
 const getImageModel = (): string => {
 	return (
 		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL ||
-		'google/gemini-3-pro-image-preview' // 使用支持图像输出的模型
+		'google/gemini-2.5-flash-image' // 使用支持图像输出的模型
 	)
 }
 
@@ -152,9 +152,6 @@ export async function generateImageFromSketch(
 		stream: false, // 确保返回完整响应
 	}
 
-	console.log('[OpenRouter] 开始生成图像, 模型:', model)
-	console.log('[OpenRouter] Prompt:', fullPrompt)
-
 	// 通过 Cloudflare Worker 代理发送请求（不需要在前端传递 API Key）
 	const response = await fetch(`${apiProxyUrl}/chat/completions`, {
 		method: 'POST',
@@ -166,12 +163,11 @@ export async function generateImageFromSketch(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		console.error('[OpenRouter] 请求失败:', response.status, errorText)
+
 		throw new Error(`图像生成失败: ${response.status} - ${errorText}`)
 	}
 
 	const data: ChatCompletionsResponse = await response.json()
-	console.log('[OpenRouter] 响应:', JSON.stringify(data, null, 2))
 
 	if (data.error) {
 		throw new Error(`图像生成错误: ${data.error.message}`)
@@ -184,7 +180,6 @@ export async function generateImageFromSketch(
 	if (message?.images && message.images.length > 0) {
 		const firstImage = message.images[0]
 		if (firstImage.image_url?.url) {
-			console.log('[OpenRouter] 从 images 数组获取到图像')
 			return firstImage.image_url.url
 		}
 	}
@@ -197,7 +192,6 @@ export async function generateImageFromSketch(
 		// 尝试从其他字段提取信息
 		const reasoning = (message as Record<string, unknown>)?.reasoning
 		if (reasoning) {
-			console.log('[OpenRouter] 模型返回了推理内容但没有图像')
 			throw new Error(
 				'当前模型未能生成图像。请检查 VITE_OPENROUTER_IMAGE_MODEL 配置，建议使用支持图像生成的模型如 google/gemini-2.5-flash-image-preview'
 			)
@@ -229,7 +223,7 @@ export async function generateImageFromSketch(
 		if (urlMatch) {
 			return urlMatch[0]
 		}
-		console.error('[OpenRouter] 无法解析响应内容:', content.substring(0, 500))
+
 		throw new Error(
 			`图像生成返回格式不正确。模型返回了文本但不是图像。请确认使用的模型 (${getImageModel()}) 支持图像生成输出。`
 		)
@@ -242,10 +236,6 @@ export async function generateImageFromSketch(
 		}
 	}
 
-	console.error(
-		'[OpenRouter] 无法从响应中提取图像:',
-		JSON.stringify(content, null, 2)
-	)
 	throw new Error(
 		`图像生成返回格式不正确：未找到图像数据。请确认模型 (${getImageModel()}) 支持图像生成。`
 	)

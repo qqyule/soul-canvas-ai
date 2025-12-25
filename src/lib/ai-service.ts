@@ -30,20 +30,13 @@ export async function generateFromSketch(
 	sketchDataUrl: string,
 	style: StylePreset
 ): Promise<GenerationResult> {
-	console.log('[AI Service] 开始图生图, 风格:', style.nameZh)
-
 	let generatedImageUrl: string
 	try {
 		generatedImageUrl = await generateImageFromSketch(
 			sketchDataUrl,
 			style.prompt
 		)
-		console.log(
-			'[AI Service] 生成成功:',
-			generatedImageUrl.substring(0, 100) + '...'
-		)
 	} catch (error) {
-		console.error('[AI Service] 生成失败:', error)
 		throw new AIServiceError(
 			'图像生成失败，请稍后重试',
 			error instanceof Error ? error : undefined
