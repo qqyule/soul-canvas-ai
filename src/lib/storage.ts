@@ -37,8 +37,14 @@ export interface DailyUsage {
 
 // ==================== 常量 ====================
 
-/** 每日最大生成次数 */
-export const DAILY_LIMIT = 20
+/** 基础每日生成次数 */
+export const BASE_DAILY_LIMIT = 20
+
+/** Star 后每日生成次数 */
+export const STARRED_DAILY_LIMIT = 1000
+
+/** GitHub 仓库地址 */
+export const GITHUB_REPO_URL = 'https://github.com/qqyule/soul-canvas-ai'
 
 /** 历史记录最大保存数量 */
 export const MAX_HISTORY_SIZE = 50
@@ -47,6 +53,7 @@ export const MAX_HISTORY_SIZE = 50
 const STORAGE_KEYS = {
 	DAILY_USAGE: 'shenbimaliang_daily_usage',
 	HISTORY: 'shenbimaliang_history',
+	IS_STARRED: 'shenbimaliang_is_starred',
 } as const
 
 // ==================== 工具函数 ====================
@@ -74,6 +81,32 @@ const safeJsonParse = <T>(json: string | null, fallback: T): T => {
 	}
 }
 
+// ==================== Star 状态管理 ====================
+
+/**
+ * 检查用户是否已 Star
+ */
+export const isUserStarred = (): boolean => {
+	return localStorage.getItem(STORAGE_KEYS.IS_STARRED) === 'true'
+}
+
+/**
+ * 标记用户已 Star
+ */
+export const markUserAsStarred = (): void => {
+	localStorage.setItem(STORAGE_KEYS.IS_STARRED, 'true')
+}
+
+/**
+ * 获取当前用户的每日限制
+ */
+export const getDailyLimit = (): number => {
+	return isUserStarred() ? STARRED_DAILY_LIMIT : BASE_DAILY_LIMIT
+}
+
+// 兼容旧代码的导出，虽然建议直接使用 getDailyLimit()
+export const DAILY_LIMIT = 20
+
 // ==================== 每日使用次数 ====================
 
 /**
@@ -98,8 +131,9 @@ export const getDailyUsage = (): DailyUsage => {
  */
 export const incrementDailyUsage = (): number => {
 	const usage = getDailyUsage()
+	const limit = getDailyLimit()
 
-	if (usage.count >= DAILY_LIMIT) {
+	if (usage.count >= limit) {
 		return -1
 	}
 
@@ -110,7 +144,7 @@ export const incrementDailyUsage = (): number => {
 
 	localStorage.setItem(STORAGE_KEYS.DAILY_USAGE, JSON.stringify(newUsage))
 
-	return DAILY_LIMIT - newUsage.count
+	return limit - newUsage.count
 }
 
 /**
@@ -118,7 +152,8 @@ export const incrementDailyUsage = (): number => {
  */
 export const getRemainingCount = (): number => {
 	const usage = getDailyUsage()
-	return Math.max(0, DAILY_LIMIT - usage.count)
+	const limit = getDailyLimit()
+	return Math.max(0, limit - usage.count)
 }
 
 /**

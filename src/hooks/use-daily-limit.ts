@@ -5,10 +5,11 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import {
-	DAILY_LIMIT,
+	getDailyLimit,
 	getRemainingCount,
 	incrementDailyUsage,
 	isLimitReached as checkLimitReached,
+	markUserAsStarred,
 } from '@/lib/storage'
 
 interface UseDailyLimitReturn {
@@ -22,6 +23,8 @@ interface UseDailyLimitReturn {
 	consumeGeneration: () => boolean
 	/** 刷新状态 */
 	refresh: () => void
+	/** 升级配额（标记为已 Star） */
+	upgradeQuota: () => void
 }
 
 /**
@@ -31,6 +34,7 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 	const [remainingCount, setRemainingCount] = useState(() =>
 		getRemainingCount()
 	)
+	const [dailyLimit, setDailyLimit] = useState(() => getDailyLimit())
 	const [isLimitReached, setIsLimitReached] = useState(() =>
 		checkLimitReached()
 	)
@@ -40,8 +44,17 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 	 */
 	const refresh = useCallback(() => {
 		setRemainingCount(getRemainingCount())
+		setDailyLimit(getDailyLimit())
 		setIsLimitReached(checkLimitReached())
 	}, [])
+
+	/**
+	 * 升级配额
+	 */
+	const upgradeQuota = useCallback(() => {
+		markUserAsStarred()
+		refresh()
+	}, [refresh])
 
 	/**
 	 * 使用一次生成次数
@@ -73,9 +86,10 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 
 	return {
 		remainingCount,
-		dailyLimit: DAILY_LIMIT,
+		dailyLimit,
 		isLimitReached,
 		consumeGeneration,
 		refresh,
+		upgradeQuota,
 	}
 }

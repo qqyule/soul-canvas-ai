@@ -1,4 +1,7 @@
 import { motion } from 'framer-motion'
+import { Github } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { GITHUB_REPO_URL } from '@/lib/storage'
 
 const Header = () => {
 	return (
@@ -35,15 +38,23 @@ const Header = () => {
 					</div>
 				</motion.div>
 
-				{/* Nav (placeholder for future features) */}
-				<div className="flex items-center gap-4">
+				{/* Nav */}
+				<div className="flex items-center gap-3">
 					<motion.div
 						whileHover={{ scale: 1.05 }}
-						className="px-4 py-2 rounded-lg bg-muted/30 border border-border/50 text-sm text-muted-foreground"
+						className="hidden sm:block px-4 py-2 rounded-lg bg-muted/30 border border-border/50 text-sm text-muted-foreground"
 					>
-						<span className="hidden sm:inline">无需登录即可体验</span>
-						<span className="sm:hidden">免费体验</span>
+						无需登录即可体验
 					</motion.div>
+
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => window.open(GITHUB_REPO_URL, '_blank')}
+						title="在 GitHub 上查看源码"
+					>
+						<Github className="h-5 w-5" />
+					</Button>
 				</div>
 			</div>
 		</motion.header>

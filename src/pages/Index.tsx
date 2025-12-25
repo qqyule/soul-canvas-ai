@@ -14,6 +14,13 @@ import {
 	type GenerationResult,
 	type GenerationStatus,
 } from '@/types/canvas'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { STARRED_DAILY_LIMIT } from '@/lib/storage'
 import { useToast } from '@/hooks/use-toast'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useHistory } from '@/hooks/use-history'
@@ -29,10 +36,23 @@ const Index = () => {
 	const [showHistory, setShowHistory] = useState(false)
 
 	const { toast } = useToast()
-	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } =
-		useDailyLimit()
+	const {
+		remainingCount,
+		dailyLimit,
+		isLimitReached,
+		consumeGeneration,
+		upgradeQuota,
+	} = useDailyLimit()
 	const { history, addToHistory, deleteFromHistory, clearAllHistory } =
 		useHistory()
+
+	const handleUpgrade = useCallback(() => {
+		upgradeQuota()
+		toast({
+			title: '权益升级成功！🎉',
+			description: `感谢您的支持，您已获得每日 ${dailyLimit} -> 1000 次生成次数`,
+		})
+	}, [upgradeQuota, dailyLimit, toast])
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
@@ -148,22 +168,36 @@ const Index = () => {
 
 								<div className="flex items-center gap-3">
 									{/* 剩余次数显示 */}
-									<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/50 text-sm">
-										<Sparkles className="h-4 w-4 text-primary" />
-										<span className="text-muted-foreground">
-											今日剩余{' '}
-											<span
-												className={
-													remainingCount <= 5
-														? 'text-amber-500 font-medium'
-														: 'text-foreground font-medium'
-												}
-											>
-												{remainingCount}
-											</span>
-											/{dailyLimit} 次
-										</span>
-									</div>
+									<TooltipProvider delayDuration={0}>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 border border-border/50 text-sm cursor-help hover:bg-muted/50 transition-colors">
+													<Sparkles className="h-4 w-4 text-primary" />
+													<span className="text-muted-foreground">
+														今日剩余{' '}
+														<span
+															className={
+																remainingCount <= 5
+																	? 'text-amber-500 font-medium'
+																	: 'text-foreground font-medium'
+															}
+														>
+															{remainingCount}
+														</span>
+														/{dailyLimit} 次
+													</span>
+												</div>
+											</TooltipTrigger>
+											{dailyLimit < STARRED_DAILY_LIMIT && (
+												<TooltipContent>
+													<p>
+														前往右上角 GitHub 点个 Star ⭐️
+														支持一下，解锁更多生成次数！
+													</p>
+												</TooltipContent>
+											)}
+										</Tooltip>
+									</TooltipProvider>
 
 									{/* 历史记录按钮 */}
 									<Button
@@ -246,6 +280,8 @@ const Index = () => {
 			<LimitExceededDialog
 				open={showLimitDialog}
 				onClose={() => setShowLimitDialog(false)}
+				dailyLimit={dailyLimit}
+				onUpgrade={handleUpgrade}
 			/>
 
 			{/* 历史记录面板 */}
