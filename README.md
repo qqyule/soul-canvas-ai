@@ -20,6 +20,15 @@
 - **⚡ 极速生成体验**: 优化的生成链路，即画即得。
 - **📱 全端适配**: 完美支持 PC 与移动端触控交互。
 
+## 📸 应用截图 (Screenshots)
+
+<div align="center">
+  <img src="public/CleanShot%202025-12-25%20at%2021.39.18@2x.png" alt="应用截图1" width="48%" />
+  </div>
+  <div align="center">
+  <img src="public/CleanShot%202025-12-25%20at%2021.40.24@2x.png" alt="应用截图2" width="48%" />
+  </div>
+
 ## 🛠 技术栈 (Tech Stack)
 
 本项目采用现代化的 SPA 架构开发：
