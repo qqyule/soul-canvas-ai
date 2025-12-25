@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cloudflare Workers secrets (本地开发)
+workers/.dev.vars

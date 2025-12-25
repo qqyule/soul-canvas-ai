@@ -2,27 +2,30 @@
  * OpenRouter API 服务层
  * 封装图生图（img2img）的 API 调用
  * 使用 /chat/completions 端点 + modalities 参数生成图像
+ *
+ * 注意：API 请求通过 Cloudflare Worker 代理，保护 API Key 不暴露在前端
  */
 
 // ==================== 配置 ====================
 
-/** OpenRouter API 基础 URL */
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
-
-/** 获取 API Key */
-const getApiKey = (): string => {
-	const key = import.meta.env.VITE_OPENROUTER_API_KEY
-	if (!key) {
-		throw new Error('VITE_OPENROUTER_API_KEY 环境变量未配置')
+/**
+ * 获取 API 代理 URL
+ * 使用 Cloudflare Worker 代理来保护 API Key
+ */
+const getApiProxyUrl = (): string => {
+	const url = import.meta.env.VITE_API_PROXY_URL
+	if (!url) {
+		throw new Error(
+			'VITE_API_PROXY_URL 环境变量未配置。请参考 workers/README.md 部署 Cloudflare Worker 并配置环境变量。'
+		)
 	}
-	return key
+	return url
 }
 
 /** 获取图像生成模型 */
 const getImageModel = (): string => {
 	return (
-		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL ||
-		'google/gemini-3-pro-image-preview' // 使用支持图像输出的模型
+		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL || 'google/gemini-2.0-flash-exp' // 使用支持图像输出的模型
 	)
 }
 
@@ -114,7 +117,7 @@ export async function generateImageFromSketch(
 	sketchBase64: string,
 	stylePrompt: string
 ): Promise<string> {
-	const apiKey = getApiKey()
+	const apiProxyUrl = getApiProxyUrl()
 	const model = getImageModel()
 
 	// 构建完整的 prompt
@@ -151,13 +154,11 @@ export async function generateImageFromSketch(
 	console.log('[OpenRouter] 开始生成图像, 模型:', model)
 	console.log('[OpenRouter] Prompt:', fullPrompt)
 
-	const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+	// 通过 Cloudflare Worker 代理发送请求（不需要在前端传递 API Key）
+	const response = await fetch(`${apiProxyUrl}/chat/completions`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${apiKey}`,
-			'HTTP-Referer': window.location.origin,
-			'X-Title': 'SoulCanvas AI',
 		},
 		body: JSON.stringify(request),
 	})
