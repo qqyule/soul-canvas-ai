@@ -3,7 +3,7 @@
 > **本项目由阿里云 ESA 提供加速、计算和保护**
 
 <div align="center">
-  <img src="https://img.alicdn.com/tfs/TB1LHUYRCzqK1RjSZPxXXc4tVXa-209-210.png" alt="Logo" width="100" />
+  <img src="https://img.alicdn.com/imgextra/i3/O1CN01H1UU3i1Cti9lYtFrs_!!6000000000139-2-tps-7534-844.png" alt="Logo" width="600" />
 </div>
 
 ## 📖 项目简介 (Project Overview)
