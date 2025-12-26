@@ -176,67 +176,68 @@ export async function generateImageFromSketch(
 	// 解析响应，提取生成的图像
 	const message = data.choices?.[0]?.message
 
-	// ====== 优先检查 images 字段（OpenRouter 官方文档指定的格式）======
-	if (message?.images && message.images.length > 0) {
+	if (!message) {
+		throw new Error('API 响应格式错误：未找到 message 字段')
+	}
+
+	// 1. 优先检查标准 images 字段 (OpenRouter/Gemini 视觉模型标准)
+	if (message.images && Array.isArray(message.images) && message.images.length > 0) {
 		const firstImage = message.images[0]
 		if (firstImage.image_url?.url) {
 			return firstImage.image_url.url
 		}
 	}
 
-	// ====== 备用：检查 content 字段 ======
-	const content = message?.content
+	const content = message.content
 
-	// 检查是否有图像数据
-	if (!content || (typeof content === 'string' && content.trim() === '')) {
-		// 尝试从其他字段提取信息
-		const reasoning = (message as Record<string, unknown>)?.reasoning
-		if (reasoning) {
-			throw new Error(
-				'当前模型未能生成图像。请检查 VITE_OPENROUTER_IMAGE_MODEL 配置，建议使用支持图像生成的模型如 google/gemini-2.5-flash-image-preview'
-			)
+	// 2. 检查 content 是否为多模态数组 (部分模型返回格式)
+	if (Array.isArray(content)) {
+		for (const part of content) {
+			if (part.type === 'image_url' && part.image_url?.url) {
+				return part.image_url.url
+			}
 		}
-		throw new Error('图像生成返回空结果。请确认模型支持图像生成功能。')
+		throw new Error('未在响应内容中找到图像数据')
 	}
 
-	// 如果响应是字符串
+	// 3. 检查 content 是否为字符串 (需从文本中提取)
 	if (typeof content === 'string') {
-		// 检查是否是 base64 数据 URL
-		if (content.startsWith('data:image')) {
-			return content
+		const trimmedContent = content.trim()
+
+		// 情况 A: 纯 URL 或 Base64
+		if (trimmedContent.startsWith('http') || trimmedContent.startsWith('data:image')) {
+			return trimmedContent
 		}
-		// 检查是否是 URL
-		if (content.startsWith('http')) {
-			return content
+
+		// 情况 B: Markdown 图片语法 ![alt](url)
+		const markdownMatch = trimmedContent.match(/!\[.*?\]\((.*?)\)/)
+		if (markdownMatch && markdownMatch[1]) {
+			return markdownMatch[1]
 		}
-		// 尝试检测内嵌的 base64 数据
-		const base64Match = content.match(
-			/data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/
-		)
-		if (base64Match) {
-			return base64Match[0]
-		}
-		// 尝试检测 URL
-		const urlMatch = content.match(
-			/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i
-		)
+
+		// 情况 C: 文本中包含 URL (http/https)
+		// 排除结尾可能的标点符号
+		const urlMatch = trimmedContent.match(/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i)
 		if (urlMatch) {
 			return urlMatch[0]
 		}
 
+		// 情况 D: 文本中包含 Base64 (较少见，但支持)
+		const base64Match = trimmedContent.match(/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/i)
+		if (base64Match) {
+			return base64Match[0]
+		}
+
+		// 调试信息：如果模型拒绝生成或生成了纯文本
+		const reasoning = (message as Record<string, unknown>)?.reasoning
+		if (reasoning) {
+			console.error('Model Reasoning:', reasoning)
+		}
+		
 		throw new Error(
-			`图像生成返回格式不正确。模型返回了文本但不是图像。请确认使用的模型 (${getImageModel()}) 支持图像生成输出。`
+			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(0, 100)}...`
 		)
 	}
 
-	// 如果是内容数组，查找图像部分
-	for (const part of content) {
-		if (part.type === 'image_url' && part.image_url?.url) {
-			return part.image_url.url
-		}
-	}
-
-	throw new Error(
-		`图像生成返回格式不正确：未找到图像数据。请确认模型 (${getImageModel()}) 支持图像生成。`
-	)
+	throw new Error('无法解析 API 响应：未找到图像数据')
 }
