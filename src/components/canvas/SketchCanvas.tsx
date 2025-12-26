@@ -5,6 +5,7 @@ import { Pencil, Eraser, Undo2, Redo2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { CanvasTool } from "@/types/canvas";
 
 interface SketchCanvasProps {
@@ -16,9 +17,11 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   const [currentTool, setCurrentTool] = useState<CanvasTool>("pen");
   const [strokeWidth, setStrokeWidth] = useState(4);
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   const handleClear = useCallback(() => {
     canvasRef.current?.clearCanvas();
+    // onChange handles state update
   }, []);
 
   const handleUndo = useCallback(() => {
@@ -30,11 +33,18 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
   }, []);
 
   const handleExport = useCallback(async () => {
+    if (!hasDrawn) {
+      toast.error("画布为空，请先绘制草图", {
+        description: "AI 需要一些线条作为灵感来源！"
+      });
+      return;
+    }
+
     if (canvasRef.current) {
       const dataUrl = await canvasRef.current.exportImage("png");
       onExport(dataUrl);
     }
-  }, [onExport]);
+  }, [onExport, hasDrawn]);
 
   const tools = [
     { id: "pen" as const, icon: Pencil, label: "画笔 (Pen)" },
@@ -129,6 +139,7 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
           strokeWidth={strokeWidth}
           strokeColor="#1a1a2e"
           canvasColor="#ffffff"
+          onChange={(paths) => setHasDrawn(paths.length > 0)}
           style={{
             borderRadius: "var(--radius)",
           }}
