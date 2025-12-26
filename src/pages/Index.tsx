@@ -159,9 +159,9 @@ const Index = () => {
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								transition={{ delay: 0.3 }}
-								className="flex items-center justify-between"
+								className="flex items-center justify-end md:justify-between"
 							>
-								<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
 									<span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
 									在画板上自由绘制您的想法
 								</div>
