@@ -66,7 +66,7 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5, delay: 0.2 }}
-			className="relative flex flex-col gap-4 pb-20 md:pb-0"
+			className="relative flex flex-col gap-4"
 		>
 			{/* Toolbar */}
 			<div className="flex items-center justify-between gap-4">
