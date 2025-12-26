@@ -54,7 +54,7 @@ const GenerationResultView = ({
 					<motion.div
 						initial={{ y: 20 }}
 						animate={{ y: 0 }}
-						className="relative w-full max-w-4xl bg-card rounded-2xl border border-border overflow-hidden shadow-2xl"
+						className="relative w-full max-w-4xl bg-card rounded-2xl border border-border/50 shadow-2xl flex flex-col max-h-[90dvh] overflow-hidden"
 					>
 						{/* Header */}
 						<div className="flex items-center justify-between p-4 border-b border-border">
@@ -68,7 +68,7 @@ const GenerationResultView = ({
 						</div>
 
 						{/* Content */}
-						<div className="p-6">
+						<div className="p-6 flex-1 overflow-y-auto">
 							{status === 'analyzing' || status === 'generating' ? (
 								<div className="flex flex-col items-center justify-center py-20 gap-6">
 									<div className="relative">
@@ -162,20 +162,9 @@ const GenerationResultView = ({
 												{result.style.icon} {result.style.nameZh}
 											</span>
 										</div>
-										<div className="text-xs text-muted-foreground font-mono">
+										<div className="text-xs text-muted-foreground font-mono line-clamp-2">
 											{result.prompt}
 										</div>
-									</div>
-
-									{/* Actions */}
-									<div className="flex items-center justify-end gap-3">
-										<Button variant="outline" onClick={onClose}>
-											继续创作
-										</Button>
-										<Button variant="glow" onClick={handleDownload}>
-											<Download className="h-4 w-4" />
-											下载图像
-										</Button>
 									</div>
 								</div>
 							) : status === 'error' ? (
@@ -195,6 +184,19 @@ const GenerationResultView = ({
 								</div>
 							) : null}
 						</div>
+
+						{/* Footer Actions - Sticky Bottom */}
+						{status === 'complete' && result && (
+							<div className="p-4 border-t border-border bg-card/95 backdrop-blur-sm sticky bottom-0 z-10 flex items-center justify-end gap-3">
+								<Button variant="outline" onClick={onClose}>
+									继续创作
+								</Button>
+								<Button variant="glow" onClick={handleDownload}>
+									<Download className="h-4 w-4 mr-2" />
+									下载图像
+								</Button>
+							</div>
+						)}
 					</motion.div>
 				</motion.div>
 			)}
