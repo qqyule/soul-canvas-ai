@@ -3,16 +3,36 @@
  * 封装图生图（img2img）的 API 调用
  * 使用 /chat/completions 端点 + modalities 参数生成图像
  *
- * 注意：API 请求通过 Cloudflare Worker 代理，保护 API Key 不暴露在前端
+ * 当前模式：前端直接请求 OpenRouter API
  */
 
 // ==================== 配置 ====================
 
+/** OpenRouter API 基础 URL */
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+
 /**
+ * 获取 OpenRouter API Key
+ * 从环境变量 VITE_OPENROUTER_API_KEY 读取
+ */
+const getApiKey = (): string => {
+	const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+	if (!apiKey) {
+		throw new Error(
+			'VITE_OPENROUTER_API_KEY 环境变量未配置。请在 .env.local 文件中配置 OpenRouter API Key。'
+		)
+	}
+	return apiKey
+}
+
+/**
+ * @deprecated 当前使用前端直接请求模式，此函数已弃用
+ * 如需恢复 Workers 代理模式，可重新启用此函数
+ *
  * 获取 API 代理 URL
  * 使用 Cloudflare Worker 代理来保护 API Key
  */
-const getApiProxyUrl = (): string => {
+const _getApiProxyUrl = (): string => {
 	const url = import.meta.env.VITE_API_PROXY_URL
 	if (!url) {
 		throw new Error(
@@ -118,7 +138,7 @@ export async function generateImageFromSketch(
 	sketchBase64: string,
 	stylePrompt: string
 ): Promise<string> {
-	const apiProxyUrl = getApiProxyUrl()
+	const apiKey = getApiKey()
 	const model = getImageModel()
 
 	// 构建完整的 prompt
@@ -152,11 +172,14 @@ export async function generateImageFromSketch(
 		stream: false, // 确保返回完整响应
 	}
 
-	// 通过 Cloudflare Worker 代理发送请求（不需要在前端传递 API Key）
-	const response = await fetch(`${apiProxyUrl}/chat/completions`, {
+	// 直接请求 OpenRouter API
+	const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+			'HTTP-Referer': window.location.origin || 'https://soul-canvas.app',
+			'X-Title': 'SoulCanvas AI',
 		},
 		body: JSON.stringify(request),
 	})
@@ -181,7 +204,12 @@ export async function generateImageFromSketch(
 	}
 
 	// 1. 优先检查标准 images 字段 (OpenRouter/Gemini 视觉模型标准)
-	if (message.images && Array.isArray(message.images) && message.images.length > 0) {
+
+	if (
+		message.images &&
+		Array.isArray(message.images) &&
+		message.images.length > 0
+	) {
 		const firstImage = message.images[0]
 		if (firstImage.image_url?.url) {
 			return firstImage.image_url.url
@@ -205,7 +233,10 @@ export async function generateImageFromSketch(
 		const trimmedContent = content.trim()
 
 		// 情况 A: 纯 URL 或 Base64
-		if (trimmedContent.startsWith('http') || trimmedContent.startsWith('data:image')) {
+		if (
+			trimmedContent.startsWith('http') ||
+			trimmedContent.startsWith('data:image')
+		) {
 			return trimmedContent
 		}
 
@@ -217,13 +248,17 @@ export async function generateImageFromSketch(
 
 		// 情况 C: 文本中包含 URL (http/https)
 		// 排除结尾可能的标点符号
-		const urlMatch = trimmedContent.match(/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i)
+		const urlMatch = trimmedContent.match(
+			/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i
+		)
 		if (urlMatch) {
 			return urlMatch[0]
 		}
 
 		// 情况 D: 文本中包含 Base64 (较少见，但支持)
-		const base64Match = trimmedContent.match(/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/i)
+		const base64Match = trimmedContent.match(
+			/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/i
+		)
 		if (base64Match) {
 			return base64Match[0]
 		}
@@ -233,9 +268,12 @@ export async function generateImageFromSketch(
 		if (reasoning) {
 			console.error('Model Reasoning:', reasoning)
 		}
-		
+
 		throw new Error(
-			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(0, 100)}...`
+			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(
+				0,
+				100
+			)}...`
 		)
 	}
 
