@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { History, Sparkles } from 'lucide-react'
 import Header from '@/components/layout/Header'
@@ -35,6 +35,9 @@ const Index = () => {
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
 
+	// 用于取消请求的 AbortController
+	const abortControllerRef = useRef<AbortController | null>(null)
+
 	const { toast } = useToast()
 	const {
 		remainingCount,
@@ -56,15 +59,8 @@ const Index = () => {
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
-			// 检查是否达到限制
+			// 检查是否达到限制（仅检查，不扣分）
 			if (isLimitReached) {
-				setShowLimitDialog(true)
-				return
-			}
-
-			// 消耗一次生成次数
-			const success = consumeGeneration()
-			if (!success) {
 				setShowLimitDialog(true)
 				return
 			}
@@ -72,10 +68,26 @@ const Index = () => {
 			setStatus('analyzing')
 			setResult(null)
 
+			// 创建新的 AbortController
+			abortControllerRef.current = new AbortController()
+			const signal = abortControllerRef.current.signal
+
 			try {
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
-				const aiResult = await generateFromSketch(sketchDataUrl, selectedStyle)
+				const aiResult = await generateFromSketch(
+					sketchDataUrl,
+					selectedStyle,
+					signal
+				)
+
+				// 成功后才扣分
+				const success = consumeGeneration()
+				if (!success) {
+					// 理论上不会走到这里，因为前面已检查过
+					setShowLimitDialog(true)
+					return
+				}
 
 				setResult(aiResult)
 				setStatus('complete')
@@ -88,6 +100,12 @@ const Index = () => {
 					description: '您的 AI 艺术作品已准备就绪',
 				})
 			} catch (error) {
+				// 请求被取消时静默处理
+				if (error instanceof DOMException && error.name === 'AbortError') {
+					console.log('[Index] 请求已取消')
+					return
+				}
+
 				setStatus('error')
 
 				// 根据错误类型显示不同的提示
@@ -101,12 +119,19 @@ const Index = () => {
 					description: errorMessage,
 					variant: 'destructive',
 				})
+			} finally {
+				abortControllerRef.current = null
 			}
 		},
 		[selectedStyle, toast, isLimitReached, consumeGeneration, addToHistory]
 	)
 
 	const handleCloseResult = useCallback(() => {
+		// 如果有进行中的请求，取消它
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort()
+			abortControllerRef.current = null
+		}
 		setStatus('idle')
 		setResult(null)
 	}, [])

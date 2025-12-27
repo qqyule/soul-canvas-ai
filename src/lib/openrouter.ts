@@ -11,6 +11,12 @@
 /** OpenRouter API 基础 URL */
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
+/** 最大重试次数 */
+const MAX_RETRIES = 1
+
+/** 重试延迟时间（毫秒） */
+const RETRY_DELAY_MS = 1000
+
 /**
  * 获取 OpenRouter API Key
  * 从环境变量 VITE_OPENROUTER_API_KEY 读取
@@ -124,6 +130,49 @@ interface ChatCompletionsResponse {
 	}
 }
 
+// ==================== 错误类型 ====================
+
+/**
+ * 网络错误类
+ * 用于标识可重试的网络错误
+ */
+export class NetworkError extends Error {
+	constructor(message: string, public readonly originalError?: Error) {
+		super(message)
+		this.name = 'NetworkError'
+	}
+}
+
+/**
+ * API 错误类
+ * 用于标识不可重试的 API 错误
+ */
+export class APIError extends Error {
+	constructor(message: string, public readonly statusCode?: number) {
+		super(message)
+		this.name = 'APIError'
+	}
+}
+
+// ==================== 工具函数 ====================
+
+/**
+ * 延迟函数
+ */
+const delay = (ms: number): Promise<void> =>
+	new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 判断错误是否可重试
+ */
+const isRetryableError = (error: unknown): boolean => {
+	// 网络错误可重试
+	if (error instanceof NetworkError) return true
+	// TypeError 通常是网络问题
+	if (error instanceof TypeError) return true
+	return false
+}
+
 // ==================== API 调用 ====================
 
 /**
@@ -132,11 +181,13 @@ interface ChatCompletionsResponse {
  *
  * @param sketchBase64 - Base64 编码的草图图片（含 data:image 前缀）
  * @param stylePrompt - 风格描述提示词
+ * @param signal - 可选的 AbortSignal，用于取消请求
  * @returns 生成图像的 URL 或 Base64
  */
 export async function generateImageFromSketch(
 	sketchBase64: string,
-	stylePrompt: string
+	stylePrompt: string,
+	signal?: AbortSignal
 ): Promise<string> {
 	const apiKey = getApiKey()
 	const model = getImageModel()
@@ -172,30 +223,82 @@ export async function generateImageFromSketch(
 		stream: false, // 确保返回完整响应
 	}
 
-	// 直接请求 OpenRouter API
-	const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${apiKey}`,
-			'HTTP-Referer': window.location.origin || 'https://soul-canvas.app',
-			'X-Title': 'SoulCanvas AI',
-		},
-		body: JSON.stringify(request),
-	})
+	// 带重试的 API 请求
+	let lastError: Error | null = null
+	let retryCount = 0
 
-	if (!response.ok) {
-		const errorText = await response.text()
+	while (retryCount <= MAX_RETRIES) {
+		// 检查是否已取消
+		if (signal?.aborted) {
+			throw new DOMException('请求已取消', 'AbortError')
+		}
 
-		throw new Error(`图像生成失败: ${response.status} - ${errorText}`)
+		try {
+			const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${apiKey}`,
+					'HTTP-Referer': window.location.origin || 'https://soul-canvas.app',
+					'X-Title': 'SoulCanvas AI',
+				},
+				body: JSON.stringify(request),
+				signal, // 传递 AbortSignal
+			})
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				// 5xx 错误可重试，4xx 错误不重试
+				if (response.status >= 500) {
+					throw new NetworkError(
+						`服务器错误: ${response.status} - ${errorText}`
+					)
+				}
+				throw new APIError(
+					`图像生成失败: ${response.status} - ${errorText}`,
+					response.status
+				)
+			}
+
+			const data: ChatCompletionsResponse = await response.json()
+
+			if (data.error) {
+				throw new APIError(`图像生成错误: ${data.error.message}`)
+			}
+
+			// 成功，跳出循环继续处理响应
+			return parseImageFromResponse(data)
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error))
+
+			// 判断是否可重试
+			if (isRetryableError(error) && retryCount < MAX_RETRIES) {
+				retryCount++
+				console.warn(
+					`[OpenRouter] 请求失败，正在重试 (${retryCount}/${MAX_RETRIES})...`,
+					error
+				)
+				await delay(RETRY_DELAY_MS)
+				continue
+			}
+
+			// 不可重试或已达最大重试次数
+			break
+		}
 	}
 
-	const data: ChatCompletionsResponse = await response.json()
-
-	if (data.error) {
-		throw new Error(`图像生成错误: ${data.error.message}`)
+	// 重试失败，抛出最后的错误
+	if (lastError) {
+		throw lastError
 	}
 
+	throw new Error('未知错误')
+}
+
+/**
+ * 从 API 响应中解析图像数据
+ */
+function parseImageFromResponse(data: ChatCompletionsResponse): string {
 	// 解析响应，提取生成的图像
 	const message = data.choices?.[0]?.message
 
