@@ -103,6 +103,7 @@ interface ChatCompletionsRequest {
 	messages: ChatMessage[]
 	modalities?: string[] // 包含 "image" 以启用图像生成
 	max_tokens?: number
+	temperature?: number // 温度参数，控制随机性，0-2，默认 1
 	image_config?: ImageConfig // 图像生成配置
 	stream?: boolean
 }
@@ -220,6 +221,7 @@ export async function generateImageFromSketch(
 		messages,
 		modalities: ['image', 'text'], // 启用图像生成
 		max_tokens: 4096,
+		temperature: 1.2, // 提高随机性和创意性
 		stream: false, // 确保返回完整响应
 	}
 
