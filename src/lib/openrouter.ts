@@ -3,16 +3,42 @@
  * 封装图生图（img2img）的 API 调用
  * 使用 /chat/completions 端点 + modalities 参数生成图像
  *
- * 注意：API 请求通过 Cloudflare Worker 代理，保护 API Key 不暴露在前端
+ * 当前模式：前端直接请求 OpenRouter API
  */
 
 // ==================== 配置 ====================
 
+/** OpenRouter API 基础 URL */
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+
+/** 最大重试次数 */
+const MAX_RETRIES = 1
+
+/** 重试延迟时间（毫秒） */
+const RETRY_DELAY_MS = 1000
+
 /**
+ * 获取 OpenRouter API Key
+ * 从环境变量 VITE_OPENROUTER_API_KEY 读取
+ */
+const getApiKey = (): string => {
+	const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+	if (!apiKey) {
+		throw new Error(
+			'VITE_OPENROUTER_API_KEY 环境变量未配置。请在 .env.local 文件中配置 OpenRouter API Key。'
+		)
+	}
+	return apiKey
+}
+
+/**
+ * @deprecated 当前使用前端直接请求模式，此函数已弃用
+ * 如需恢复 Workers 代理模式，可重新启用此函数
+ *
  * 获取 API 代理 URL
  * 使用 Cloudflare Worker 代理来保护 API Key
  */
-const getApiProxyUrl = (): string => {
+const _getApiProxyUrl = (): string => {
 	const url = import.meta.env.VITE_API_PROXY_URL
 	if (!url) {
 		throw new Error(
@@ -77,6 +103,7 @@ interface ChatCompletionsRequest {
 	messages: ChatMessage[]
 	modalities?: string[] // 包含 "image" 以启用图像生成
 	max_tokens?: number
+	temperature?: number // 温度参数，控制随机性，0-2，默认 1
 	image_config?: ImageConfig // 图像生成配置
 	stream?: boolean
 }
@@ -104,6 +131,49 @@ interface ChatCompletionsResponse {
 	}
 }
 
+// ==================== 错误类型 ====================
+
+/**
+ * 网络错误类
+ * 用于标识可重试的网络错误
+ */
+export class NetworkError extends Error {
+	constructor(message: string, public readonly originalError?: Error) {
+		super(message)
+		this.name = 'NetworkError'
+	}
+}
+
+/**
+ * API 错误类
+ * 用于标识不可重试的 API 错误
+ */
+export class APIError extends Error {
+	constructor(message: string, public readonly statusCode?: number) {
+		super(message)
+		this.name = 'APIError'
+	}
+}
+
+// ==================== 工具函数 ====================
+
+/**
+ * 延迟函数
+ */
+const delay = (ms: number): Promise<void> =>
+	new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 判断错误是否可重试
+ */
+const isRetryableError = (error: unknown): boolean => {
+	// 网络错误可重试
+	if (error instanceof NetworkError) return true
+	// TypeError 通常是网络问题
+	if (error instanceof TypeError) return true
+	return false
+}
+
 // ==================== API 调用 ====================
 
 /**
@@ -112,13 +182,15 @@ interface ChatCompletionsResponse {
  *
  * @param sketchBase64 - Base64 编码的草图图片（含 data:image 前缀）
  * @param stylePrompt - 风格描述提示词
+ * @param signal - 可选的 AbortSignal，用于取消请求
  * @returns 生成图像的 URL 或 Base64
  */
 export async function generateImageFromSketch(
 	sketchBase64: string,
-	stylePrompt: string
+	stylePrompt: string,
+	signal?: AbortSignal
 ): Promise<string> {
-	const apiProxyUrl = getApiProxyUrl()
+	const apiKey = getApiKey()
 	const model = getImageModel()
 
 	// 构建完整的 prompt
@@ -149,30 +221,86 @@ export async function generateImageFromSketch(
 		messages,
 		modalities: ['image', 'text'], // 启用图像生成
 		max_tokens: 4096,
+		temperature: 1.2, // 提高随机性和创意性
 		stream: false, // 确保返回完整响应
 	}
 
-	// 通过 Cloudflare Worker 代理发送请求（不需要在前端传递 API Key）
-	const response = await fetch(`${apiProxyUrl}/chat/completions`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(request),
-	})
+	// 带重试的 API 请求
+	let lastError: Error | null = null
+	let retryCount = 0
 
-	if (!response.ok) {
-		const errorText = await response.text()
+	while (retryCount <= MAX_RETRIES) {
+		// 检查是否已取消
+		if (signal?.aborted) {
+			throw new DOMException('请求已取消', 'AbortError')
+		}
 
-		throw new Error(`图像生成失败: ${response.status} - ${errorText}`)
+		try {
+			const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${apiKey}`,
+					'HTTP-Referer': window.location.origin || 'https://soul-canvas.app',
+					'X-Title': 'SoulCanvas AI',
+				},
+				body: JSON.stringify(request),
+				signal, // 传递 AbortSignal
+			})
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				// 5xx 错误可重试，4xx 错误不重试
+				if (response.status >= 500) {
+					throw new NetworkError(
+						`服务器错误: ${response.status} - ${errorText}`
+					)
+				}
+				throw new APIError(
+					`图像生成失败: ${response.status} - ${errorText}`,
+					response.status
+				)
+			}
+
+			const data: ChatCompletionsResponse = await response.json()
+
+			if (data.error) {
+				throw new APIError(`图像生成错误: ${data.error.message}`)
+			}
+
+			// 成功，跳出循环继续处理响应
+			return parseImageFromResponse(data)
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error))
+
+			// 判断是否可重试
+			if (isRetryableError(error) && retryCount < MAX_RETRIES) {
+				retryCount++
+				console.warn(
+					`[OpenRouter] 请求失败，正在重试 (${retryCount}/${MAX_RETRIES})...`,
+					error
+				)
+				await delay(RETRY_DELAY_MS)
+				continue
+			}
+
+			// 不可重试或已达最大重试次数
+			break
+		}
 	}
 
-	const data: ChatCompletionsResponse = await response.json()
-
-	if (data.error) {
-		throw new Error(`图像生成错误: ${data.error.message}`)
+	// 重试失败，抛出最后的错误
+	if (lastError) {
+		throw lastError
 	}
 
+	throw new Error('未知错误')
+}
+
+/**
+ * 从 API 响应中解析图像数据
+ */
+function parseImageFromResponse(data: ChatCompletionsResponse): string {
 	// 解析响应，提取生成的图像
 	const message = data.choices?.[0]?.message
 
@@ -181,7 +309,12 @@ export async function generateImageFromSketch(
 	}
 
 	// 1. 优先检查标准 images 字段 (OpenRouter/Gemini 视觉模型标准)
-	if (message.images && Array.isArray(message.images) && message.images.length > 0) {
+
+	if (
+		message.images &&
+		Array.isArray(message.images) &&
+		message.images.length > 0
+	) {
 		const firstImage = message.images[0]
 		if (firstImage.image_url?.url) {
 			return firstImage.image_url.url
@@ -205,7 +338,10 @@ export async function generateImageFromSketch(
 		const trimmedContent = content.trim()
 
 		// 情况 A: 纯 URL 或 Base64
-		if (trimmedContent.startsWith('http') || trimmedContent.startsWith('data:image')) {
+		if (
+			trimmedContent.startsWith('http') ||
+			trimmedContent.startsWith('data:image')
+		) {
 			return trimmedContent
 		}
 
@@ -217,13 +353,17 @@ export async function generateImageFromSketch(
 
 		// 情况 C: 文本中包含 URL (http/https)
 		// 排除结尾可能的标点符号
-		const urlMatch = trimmedContent.match(/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i)
+		const urlMatch = trimmedContent.match(
+			/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i
+		)
 		if (urlMatch) {
 			return urlMatch[0]
 		}
 
 		// 情况 D: 文本中包含 Base64 (较少见，但支持)
-		const base64Match = trimmedContent.match(/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/i)
+		const base64Match = trimmedContent.match(
+			/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+/i
+		)
 		if (base64Match) {
 			return base64Match[0]
 		}
@@ -233,9 +373,12 @@ export async function generateImageFromSketch(
 		if (reasoning) {
 			console.error('Model Reasoning:', reasoning)
 		}
-		
+
 		throw new Error(
-			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(0, 100)}...`
+			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(
+				0,
+				100
+			)}...`
 		)
 	}
 

@@ -24,19 +24,26 @@ export class AIServiceError extends Error {
  *
  * @param sketchDataUrl - Base64 编码的草图（含 data:image 前缀）
  * @param style - 用户选择的风格预设
+ * @param signal - 可选的 AbortSignal，用于取消请求
  * @returns 生成结果对象
  */
 export async function generateFromSketch(
 	sketchDataUrl: string,
-	style: StylePreset
+	style: StylePreset,
+	signal?: AbortSignal
 ): Promise<GenerationResult> {
 	let generatedImageUrl: string
 	try {
 		generatedImageUrl = await generateImageFromSketch(
 			sketchDataUrl,
-			style.prompt
+			style.prompt,
+			signal
 		)
 	} catch (error) {
+		// 如果是取消请求，直接抛出不包装
+		if (error instanceof DOMException && error.name === 'AbortError') {
+			throw error
+		}
 		throw new AIServiceError(
 			'图像生成失败，请稍后重试',
 			error instanceof Error ? error : undefined
