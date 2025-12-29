@@ -6,6 +6,8 @@
  * 当前模式：前端直接请求 OpenRouter API
  */
 
+import { buildFinalPrompt } from '@/prompts'
+
 // ==================== 配置 ====================
 
 /** OpenRouter API 基础 URL */
@@ -182,6 +184,7 @@ const isRetryableError = (error: unknown): boolean => {
  *
  * @param sketchBase64 - Base64 编码的草图图片（含 data:image 前缀）
  * @param stylePrompt - 风格描述提示词
+ * @param userPrompt - 用户自定义提示词（可选）
  * @param signal - 可选的 AbortSignal，用于取消请求
  * @returns 生成图像的 URL 或 Base64
  */
@@ -194,16 +197,8 @@ export async function generateImageFromSketch(
 	const apiKey = getApiKey()
 	const model = getImageModel()
 
-	// 构建完整的 prompt
-	// 如果用户提供了自定义提示词，则将其与风格提示词结合
-	// 安全防护：再次清理输入，防止超长内容
-	const sanitizedUserPrompt = userPrompt?.trim().slice(0, 500)
-
-	const combinedPrompt = sanitizedUserPrompt
-		? `${sanitizedUserPrompt}. Style: ${stylePrompt}`
-		: stylePrompt
-
-	const fullPrompt = `Transform this sketch into: ${combinedPrompt}, high quality, detailed, professional`
+	// 使用集中管理的 prompt 构建函数
+	const fullPrompt = buildFinalPrompt(stylePrompt, userPrompt)
 
 	// 构建多模态消息，包含草图图像和文本提示
 	const messages: ChatMessage[] = [
