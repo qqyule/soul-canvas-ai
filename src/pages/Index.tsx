@@ -75,12 +75,18 @@ const Index = () => {
 			const signal = abortControllerRef.current.signal
 
 			try {
+				// 简单的输入清洗：去除首尾空格
+				const sanitizedPrompt = userPrompt.trim()
+
+				// 长度截断（虽然前端限制了 input 长度，但 API 层再做一次防御）
+				const finalPrompt = sanitizedPrompt.slice(0, 500)
+
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
 				const aiResult = await generateFromSketch(
 					sketchDataUrl,
 					selectedStyle,
-					userPrompt,
+					finalPrompt,
 					signal
 				)
 
@@ -267,8 +273,12 @@ const Index = () => {
 										placeholder="输入提示词描述你的草图（例如：一艘在星际穿梭的飞船）..."
 										value={userPrompt}
 										onChange={(e) => setUserPrompt(e.target.value)}
+										maxLength={500}
 										className="w-full bg-card/50 border-border/60 hover:border-primary/30 focus-visible:ring-primary/30 backdrop-blur-sm pr-10"
 									/>
+									<div className="absolute right-10 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50 pointer-events-none">
+										{userPrompt.length}/500
+									</div>
 									{userPrompt && (
 										<button
 											onClick={() => setUserPrompt('')}
