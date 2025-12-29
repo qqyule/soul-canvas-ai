@@ -7,6 +7,7 @@ import StyleSelector from '@/components/canvas/StyleSelector'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import HistoryPanel from '@/components/canvas/HistoryPanel'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
 	STYLE_PRESETS,
@@ -32,6 +33,7 @@ const Index = () => {
 	)
 	const [status, setStatus] = useState<GenerationStatus>('idle')
 	const [result, setResult] = useState<GenerationResult | null>(null)
+	const [userPrompt, setUserPrompt] = useState('')
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
 
@@ -73,11 +75,18 @@ const Index = () => {
 			const signal = abortControllerRef.current.signal
 
 			try {
+				// 简单的输入清洗：去除首尾空格
+				const sanitizedPrompt = userPrompt.trim()
+
+				// 长度截断（虽然前端限制了 input 长度，但 API 层再做一次防御）
+				const finalPrompt = sanitizedPrompt.slice(0, 500)
+
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
 				const aiResult = await generateFromSketch(
 					sketchDataUrl,
 					selectedStyle,
+					finalPrompt,
 					signal
 				)
 
@@ -123,7 +132,14 @@ const Index = () => {
 				abortControllerRef.current = null
 			}
 		},
-		[selectedStyle, toast, isLimitReached, consumeGeneration, addToHistory]
+		[
+			selectedStyle,
+			userPrompt,
+			toast,
+			isLimitReached,
+			consumeGeneration,
+			addToHistory,
+		]
 	)
 
 	const handleCloseResult = useCallback(() => {
@@ -186,7 +202,7 @@ const Index = () => {
 								transition={{ delay: 0.3 }}
 								className="flex items-center justify-end md:justify-between"
 							>
-								<div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+								<div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground flex-1">
 									<span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
 									在画板上自由绘制您的想法
 								</div>
@@ -241,6 +257,50 @@ const Index = () => {
 											</span>
 										)}
 									</Button>
+								</div>
+							</motion.div>
+
+							{/* Prompt Input Box */}
+							<motion.div
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.35 }}
+								className="relative group"
+							>
+								<div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+								<div className="relative">
+									<Input
+										placeholder="输入提示词描述你的草图（例如：一艘在星际穿梭的飞船）..."
+										value={userPrompt}
+										onChange={(e) => setUserPrompt(e.target.value)}
+										maxLength={500}
+										className="w-full bg-card/50 border-border/60 hover:border-primary/30 focus-visible:ring-primary/30 backdrop-blur-sm pr-10"
+									/>
+									<div className="absolute right-10 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50 pointer-events-none">
+										{userPrompt.length}/500
+									</div>
+									{userPrompt && (
+										<button
+											onClick={() => setUserPrompt('')}
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+											aria-label="清空提示词"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<line x1="18" y1="6" x2="6" y2="18"></line>
+												<line x1="6" y1="6" x2="18" y2="18"></line>
+											</svg>
+										</button>
+									)}
 								</div>
 							</motion.div>
 
