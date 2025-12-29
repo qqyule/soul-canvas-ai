@@ -196,8 +196,11 @@ export async function generateImageFromSketch(
 
 	// 构建完整的 prompt
 	// 如果用户提供了自定义提示词，则将其与风格提示词结合
-	const combinedPrompt = userPrompt
-		? `${userPrompt}. Style: ${stylePrompt}`
+	// 安全防护：再次清理输入，防止超长内容
+	const sanitizedUserPrompt = userPrompt?.trim().slice(0, 500)
+
+	const combinedPrompt = sanitizedUserPrompt
+		? `${sanitizedUserPrompt}. Style: ${stylePrompt}`
 		: stylePrompt
 
 	const fullPrompt = `Transform this sketch into: ${combinedPrompt}, high quality, detailed, professional`
