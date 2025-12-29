@@ -176,6 +176,7 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
 					onClick={handleExport}
 					disabled={isGenerating}
 					className="w-full shadow-lg md:shadow-none backdrop-blur-sm"
+					id="tour-generate"
 				>
 					{isGenerating ? (
 						<>

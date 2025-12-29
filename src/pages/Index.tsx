@@ -7,6 +7,7 @@ import StyleSelector from '@/components/canvas/StyleSelector'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import HistoryPanel from '@/components/canvas/HistoryPanel'
+import OnboardingTour from '@/components/OnboardingTour'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -154,6 +155,7 @@ const Index = () => {
 
 	return (
 		<div className="min-h-screen animated-gradient">
+			<OnboardingTour />
 			<Header />
 
 			{/* Background Grid */}
@@ -248,6 +250,7 @@ const Index = () => {
 										onClick={() => setShowHistory(true)}
 										aria-label="打开历史记录"
 										tabIndex={0}
+										id="tour-history"
 									>
 										<History className="h-4 w-4" />
 										<span className="hidden sm:inline">历史记录</span>
@@ -275,6 +278,7 @@ const Index = () => {
 										onChange={(e) => setUserPrompt(e.target.value)}
 										maxLength={500}
 										className="w-full bg-card/50 border-border/60 hover:border-primary/30 focus-visible:ring-primary/30 backdrop-blur-sm pr-10"
+										id="tour-prompt"
 									/>
 									<div className="absolute right-10 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50 pointer-events-none">
 										{userPrompt.length}/500
@@ -304,18 +308,24 @@ const Index = () => {
 								</div>
 							</motion.div>
 
-							<SketchCanvas
-								onExport={handleGenerate}
-								isGenerating={status === 'analyzing' || status === 'generating'}
-							/>
+							<div id="tour-canvas">
+								<SketchCanvas
+									onExport={handleGenerate}
+									isGenerating={
+										status === 'analyzing' || status === 'generating'
+									}
+								/>
+							</div>
 						</div>
 
 						{/* Style Selector */}
 						<div className="lg:col-span-1">
-							<StyleSelector
-								selectedStyle={selectedStyle}
-								onSelectStyle={setSelectedStyle}
-							/>
+							<div id="tour-style">
+								<StyleSelector
+									selectedStyle={selectedStyle}
+									onSelectStyle={setSelectedStyle}
+								/>
+							</div>
 
 							{/* Tips Section */}
 							<motion.div
