@@ -30,6 +30,7 @@ export class AIServiceError extends Error {
 export async function generateFromSketch(
 	sketchDataUrl: string,
 	style: StylePreset,
+	userPrompt?: string,
 	signal?: AbortSignal
 ): Promise<GenerationResult> {
 	let generatedImageUrl: string
@@ -37,6 +38,7 @@ export async function generateFromSketch(
 		generatedImageUrl = await generateImageFromSketch(
 			sketchDataUrl,
 			style.prompt,
+			userPrompt,
 			signal
 		)
 	} catch (error) {
@@ -55,7 +57,7 @@ export async function generateFromSketch(
 		id: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
 		sketchDataUrl,
 		generatedImageUrl,
-		prompt: style.prompt,
+		prompt: userPrompt ? `${userPrompt} (风格: ${style.nameZh})` : style.prompt,
 		style,
 		createdAt: new Date(),
 	}

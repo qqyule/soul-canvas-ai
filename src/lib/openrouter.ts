@@ -188,13 +188,19 @@ const isRetryableError = (error: unknown): boolean => {
 export async function generateImageFromSketch(
 	sketchBase64: string,
 	stylePrompt: string,
+	userPrompt?: string,
 	signal?: AbortSignal
 ): Promise<string> {
 	const apiKey = getApiKey()
 	const model = getImageModel()
 
 	// 构建完整的 prompt
-	const fullPrompt = `Transform this sketch into: ${stylePrompt}, high quality, detailed, professional`
+	// 如果用户提供了自定义提示词，则将其与风格提示词结合
+	const combinedPrompt = userPrompt
+		? `${userPrompt}. Style: ${stylePrompt}`
+		: stylePrompt
+
+	const fullPrompt = `Transform this sketch into: ${combinedPrompt}, high quality, detailed, professional`
 
 	// 构建多模态消息，包含草图图像和文本提示
 	const messages: ChatMessage[] = [
