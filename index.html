@@ -1,25 +1,74 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>神笔马良 (Soul Canvas) - AI 灵感画板</title>
-    <meta name="description" content="神笔马良 (Soul Canvas) 是一款智能 AI 绘图应用，旨在打破艺术创作的门槛。通过“简笔画 + AI 识别 + 风格化生成”的模式，简单几笔即可生成专业级图像。本项目由阿里云 ESA 提供加速支持。" />
-    <meta name="author" content="SoulCanvas" />
-    <meta name="keywords" content="神笔马良, Soul Canvas, AI绘画, AI生成图像, 草图生成, 阿里云ESA, 边缘计算, sketch to image, AI art generator" />
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#8B5CF6" />
+		<link rel="canonical" href="https://soul-canvas-ai.qqyule.top/" />
+		<title>神笔马良 (Soul Canvas) - AI 灵感画板</title>
+		<meta
+			name="description"
+			content="神笔马良 (Soul Canvas) 是一款智能 AI 绘图应用，旨在打破艺术创作的门槛。通过“简笔画 + AI 识别 + 风格化生成”的模式，简单几笔即可生成专业级图像。本项目由阿里云 ESA 提供加速支持。"
+		/>
+		<meta name="author" content="SoulCanvas" />
+		<meta
+			name="keywords"
+			content="神笔马良, Soul Canvas, AI绘画, AI生成图像, 草图生成, 阿里云ESA, 边缘计算, sketch to image, AI art generator"
+		/>
 
-    <meta property="og:title" content="神笔马良 (Soul Canvas) - AI 灵感画板" />
-    <meta property="og:description" content="画出想法，AI 来实现。通过“简笔画 + AI 识别 + 风格化生成”模式，打破艺术创作门槛。" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://qqyule.s3.bitiful.net/soul-canvas.png" />
+		<meta property="og:title" content="神笔马良 (Soul Canvas) - AI 灵感画板" />
+		<meta
+			property="og:description"
+			content="画出想法，AI 来实现。通过“简笔画 + AI 识别 + 风格化生成”模式，打破艺术创作门槛。"
+		/>
+		<meta property="og:url" content="https://soul-canvas-ai.qqyule.top/" />
+		<meta property="og:type" content="website" />
+		<meta
+			property="og:image"
+			content="https://qqyule.s3.bitiful.net/soul-canvas.png"
+		/>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@SoulCanvas" />
-    <meta name="twitter:image" content="https://qqyule.s3.bitiful.net/soul-canvas.png" />
-  </head>
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@SoulCanvas" />
+		<meta
+			name="twitter:image"
+			content="https://qqyule.s3.bitiful.net/soul-canvas.png"
+		/>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+		<!-- iOS PWA Support -->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta
+			name="apple-mobile-web-app-status-bar-style"
+			content="black-translucent"
+		/>
+		<meta name="apple-mobile-web-app-title" content="神笔马良" />
+		<link rel="apple-touch-icon" href="/favicon.ico" />
+
+		<!-- 结构化数据 JSON-LD -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebApplication",
+				"name": "神笔马良 (Soul Canvas)",
+				"url": "https://soul-canvas-ai.qqyule.top/",
+				"description": "智能 AI 绘图应用，通过简笔画 + AI 识别 + 风格化生成，简单几笔即可生成专业级图像",
+				"applicationCategory": "DesignApplication",
+				"operatingSystem": "All",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "CNY"
+				},
+				"author": {
+					"@type": "Organization",
+					"name": "SoulCanvas"
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>
