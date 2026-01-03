@@ -3,14 +3,14 @@
  * @description 封装作品相关的数据库操作，集成 Zod 验证
  */
 
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, desc, sql } from 'drizzle-orm'
 import { getDb } from '../index'
 import {
 	artworks,
 	type Artwork,
+	type NewArtwork,
 	insertArtworkSchema,
 	updateArtworkSchema,
-	type InsertArtwork,
 	type UpdateArtwork,
 } from '../schema'
 
@@ -74,10 +74,11 @@ export const artworksRepository = {
 	 * @returns 创建的作品
 	 * @throws Zod 验证错误
 	 */
-	async create(data: InsertArtwork): Promise<Artwork> {
+	async create(data: NewArtwork): Promise<Artwork> {
 		const db = getDb()
-		const validated = insertArtworkSchema.parse(data)
-		const result = await db.insert(artworks).values(validated).returning()
+		// 验证数据
+		insertArtworkSchema.parse(data)
+		const result = await db.insert(artworks).values(data).returning()
 		return result[0]
 	},
 
@@ -132,9 +133,9 @@ export const artworksRepository = {
 	async countByUserId(userId: string): Promise<number> {
 		const db = getDb()
 		const result = await db
-			.select()
+			.select({ count: sql<number>`count(*)` })
 			.from(artworks)
 			.where(eq(artworks.userId, userId))
-		return result.length
+		return Number(result[0]?.count ?? 0)
 	},
 }

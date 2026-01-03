@@ -3,14 +3,14 @@
  * @description 封装用户相关的数据库操作，集成 Zod 验证
  */
 
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { getDb } from '../index'
 import {
 	users,
 	type User,
+	type NewUser,
 	insertUserSchema,
 	updateUserSchema,
-	type InsertUser,
 	type UpdateUser,
 } from '../schema'
 
@@ -54,8 +54,9 @@ export const usersRepository = {
 		const result = await db
 			.select()
 			.from(users)
-			.where(eq(users.provider, provider))
-			.where(eq(users.providerId, providerId))
+			.where(
+				and(eq(users.provider, provider), eq(users.providerId, providerId))
+			)
 		return result[0] ?? null
 	},
 
@@ -65,10 +66,12 @@ export const usersRepository = {
 	 * @returns 创建的用户
 	 * @throws Zod 验证错误
 	 */
-	async create(data: InsertUser): Promise<User> {
+	async create(data: NewUser): Promise<User> {
 		const db = getDb()
-		const validated = insertUserSchema.parse(data)
-		const result = await db.insert(users).values(validated).returning()
+		// 验证数据，如果失败会抛出错误
+		insertUserSchema.parse(data)
+		// 插入数据库
+		const result = await db.insert(users).values(data).returning()
 		return result[0]
 	},
 
@@ -106,20 +109,21 @@ export const usersRepository = {
 	 * @param data 用户数据
 	 * @returns 用户信息
 	 */
-	async upsertByEmail(data: InsertUser): Promise<User> {
-		const validated = insertUserSchema.parse(data)
-		const existing = await this.getByEmail(validated.email)
+	async upsertByEmail(data: NewUser): Promise<User> {
+		// 验证数据
+		insertUserSchema.parse(data)
+		const existing = await this.getByEmail(data.email)
 
 		if (existing) {
 			const updated = await this.update(existing.id, {
-				name: validated.name,
-				avatarUrl: validated.avatarUrl,
-				provider: validated.provider,
-				providerId: validated.providerId,
+				name: data.name,
+				avatarUrl: data.avatarUrl,
+				provider: data.provider,
+				providerId: data.providerId,
 			})
 			return updated ?? existing
 		}
 
-		return this.create(validated)
+		return this.create(data)
 	},
 }

@@ -8,8 +8,8 @@ import { getDb } from '../index'
 import {
 	generationLogs,
 	type GenerationLog,
+	type NewGenerationLog,
 	insertGenerationLogSchema,
-	type InsertGenerationLog,
 	GENERATION_STATUS,
 } from '../schema'
 
@@ -23,10 +23,11 @@ export const generationLogsRepository = {
 	 * @returns 创建的日志
 	 * @throws Zod 验证错误
 	 */
-	async create(data: InsertGenerationLog): Promise<GenerationLog> {
+	async create(data: NewGenerationLog): Promise<GenerationLog> {
 		const db = getDb()
-		const validated = insertGenerationLogSchema.parse(data)
-		const result = await db.insert(generationLogs).values(validated).returning()
+		// 验证数据
+		insertGenerationLogSchema.parse(data)
+		const result = await db.insert(generationLogs).values(data).returning()
 		return result[0]
 	},
 
@@ -113,7 +114,7 @@ export const generationLogsRepository = {
 	 * @returns 创建的日志
 	 */
 	async logSuccess(
-		data: Omit<InsertGenerationLog, 'status'> & { durationMs: number }
+		data: Omit<NewGenerationLog, 'status'> & { durationMs: number }
 	): Promise<GenerationLog> {
 		return this.create({
 			...data,
@@ -127,7 +128,7 @@ export const generationLogsRepository = {
 	 * @returns 创建的日志
 	 */
 	async logFailure(
-		data: Omit<InsertGenerationLog, 'status'> & { errorMessage: string }
+		data: Omit<NewGenerationLog, 'status'> & { errorMessage: string }
 	): Promise<GenerationLog> {
 		return this.create({
 			...data,
@@ -141,7 +142,7 @@ export const generationLogsRepository = {
 	 * @returns 创建的日志
 	 */
 	async logTimeout(
-		data: Omit<InsertGenerationLog, 'status'>
+		data: Omit<NewGenerationLog, 'status'>
 	): Promise<GenerationLog> {
 		return this.create({
 			...data,
