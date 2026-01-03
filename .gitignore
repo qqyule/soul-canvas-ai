@@ -27,3 +27,6 @@ drizzle
 
 # Cloudflare Workers secrets (本地开发)
 workers/.dev.vars
+
+# Vitest coverage
+coverage/
