@@ -4,6 +4,7 @@ import { Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GITHUB_REPO_URL } from '@/lib/storage'
 import { cn } from '@/lib/utils'
+import UserProfile from '@/components/auth/UserProfile'
 
 const Header = () => {
 	const [isScrolled, setIsScrolled] = useState(false)
@@ -57,12 +58,7 @@ const Header = () => {
 
 				{/* Nav */}
 				<div className="flex items-center gap-3">
-					<motion.div
-						whileHover={{ scale: 1.05 }}
-						className="hidden sm:block px-4 py-2 rounded-lg bg-muted/30 border border-border/50 text-sm text-muted-foreground"
-					>
-						无需登录即可体验
-					</motion.div>
+					<UserProfile />
 
 					<Button
 						variant="ghost"

@@ -22,7 +22,10 @@ const { createInsertSchema, createSelectSchema, createUpdateSchema } =
 export const insertUserSchema = createInsertSchema(users, {
 	email: (schema) => schema.email('请输入有效的邮箱地址'),
 	name: (schema) => schema.max(50, '用户名最长50个字符'),
-	provider: z.enum(['github', 'google', 'email']).optional().nullable(),
+	provider: z
+		.enum(['clerk', 'github', 'google', 'email'])
+		.optional()
+		.nullable(),
 	avatarUrl: (schema) => schema.url('请输入有效的 URL'),
 })
 

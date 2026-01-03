@@ -18,8 +18,8 @@ export const users = pgTable('users', {
 	/** 头像 URL */
 	avatarUrl: text('avatar_url'),
 	/** OAuth 提供商 */
-	provider: text('provider'), // 'github' | 'google' | 'email'
-	/** OAuth 提供商用户 ID */
+	provider: text('provider').default('clerk'), // 'clerk' | 'github' | 'google' | 'email'
+	/** OAuth 提供商用户 ID (Clerk User ID) */
 	providerId: text('provider_id'),
 	/** 创建时间 */
 	createdAt: timestamp('created_at').notNull().defaultNow(),
