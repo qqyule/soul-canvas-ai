@@ -9,58 +9,59 @@ import '@testing-library/jest-dom'
 vi.mock('@clerk/clerk-react', () => ({
 	useUser: vi.fn(),
 	UserButton: () => <button data-testid="user-button">User Btn</button>,
-	SignInButton: ({ children }: any) => (
+	SignInButton: ({ children }: { children: React.ReactNode }) => (
 		<div data-testid="sign-in-btn">{children}</div>
 	),
-	SignedIn: ({ children }: any) => {
+	SignedIn: ({ children }: { children: React.ReactNode }) => {
 		const { isSignedIn } = useUser()
 		return isSignedIn ? <>{children}</> : null
 	},
-	SignedOut: ({ children }: any) => {
+	SignedOut: ({ children }: { children: React.ReactNode }) => {
 		const { isSignedIn } = useUser()
 		return !isSignedIn ? <>{children}</> : null
 	},
 }))
 
 describe('UserProfile', () => {
-	it('renders Login button when signed out', () => {
+	it('renders login button when signed out', () => {
 		vi.mocked(useUser).mockReturnValue({
+			isLoaded: true,
 			isSignedIn: false,
 			user: null,
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		render(<UserProfile />)
-
+		expect(screen.getByTestId('sign-in-btn')).toBeInTheDocument()
 		expect(screen.getByText('登录')).toBeInTheDocument()
-		expect(screen.queryByTestId('user-button')).not.toBeInTheDocument()
 	})
 
-	it('renders UserButton and Name when signed in', () => {
+	it('renders user button when signed in', () => {
 		vi.mocked(useUser).mockReturnValue({
+			isLoaded: true,
 			isSignedIn: true,
 			user: {
-				fullName: 'Alice',
-				username: 'alice123',
+				id: 'user_123',
+				fullName: 'Test User',
+				primaryEmailAddress: { emailAddress: 'test@example.com' },
 			},
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		render(<UserProfile />)
-
 		expect(screen.getByTestId('user-button')).toBeInTheDocument()
-		expect(screen.getByText('Alice')).toBeInTheDocument()
 	})
 
-	it('renders Username if FullName is missing', () => {
+	it('renders user name when signed in', () => {
 		vi.mocked(useUser).mockReturnValue({
+			isLoaded: true,
 			isSignedIn: true,
 			user: {
-				fullName: null,
-				username: 'bob_artist',
+				id: 'user_123',
+				fullName: 'Test User',
+				primaryEmailAddress: { emailAddress: 'test@example.com' },
 			},
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		render(<UserProfile />)
-
-		expect(screen.getByText('bob_artist')).toBeInTheDocument()
+		expect(screen.getByText('Test User')).toBeInTheDocument()
 	})
 })

@@ -16,6 +16,22 @@ vi.mock('@clerk/clerk-react', () => ({
 	useUser: vi.fn(),
 }))
 
+vi.mock('@/hooks/use-toast', () => ({
+	useToast: vi.fn(() => ({
+		toast: vi.fn(),
+	})),
+}))
+
+type UserMock = {
+	id: string
+	fullName: string | null
+	username: string | null
+	imageUrl: string
+	primaryEmailAddress: {
+		emailAddress: string
+	} | null
+}
+
 describe('useUserSync', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
@@ -26,7 +42,7 @@ describe('useUserSync', () => {
 			isLoaded: false,
 			isSignedIn: false,
 			user: null,
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		renderHook(() => useUserSync())
 
@@ -38,7 +54,7 @@ describe('useUserSync', () => {
 			isLoaded: true,
 			isSignedIn: false,
 			user: null,
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		renderHook(() => useUserSync())
 
@@ -46,7 +62,7 @@ describe('useUserSync', () => {
 	})
 
 	it('should sync user if signed in and has email', () => {
-		const mockUser = {
+		const mockUser: UserMock = {
 			id: 'user_123',
 			fullName: 'Test User',
 			username: 'testuser',
@@ -60,7 +76,7 @@ describe('useUserSync', () => {
 			isLoaded: true,
 			isSignedIn: true,
 			user: mockUser,
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		renderHook(() => useUserSync())
 
@@ -75,8 +91,11 @@ describe('useUserSync', () => {
 	})
 
 	it('should handle sync error gracefully', async () => {
-		const mockUser = {
+		const mockUser: UserMock = {
 			id: 'user_123',
+			fullName: 'Test User',
+			username: 'testuser',
+			imageUrl: 'https://example.com/avatar.jpg',
 			primaryEmailAddress: { emailAddress: 'test@example.com' },
 		}
 
@@ -84,7 +103,7 @@ describe('useUserSync', () => {
 			isLoaded: true,
 			isSignedIn: true,
 			user: mockUser,
-		} as any)
+		} as unknown as ReturnType<typeof useUser>)
 
 		const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 		vi.mocked(usersRepository.upsertByEmail).mockRejectedValueOnce(

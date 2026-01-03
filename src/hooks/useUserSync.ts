@@ -1,6 +1,7 @@
 import { useUser } from '@clerk/clerk-react'
 import { useEffect, useState } from 'react'
 import { usersRepository } from '@/db/repositories/users'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * 用户同步 Hook
@@ -9,6 +10,7 @@ import { usersRepository } from '@/db/repositories/users'
 export const useUserSync = () => {
 	const { user, isLoaded } = useUser()
 	const [isSynced, setIsSynced] = useState(false)
+	const { toast } = useToast()
 
 	useEffect(() => {
 		const syncUser = async () => {
@@ -37,11 +39,16 @@ export const useUserSync = () => {
 				console.log('User synced to Neon database:', email)
 			} catch (error) {
 				console.error('Failed to sync user to database:', error)
+				toast({
+					title: '用户数据同步失败',
+					description: '无法将您的账户信息保存至数据库，请尝试刷新页面。',
+					variant: 'destructive',
+				})
 			}
 		}
 
 		syncUser()
-	}, [user, isLoaded, isSynced])
+	}, [user, isLoaded, isSynced, toast])
 
 	return { isSynced }
 }
