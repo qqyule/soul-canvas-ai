@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { GITHUB_REPO_URL } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import UserProfile from '@/components/auth/UserProfile'
 
@@ -59,15 +57,6 @@ const Header = () => {
 				{/* Nav */}
 				<div className="flex items-center gap-3">
 					<UserProfile />
-
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => window.open(GITHUB_REPO_URL, '_blank')}
-						title="在 GitHub 上查看源码"
-					>
-						<Github className="h-5 w-5" />
-					</Button>
 				</div>
 			</div>
 		</motion.header>

@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
+import { useUser } from '@clerk/clerk-react'
 import {
 	getDailyLimit,
 	getRemainingCount,
@@ -31,22 +32,37 @@ interface UseDailyLimitReturn {
  * 每日生成限制 Hook
  */
 export const useDailyLimit = (): UseDailyLimitReturn => {
+	const { isSignedIn, isLoaded } = useUser()
+
+	// 计算当前限制的辅助函数
+	const getCurrentLimit = useCallback(() => {
+		// 如果 Clerk 还没加载完成，默认为未登录状态
+		if (!isLoaded) return getDailyLimit(false)
+		return getDailyLimit(!!isSignedIn)
+	}, [isSignedIn, isLoaded])
+
 	const [remainingCount, setRemainingCount] = useState(() =>
-		getRemainingCount()
+		getRemainingCount(getDailyLimit(false))
 	)
-	const [dailyLimit, setDailyLimit] = useState(() => getDailyLimit())
+	const [dailyLimit, setDailyLimit] = useState(() => getDailyLimit(false))
 	const [isLimitReached, setIsLimitReached] = useState(() =>
-		checkLimitReached()
+		checkLimitReached(getDailyLimit(false))
 	)
 
 	/**
 	 * 刷新状态
 	 */
 	const refresh = useCallback(() => {
-		setRemainingCount(getRemainingCount())
-		setDailyLimit(getDailyLimit())
-		setIsLimitReached(checkLimitReached())
-	}, [])
+		const currentLimit = getCurrentLimit()
+		setRemainingCount(getRemainingCount(currentLimit))
+		setDailyLimit(currentLimit)
+		setIsLimitReached(checkLimitReached(currentLimit))
+	}, [getCurrentLimit])
+
+	// 当登录状态变化时，自动刷新
+	useEffect(() => {
+		refresh()
+	}, [isSignedIn, isLoaded, refresh])
 
 	/**
 	 * 升级配额
@@ -63,12 +79,14 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 	 */
 	const consumeGeneration = useCallback(
 		(amount: number = 1): boolean => {
-			if (checkLimitReached() || remainingCount < amount) {
+			const currentLimit = getCurrentLimit()
+
+			if (checkLimitReached(currentLimit) || remainingCount < amount) {
 				setIsLimitReached(true)
 				return false
 			}
 
-			const remaining = incrementDailyUsage(amount)
+			const remaining = incrementDailyUsage(amount, currentLimit)
 
 			if (remaining === -1) {
 				// 理论上 checkLimitReached 应该已经拦截了，但双重保险
@@ -84,7 +102,7 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 
 			return true
 		},
-		[remainingCount, refresh]
+		[remainingCount, refresh, getCurrentLimit]
 	)
 
 	// 组件挂载时刷新状态（处理跨日期情况）

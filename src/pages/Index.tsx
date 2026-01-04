@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { History, Sparkles } from 'lucide-react'
+import { History, Sparkles, Github } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
 import StyleSelector from '@/components/canvas/StyleSelector'
@@ -28,7 +28,11 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { STARRED_DAILY_LIMIT } from '@/lib/storage'
+import {
+	STARRED_DAILY_LIMIT,
+	GITHUB_REPO_URL,
+	AUTHENTICATED_DAILY_LIMIT,
+} from '@/lib/storage'
 import { useToast } from '@/hooks/use-toast'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useHistory } from '@/hooks/use-history'
@@ -55,13 +59,8 @@ const Index = () => {
 
 	const { toast } = useToast()
 	const { isSignedIn } = useUser()
-	const {
-		remainingCount,
-		dailyLimit,
-		isLimitReached,
-		consumeGeneration,
-		upgradeQuota,
-	} = useDailyLimit()
+	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } =
+		useDailyLimit()
 	const {
 		history,
 		filteredHistory,
@@ -74,14 +73,6 @@ const Index = () => {
 		clearAllHistory,
 	} = useHistory()
 	const { saveStatus, saveDraft, checkLatestDraft, deleteDraft } = useDrafts()
-
-	const handleUpgrade = useCallback(() => {
-		upgradeQuota()
-		toast({
-			title: '权益升级成功！🎉',
-			description: `感谢您的支持，您已获得每日 ${dailyLimit} -> 1000 次生成次数`,
-		})
-	}, [upgradeQuota, dailyLimit, toast])
 
 	/**
 	 * 处理画布数据变化，触发自动保存
@@ -388,14 +379,24 @@ const Index = () => {
 													</span>
 												</div>
 											</TooltipTrigger>
-											{dailyLimit < STARRED_DAILY_LIMIT && (
-												<TooltipContent>
+											<TooltipContent>
+												{isSignedIn ? (
 													<p>
-														前往右上角 GitHub 点个 Star ⭐️
-														支持一下，解锁更多生成次数！
+														每日享有 {dailyLimit} 次生成机会
+														{dailyLimit < STARRED_DAILY_LIMIT &&
+															' (Star 项目可解锁 1000 次)'}
 													</p>
-												</TooltipContent>
-											)}
+												) : (
+													<p>
+														当前为游客模式 (每日 {dailyLimit} 次)
+														<br />
+														<span className="font-bold text-primary">
+															登录
+														</span>{' '}
+														立即升级至每日 {AUTHENTICATED_DAILY_LIMIT} 次！
+													</p>
+												)}
+											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
 
@@ -516,10 +517,21 @@ const Index = () => {
 				</div>
 			</PageTransition>
 
-			<footer className="pt-6 pb-24 md:py-6 text-center">
+			<footer className="pt-6 pb-24 md:py-6 text-center space-y-4">
 				<p className="text-sm text-muted-foreground/60">
 					大模型版本：Google Nano Banana Pro
 				</p>
+				<div className="flex justify-center">
+					<a
+						href={GITHUB_REPO_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-2 text-sm text-muted-foreground/80 hover:text-foreground transition-colors"
+					>
+						<Github className="h-4 w-4" />
+						<span>GitHub</span>
+					</a>
+				</div>
 			</footer>
 
 			{/* Generation Result Modal */}
@@ -535,7 +547,6 @@ const Index = () => {
 				open={showLimitDialog}
 				onClose={() => setShowLimitDialog(false)}
 				dailyLimit={dailyLimit}
-				onUpgrade={handleUpgrade}
 			/>
 
 			{/* 历史记录面板 */}

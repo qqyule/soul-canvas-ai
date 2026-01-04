@@ -17,7 +17,7 @@
 | P1-1   | 历史记录模块优化   | `feature/history-optimize` | ⚪ 待开始 | ⭐⭐⭐   |
 | P1-2   | 风格选取 UI 优化   | `feature/style-ui-refine`  | ✅ 已完成 | ⭐⭐⭐   |
 | P1-3   | 动效与交互增强系统 | `feature/interact-effects` | ⚪ 待开始 | ⭐⭐⭐⭐ |
-| P1-4   | 批量生成 & 变体    | `feature/batch-generation` | ⚪ 待开始 | ⭐⭐⭐   |
+| P1-4   | 批量生成 & 变体    | `feature/batch-generation` | ✅ 已完成 | ⭐⭐⭐   |
 | P1-5   | 自定义风格         | `feature/custom-styles`    | ⚪ 待开始 | ⭐⭐⭐   |
 
 ---
@@ -191,15 +191,14 @@ const MotionButton = ({ children, onClick }) => (
 
 **分支**: `feature/batch-generation`
 
-**状态**: ⚪ 待开始
+**状态**: ✅ 已完成
 
 ### 功能范围
 
-- [ ] 一次生成多个变体 (2/4/6 张)
-- [ ] 变体参数微调 (seed 变化)
-- [ ] 并行生成队列管理
-- [ ] 生成结果网格预览
-- [ ] 单张选择 / 全部保存
+- [x] 一次生成多个变体 (1-4 张)
+- [x] 并行生成队列管理
+- [x] 生成结果网格预览
+- [x] 单张选择 / 全部下载保存
 
 ---
 
