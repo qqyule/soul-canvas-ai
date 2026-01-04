@@ -38,23 +38,30 @@ const GenerationResultView = ({
 	const activeResult = results ? results[selectedIndex] : null
 
 	const handleDownload = async (
-		url: string = activeResult?.generatedImageUrl || ''
+		targetUrl: string = activeResult?.generatedImageUrl || ''
 	) => {
-		if (!url) return
+		if (!targetUrl) return
 
 		try {
-			const response = await fetch(url)
+			const response = await fetch(targetUrl)
 			const blob = await response.blob()
-			const url = URL.createObjectURL(blob)
+			const blobUrl = URL.createObjectURL(blob)
 			const a = document.createElement('a')
-			a.href = url
+			a.href = blobUrl
 			a.download = `shenbimaliang-${Date.now()}.png`
 			document.body.appendChild(a)
 			a.click()
 			document.body.removeChild(a)
-			URL.revokeObjectURL(url)
+			URL.revokeObjectURL(blobUrl)
 		} catch (error) {
-			// Ignore error
+			console.error('Download failed, fallback to direct link:', error)
+			const a = document.createElement('a')
+			a.href = targetUrl
+			a.download = `shenbimaliang-${Date.now()}.png`
+			a.target = '_blank'
+			document.body.appendChild(a)
+			a.click()
+			document.body.removeChild(a)
 		}
 	}
 

@@ -63,7 +63,14 @@ const handleDownload = async (url: string | undefined, filename: string) => {
 		document.body.removeChild(a)
 		URL.revokeObjectURL(blobUrl)
 	} catch (error) {
-		// Ignore error
+		console.error('Download failed, fallback to direct link:', error)
+		const a = document.createElement('a')
+		a.href = url
+		a.download = filename
+		a.target = '_blank'
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
 	}
 }
 
