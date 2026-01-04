@@ -255,23 +255,8 @@ const Index = () => {
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
 
-				// 并行执行批量生成
-				const generatePromise = generateFromSketch(
-					sketchDataUrl,
-					selectedStyle,
-					finalPrompt,
-					signal
-				)
-
-				const promises = Array(batchSize)
-					.fill(null)
-					.map(() => generatePromise)
-				// 注意：这里简单的重复调用 generateFromSketch 并不能保证随机性，
-				// 除非后端支持或每次调用生成不同的 seed (但在 generateFromSketch 内部目前没暴露 seed 参数)。
-				// 现在的 AI Service 会调用 OpenRouter，如果 OpenRouter 侧没有传 seed，通常是随机的。
-				// *为了确保变体，实际上应该并发调用*。
-
-				// 修正：上面的 promises map 应该每次创建新的 Promise 调用
+				// 批量生成：创建 batchSize 个并行请求
+				// 每个请求独立调用，确保生成不同的变体
 				const actualPromises = Array.from({ length: batchSize }).map(() =>
 					generateFromSketch(sketchDataUrl, selectedStyle, finalPrompt, signal)
 				)
