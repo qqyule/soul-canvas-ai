@@ -7,6 +7,11 @@
 // ==================== 类型定义 ====================
 
 /**
+ * 风格分类
+ */
+export type StyleCategory = 'all' | 'realistic' | 'anime' | '3d' | 'artistic'
+
+/**
  * 风格预设接口
  */
 export interface StylePreset {
@@ -24,6 +29,10 @@ export interface StylePreset {
 	gradient: string
 	/** 图标符号 */
 	icon: string
+	/** 预览图路径 */
+	imageUrl: string
+	/** 风格分类 */
+	category: StyleCategory
 }
 
 // ==================== 风格预设列表 ====================
@@ -42,6 +51,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Convert the sketch into a minimalist vector logo design. Use the drawn shape as the logo icon. Clean lines, professional branding, flat design, modern corporate identity, high contrast, scalable vector style, sharp edges based on the original outline',
 		gradient: 'from-cyan-400 via-blue-500 to-purple-600',
 		icon: '✦',
+		imageUrl: '/styles/logo.png',
+		category: 'artistic',
 	},
 	{
 		id: 'realistic',
@@ -52,6 +63,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Transform the sketch into an ultra realistic photograph. The drawn subject becomes a photorealistic object or scene. 8K resolution, cinematic lighting, professional DSLR quality, hyperrealistic textures, natural shadows and reflections based on the sketch composition',
 		gradient: 'from-amber-400 via-orange-500 to-red-600',
 		icon: '◎',
+		imageUrl: '/styles/realistic.png',
+		category: 'realistic',
 	},
 	{
 		id: 'flat-icon',
@@ -62,6 +75,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Convert the drawn shape into a flat design icon. Transform sketch lines into clean geometric shapes. SVG style, minimal forms, bold vibrant colors, material design inspired, perfect symmetry where applicable, crisp edges following the original outline',
 		gradient: 'from-green-400 via-emerald-500 to-teal-600',
 		icon: '◆',
+		imageUrl: '/styles/flat-icon.png',
+		category: 'artistic',
 	},
 	{
 		id: 'ghibli',
@@ -72,6 +87,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Animate the sketch in Studio Ghibli style. Transform the drawing into a whimsical anime scene. Hayao Miyazaki inspired, soft watercolor textures, dreamy magical atmosphere, hand-drawn animation quality, the sketch subject becomes a charming Ghibli character or element',
 		gradient: 'from-pink-400 via-rose-500 to-purple-600',
 		icon: '❋',
+		imageUrl: '/styles/ghibli.png',
+		category: 'anime',
 	},
 	{
 		id: 'cyberpunk',
@@ -82,6 +99,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Incorporate the sketch into a cyberpunk scene. The drawn subject becomes a neon-lit futuristic element. Vibrant neon colors (pink, cyan, purple), holographic effects, rain-slicked surfaces reflecting the sketch shape, Blade Runner inspired, high tech dystopian atmosphere',
 		gradient: 'from-violet-400 via-purple-500 to-fuchsia-600',
 		icon: '⬡',
+		imageUrl: '/styles/cyberpunk.png',
+		category: 'artistic',
 	},
 	{
 		id: '3d-render',
@@ -92,6 +111,8 @@ export const STYLE_PRESETS: StylePreset[] = [
 			'Render the sketch as a 3D object. Transform the drawing into a polished 3D model. Octane render quality, glossy materials, professional studio lighting, soft shadows, the sketch shape becomes a tangible 3D form with realistic materials and depth',
 		gradient: 'from-blue-400 via-indigo-500 to-violet-600',
 		icon: '◇',
+		imageUrl: '/styles/3d-render.png',
+		category: '3d',
 	},
 ]
 

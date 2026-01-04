@@ -1,7 +1,9 @@
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
-import type { StylePreset } from '@/types/canvas'
-import { STYLE_PRESETS } from '@/types/canvas'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import type { StylePreset, StyleCategory } from '@/prompts/style-presets'
+import { STYLE_PRESETS } from '@/prompts/style-presets'
+import { StyleCard } from './style/StyleCard'
+import { StyleCategoryNav } from './style/StyleCategoryNav'
 
 interface StyleSelectorProps {
 	selectedStyle: StylePreset
@@ -19,74 +21,30 @@ const StyleSelector = ({
 			transition={{ duration: 0.5, delay: 0.3 }}
 			className="space-y-4"
 		>
-			<div className="space-y-1">
-				<h3 className="text-lg font-semibold text-foreground">选择风格</h3>
-				<p className="text-sm text-muted-foreground">
-					Choose a style for your creation
-				</p>
+			<div className="flex items-center justify-between">
+				<div className="space-y-1">
+					<h3 className="text-lg font-semibold text-foreground">选择风格</h3>
+					<p className="text-sm text-muted-foreground">
+						Choose a style for your creation
+					</p>
+				</div>
 			</div>
 
-			<div className="flex overflow-x-auto pb-4 gap-3 snap-x md:grid md:grid-cols-3 md:pb-0 scrollbar-hide -mx-2 px-2 md:mx-0 md:px-0">
-				{STYLE_PRESETS.map((style, index) => (
-					<motion.button
-						key={style.id}
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.3, delay: 0.1 * index }}
-						whileHover={{ scale: 1.03, y: -2 }}
-						whileTap={{ scale: 0.97 }}
-						onClick={() => onSelectStyle(style)}
-						className={cn(
-							'group relative overflow-hidden rounded-xl p-4 text-left transition-all duration-300 flex-shrink-0 w-36 md:w-auto snap-center',
-							'bg-gradient-card border border-border/50',
-							'hover:border-primary/50',
-							selectedStyle.id === style.id && [
-								'border-primary shadow-glow-sm',
-								'bg-gradient-to-br from-primary/10 to-secondary/10',
-							]
-						)}
-					>
-						{/* Gradient Accent */}
-						<div
-							className={cn(
-								'absolute inset-0 opacity-0 transition-opacity duration-300',
-								'group-hover:opacity-10',
-								selectedStyle.id === style.id && 'opacity-20',
-								`bg-gradient-to-br ${style.gradient}`
-							)}
+			<motion.div
+				layout
+				className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3"
+			>
+				<AnimatePresence mode="popLayout">
+					{STYLE_PRESETS.map((style) => (
+						<StyleCard
+							key={style.id}
+							style={style}
+							isSelected={selectedStyle.id === style.id}
+							onClick={() => onSelectStyle(style)}
 						/>
-
-						{/* Content */}
-						<div className="relative z-10 space-y-2">
-							<div className="flex items-center gap-2">
-								<span
-									className={cn(
-										'text-xl transition-transform duration-300',
-										'group-hover:scale-110',
-										selectedStyle.id === style.id && 'scale-110'
-									)}
-								>
-									{style.icon}
-								</span>
-								<span className="font-medium text-foreground">
-									{style.nameZh}
-								</span>
-							</div>
-							<p className="text-xs text-muted-foreground line-clamp-2">
-								{style.description}
-							</p>
-						</div>
-
-						{/* Selected Indicator */}
-						{selectedStyle.id === style.id && (
-							<motion.div
-								layoutId="selected-style"
-								className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary shadow-glow-sm"
-							/>
-						)}
-					</motion.button>
-				))}
-			</div>
+					))}
+				</AnimatePresence>
+			</motion.div>
 		</motion.div>
 	)
 }
