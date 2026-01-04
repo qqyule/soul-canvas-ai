@@ -15,9 +15,15 @@ import type { CanvasTool } from '@/types/canvas'
 interface SketchCanvasProps {
 	onExport: (dataUrl: string) => void
 	isGenerating: boolean
+	/** 画布数据变化回调（用于自动保存） */
+	onCanvasChange?: (canvasData: string) => void
 }
 
-const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
+const SketchCanvas = ({
+	onExport,
+	isGenerating,
+	onCanvasChange,
+}: SketchCanvasProps) => {
 	const canvasRef = useRef<ReactSketchCanvasRef>(null)
 	const [currentTool, setCurrentTool] = useState<CanvasTool>('pen')
 	const [strokeWidth, setStrokeWidth] = useState(4)
@@ -143,7 +149,13 @@ const SketchCanvas = ({ onExport, isGenerating }: SketchCanvasProps) => {
 					strokeWidth={strokeWidth}
 					strokeColor="#1a1a2e"
 					canvasColor="#ffffff"
-					onChange={(paths) => setHasDrawn(paths.length > 0)}
+					onChange={(paths) => {
+						setHasDrawn(paths.length > 0)
+						// 触发自动保存回调
+						if (onCanvasChange && paths.length > 0) {
+							onCanvasChange(JSON.stringify(paths))
+						}
+					}}
 					style={{
 						borderRadius: 'var(--radius)',
 					}}

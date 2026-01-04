@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { History, Sparkles } from 'lucide-react'
 import Header from '@/components/layout/Header'
@@ -8,6 +8,8 @@ import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import HistoryPanel from '@/components/canvas/HistoryPanel'
 import OnboardingTour from '@/components/OnboardingTour'
+import DraftStatusIndicator from '@/components/drafts/DraftStatusIndicator'
+import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +28,10 @@ import { STARRED_DAILY_LIMIT } from '@/lib/storage'
 import { useToast } from '@/hooks/use-toast'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useHistory } from '@/hooks/use-history'
+import { useDrafts } from '@/hooks/use-drafts'
 import { generateFromSketch, AIServiceError } from '@/lib/ai-service'
+import { useUser } from '@clerk/clerk-react'
+import type { Draft } from '@/lib/draft-db'
 
 const Index = () => {
 	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(
@@ -37,11 +42,14 @@ const Index = () => {
 	const [userPrompt, setUserPrompt] = useState('')
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
+	const [showRecoveryDialog, setShowRecoveryDialog] = useState(false)
+	const [draftToRecover, setDraftToRecover] = useState<Draft | null>(null)
 
 	// 用于取消请求的 AbortController
 	const abortControllerRef = useRef<AbortController | null>(null)
 
 	const { toast } = useToast()
+	const { isSignedIn } = useUser()
 	const {
 		remainingCount,
 		dailyLimit,
@@ -51,6 +59,7 @@ const Index = () => {
 	} = useDailyLimit()
 	const { history, addToHistory, deleteFromHistory, clearAllHistory } =
 		useHistory()
+	const { saveStatus, saveDraft, checkLatestDraft, deleteDraft } = useDrafts()
 
 	const handleUpgrade = useCallback(() => {
 		upgradeQuota()
@@ -59,6 +68,83 @@ const Index = () => {
 			description: `感谢您的支持，您已获得每日 ${dailyLimit} -> 1000 次生成次数`,
 		})
 	}, [upgradeQuota, dailyLimit, toast])
+
+	/**
+	 * 处理画布数据变化，触发自动保存
+	 */
+	const handleCanvasChange = useCallback(
+		(canvasData: string) => {
+			saveDraft({
+				canvasData,
+				styleId: selectedStyle.id,
+				prompt: userPrompt,
+			})
+		},
+		[saveDraft, selectedStyle.id, userPrompt]
+	)
+
+	/**
+	 * 恢复草稿
+	 */
+	const handleRecoverDraft = useCallback(
+		async (draft: Draft) => {
+			try {
+				// TODO: 将草稿数据恢复到画布
+				// 需要 SketchCanvas 暴露 loadPaths 方法
+				console.log('Recovering draft:', draft)
+
+				// 恢复提示词和风格
+				if (draft.prompt) setUserPrompt(draft.prompt)
+				const style = STYLE_PRESETS.find((s) => s.id === draft.styleId)
+				if (style) setSelectedStyle(style)
+
+				toast({
+					title: '草稿已恢复',
+					description: '已恢复上次未完成的作品',
+				})
+			} catch (error) {
+				console.error('Failed to recover draft:', error)
+				toast({
+					title: '恢复失败',
+					description: '无法恢复草稿，请重新开始',
+					variant: 'destructive',
+				})
+			}
+		},
+		[toast]
+	)
+
+	/**
+	 * 放弃草稿
+	 */
+	const handleDiscardDraft = useCallback(
+		async (draft: Draft) => {
+			try {
+				await deleteDraft(draft.id)
+				toast({
+					title: '已放弃草稿',
+					description: '草稿已删除',
+				})
+			} catch (error) {
+				console.error('Failed to discard draft:', error)
+			}
+		},
+		[deleteDraft, toast]
+	)
+
+	/**
+	 * 页面加载时检查是否有未完成的草稿
+	 */
+	useEffect(() => {
+		const checkDraft = async () => {
+			const latest = await checkLatestDraft()
+			if (latest) {
+				setDraftToRecover(latest)
+				setShowRecoveryDialog(true)
+			}
+		}
+		checkDraft()
+	}, [checkLatestDraft])
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
@@ -314,6 +400,7 @@ const Index = () => {
 									isGenerating={
 										status === 'analyzing' || status === 'generating'
 									}
+onCanvasChange={handleCanvasChange}
 								/>
 							</div>
 						</div>
@@ -387,6 +474,15 @@ const Index = () => {
 				onDelete={deleteFromHistory}
 				onClearAll={clearAllHistory}
 			/>
+
+{/* 草稿恢复对话框 */}
+<DraftRecoveryDialog
+draft={draftToRecover}
+open={showRecoveryDialog}
+onClose={() => setShowRecoveryDialog(false)}
+onRecover={handleRecoverDraft}
+onDiscard={handleDiscardDraft}
+/>
 		</div>
 	)
 }

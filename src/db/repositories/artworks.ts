@@ -138,4 +138,59 @@ export const artworksRepository = {
 			.where(eq(artworks.userId, userId))
 		return Number(result[0]?.count ?? 0)
 	},
+
+	// ==================== 草稿相关操作 ====================
+
+	/**
+	 * 获取用户的草稿列表
+	 * @param userId 用户 ID
+	 * @param limit 限制数量
+	 * @returns 草稿列表
+	 */
+	async getDraftsByUserId(userId: string, limit = 10): Promise<Artwork[]> {
+		const db = getDb()
+		return db
+			.select()
+			.from(artworks)
+			.where(sql`${artworks.userId} = ${userId} AND ${artworks.isDraft} = true`)
+			.orderBy(desc(artworks.updatedAt))
+			.limit(limit)
+	},
+
+	/**
+	 * 保存草稿（创建或更新）
+	 * @param data 草稿数据
+	 * @returns 保存的草稿
+	 */
+	async saveDraft(data: NewArtwork & { id?: string }): Promise<Artwork> {
+		const db = getDb()
+		// 验证数据
+		insertArtworkSchema.parse({ ...data, isDraft: true })
+
+		if (data.id) {
+			// 更新现有草稿
+			const result = await db
+				.update(artworks)
+				.set({ ...data, isDraft: true, updatedAt: new Date() })
+				.where(eq(artworks.id, data.id))
+				.returning()
+			return result[0]
+		} else {
+			// 创建新草稿
+			const result = await db
+				.insert(artworks)
+				.values({ ...data, isDraft: true })
+				.returning()
+			return result[0]
+		}
+	},
+
+	/**
+	 * 将草稿转为正式作品
+	 * @param id 草稿 ID
+	 * @returns 更新后的作品或 null
+	 */
+	async publishDraft(id: string): Promise<Artwork | null> {
+		return this.update(id, { isDraft: false })
+	},
 }

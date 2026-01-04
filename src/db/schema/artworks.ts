@@ -37,6 +37,8 @@ export const artworks = pgTable('artworks', {
 	metadata: jsonb('metadata'),
 	/** 是否公开展示 */
 	isPublic: boolean('is_public').default(false),
+	/** 是否为草稿（未完成作品） */
+	isDraft: boolean('is_draft').default(false),
 	/** 创建时间 */
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	/** 更新时间 */
