@@ -20,7 +20,7 @@ interface UseDailyLimitReturn {
 	/** 是否达到限制 */
 	isLimitReached: boolean
 	/** 消耗一次生成次数，返回是否成功 */
-	consumeGeneration: () => boolean
+	consumeGeneration: (amount?: number) => boolean
 	/** 刷新状态 */
 	refresh: () => void
 	/** 升级配额（标记为已 Star） */
@@ -57,27 +57,35 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 	}, [refresh])
 
 	/**
-	 * 使用一次生成次数
+	 * 使用一次或多次生成次数
+	 * @param amount 消耗的数量，默认为 1
 	 * @returns 是否成功（未达限制）
 	 */
-	const consumeGeneration = useCallback((): boolean => {
-		if (checkLimitReached()) {
-			setIsLimitReached(true)
-			return false
-		}
+	const consumeGeneration = useCallback(
+		(amount: number = 1): boolean => {
+			if (checkLimitReached() || remainingCount < amount) {
+				setIsLimitReached(true)
+				return false
+			}
 
-		const remaining = incrementDailyUsage()
+			const remaining = incrementDailyUsage(amount)
 
-		if (remaining === -1) {
-			setIsLimitReached(true)
-			return false
-		}
+			if (remaining === -1) {
+				// 理论上 checkLimitReached 应该已经拦截了，但双重保险
+				// 如果 incrementDailyUsage 返回 -1，说明实际上超限了（可能是并发导致）
+				// 这种情况下不更新 remaining 为 -1，而是保持原样或强制刷新
+				refresh()
+				setIsLimitReached(true)
+				return false
+			}
 
-		setRemainingCount(remaining)
-		setIsLimitReached(remaining <= 0)
+			setRemainingCount(remaining)
+			setIsLimitReached(remaining <= 0)
 
-		return true
-	}, [])
+			return true
+		},
+		[remainingCount, refresh]
+	)
 
 	// 组件挂载时刷新状态（处理跨日期情况）
 	useEffect(() => {

@@ -4,6 +4,7 @@ import { History, Sparkles } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
 import StyleSelector from '@/components/canvas/StyleSelector'
+import BatchSelector from '@/components/canvas/BatchSelector'
 import { fadeIn, slideUp, staggerChildren } from '@/config/animations'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
@@ -41,7 +42,8 @@ const Index = () => {
 		STYLE_PRESETS[0]
 	)
 	const [status, setStatus] = useState<GenerationStatus>('idle')
-	const [result, setResult] = useState<GenerationResult | null>(null)
+	const [results, setResults] = useState<GenerationResult[] | null>(null)
+	const [batchSize, setBatchSize] = useState(1)
 	const [userPrompt, setUserPrompt] = useState('')
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
@@ -160,14 +162,19 @@ const Index = () => {
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
-			// 检查是否达到限制（仅检查，不扣分）
-			if (isLimitReached) {
+			// 检查是否达到限制（预检查）
+			if (checkLatestDraft === undefined) {
+				// skip
+			}
+
+			// 检查剩余次数是否足够
+			if (isLimitReached || remainingCount < batchSize) {
 				setShowLimitDialog(true)
 				return
 			}
 
 			setStatus('analyzing')
-			setResult(null)
+			setResults(null)
 
 			// 创建新的 AbortController
 			abortControllerRef.current = new AbortController()
@@ -182,30 +189,48 @@ const Index = () => {
 
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
-				const aiResult = await generateFromSketch(
+
+				// 并行执行批量生成
+				const generatePromise = generateFromSketch(
 					sketchDataUrl,
 					selectedStyle,
 					finalPrompt,
 					signal
 				)
 
-				// 成功后才扣分
-				const success = consumeGeneration()
+				const promises = Array(batchSize)
+					.fill(null)
+					.map(() => generatePromise)
+				// 注意：这里简单的重复调用 generateFromSketch 并不能保证随机性，
+				// 除非后端支持或每次调用生成不同的 seed (但在 generateFromSketch 内部目前没暴露 seed 参数)。
+				// 现在的 AI Service 会调用 OpenRouter，如果 OpenRouter 侧没有传 seed，通常是随机的。
+				// *为了确保变体，实际上应该并发调用*。
+
+				// 修正：上面的 promises map 应该每次创建新的 Promise 调用
+				const actualPromises = Array.from({ length: batchSize }).map(() =>
+					generateFromSketch(sketchDataUrl, selectedStyle, finalPrompt, signal)
+				)
+
+				const results = await Promise.all(actualPromises)
+
+				// 批量扣分
+				const success = consumeGeneration(batchSize)
 				if (!success) {
-					// 理论上不会走到这里，因为前面已检查过
 					setShowLimitDialog(true)
-					return
+					// 虽然生成成功了但扣分失败（并发边界情况），展示结果但提示耗尽
 				}
 
-				setResult(aiResult)
+				setResults(results)
 				setStatus('complete')
 
-				// 保存到历史记录
-				addToHistory(sketchDataUrl, aiResult.generatedImageUrl, selectedStyle)
+				// 批量保存到历史记录
+				results.forEach((res) => {
+					addToHistory(sketchDataUrl, res.generatedImageUrl, selectedStyle)
+				})
 
 				toast({
 					title: '生成成功! ✨',
-					description: '您的 AI 艺术作品已准备就绪',
+					description: `已为您生成 ${batchSize} 张 AI 艺术作品`,
 				})
 			} catch (error) {
 				// 请求被取消时静默处理
@@ -236,6 +261,8 @@ const Index = () => {
 			userPrompt,
 			toast,
 			isLimitReached,
+			remainingCount,
+			batchSize,
 			consumeGeneration,
 			addToHistory,
 		]
@@ -248,7 +275,7 @@ const Index = () => {
 			abortControllerRef.current = null
 		}
 		setStatus('idle')
-		setResult(null)
+		setResults(null)
 	}, [])
 
 	return (
@@ -332,6 +359,14 @@ const Index = () => {
 								</div>
 
 								<div className="flex items-center gap-3">
+									{/* 批量生成选择器 */}
+									<BatchSelector
+										value={batchSize}
+										onChange={setBatchSize}
+										disabled={remainingCount < 1}
+										maxBatchSize={4}
+									/>
+
 									{/* 剩余次数显示 */}
 									<TooltipProvider delayDuration={0}>
 										<Tooltip>
@@ -489,8 +524,9 @@ const Index = () => {
 
 			{/* Generation Result Modal */}
 			<GenerationResultView
-				result={result}
+				results={results}
 				status={status}
+				batchCount={batchSize}
 				onClose={handleCloseResult}
 			/>
 

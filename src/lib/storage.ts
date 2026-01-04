@@ -127,19 +127,20 @@ export const getDailyUsage = (): DailyUsage => {
 
 /**
  * 增加使用次数
+ * @param amount 增加的数量，默认为 1
  * @returns 更新后的剩余次数，如果已达限制返回 -1
  */
-export const incrementDailyUsage = (): number => {
+export const incrementDailyUsage = (amount: number = 1): number => {
 	const usage = getDailyUsage()
 	const limit = getDailyLimit()
 
-	if (usage.count >= limit) {
+	if (usage.count + amount > limit) {
 		return -1
 	}
 
 	const newUsage: DailyUsage = {
 		date: getTodayString(),
-		count: usage.count + 1,
+		count: usage.count + amount,
 	}
 
 	localStorage.setItem(STORAGE_KEYS.DAILY_USAGE, JSON.stringify(newUsage))
