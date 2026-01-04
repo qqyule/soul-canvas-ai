@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import UserProfile from '@/components/auth/UserProfile'
+import Logo from '@/components/common/Logo'
 
 interface HeaderProps {
 	onLogoClick?: () => void
@@ -33,31 +34,7 @@ const Header = ({ onLogoClick }: HeaderProps) => {
 		>
 			<div className="max-w-7xl mx-auto flex items-center justify-between">
 				{/* Logo */}
-				<motion.div
-					whileHover={{ scale: 1.02 }}
-					className="flex items-center gap-3 cursor-pointer"
-					onClick={onLogoClick}
-				>
-					<div className="relative">
-						<div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow-sm">
-							<span className="text-xl">✦</span>
-						</div>
-						<motion.div
-							animate={{
-								opacity: [0.5, 1, 0.5],
-								scale: [1, 1.1, 1],
-							}}
-							transition={{ duration: 2, repeat: Infinity }}
-							className="absolute inset-0 rounded-xl bg-gradient-primary blur-lg opacity-50"
-						/>
-					</div>
-					<div>
-						<h1 className="text-xl font-bold text-gradient">神笔马良</h1>
-						<p className="text-xs text-muted-foreground">
-							一笔成画，AI 帮你实现
-						</p>
-					</div>
-				</motion.div>
+				<Logo onClick={onLogoClick} />
 
 				{/* Nav */}
 				<div className="flex items-center gap-3">

@@ -41,6 +41,10 @@ import { useDrafts } from '@/hooks/use-drafts'
 import { generateFromSketch, AIServiceError } from '@/lib/ai-service'
 import { useUser } from '@clerk/clerk-react'
 import type { Draft } from '@/lib/draft-db'
+import type { InspirationConfig } from '@/lib/inspiration-generator'
+import { generateRandomInspiration } from '@/lib/inspiration-generator'
+import { animatePathsDrawing } from '@/lib/inspiration-animation'
+import type { SketchCanvasRef } from '@/components/canvas/SketchCanvas'
 
 const Index = () => {
 	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(
@@ -58,6 +62,8 @@ const Index = () => {
 
 	// 用于取消请求的 AbortController
 	const abortControllerRef = useRef<AbortController | null>(null)
+	// SketchCanvas ref
+	const sketchCanvasRef = useRef<SketchCanvasRef>(null)
 
 	const { toast } = useToast()
 	const { isSignedIn } = useUser()
@@ -89,6 +95,55 @@ const Index = () => {
 		},
 		[saveDraft, selectedStyle.id, userPrompt]
 	)
+
+	/**
+	 * 处理灵感生成
+	 */
+	/**
+	 * 直接生成随机灵感
+	 */
+	const handleRandomInspiration = useCallback(async () => {
+		try {
+			// 随机配置
+			const categories = ['geometric', 'organic', 'sketch', 'pattern'] as const
+			const complexities = ['simple', 'medium', 'complex'] as const
+			const config: InspirationConfig = {
+				category: categories[Math.floor(Math.random() * categories.length)],
+				complexity:
+					complexities[Math.floor(Math.random() * complexities.length)],
+				canvasWidth: 800,
+				canvasHeight: 400,
+			}
+
+			// 生成灵感
+			const result = generateRandomInspiration(config)
+
+			// 清空画布并加载新路径
+			sketchCanvasRef.current?.clearCanvas()
+			await animatePathsDrawing(
+				sketchCanvasRef,
+				result.paths,
+				result.animationDuration
+			)
+
+			// 填充推荐提示词（如果输入框为空）
+			if (!userPrompt && result.suggestedPrompts.length > 0) {
+				setUserPrompt(result.suggestedPrompts[0])
+			}
+
+			toast({
+				title: '灵感已生成！✨',
+				description: 'AI 已为您绘制了草图并填写了提示词',
+			})
+		} catch (error) {
+			console.error('Failed to generate inspiration:', error)
+			toast({
+				title: '生成失败',
+				description: '无法生成灵感，请重试',
+				variant: 'destructive',
+			})
+		}
+	}, [userPrompt, toast])
 
 	/**
 	 * 恢复草稿
@@ -481,11 +536,13 @@ const Index = () => {
 
 							<div id="tour-canvas">
 								<SketchCanvas
+									ref={sketchCanvasRef}
 									onExport={handleGenerate}
 									isGenerating={
 										status === 'analyzing' || status === 'generating'
 									}
 									onCanvasChange={handleCanvasChange}
+									onInspirationClick={handleRandomInspiration}
 								/>
 							</div>
 						</motion.div>
