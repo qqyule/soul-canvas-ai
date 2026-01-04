@@ -38,11 +38,11 @@ const Logo = ({ className, showText = true, onClick }: LogoProps) => {
 				<div className="flex flex-col -space-y-0.5">
 					<div className="flex items-center">
 						<span className="font-bold text-xl tracking-tight text-foreground relative">
-							Soul
+							神笔
 							<span className="text-primary/10 absolute -bottom-1 left-0 w-full h-1.5 -z-10 rounded-sm group-hover:text-primary/20 transition-colors" />
 						</span>
 						<span className="font-light text-xl tracking-tight text-foreground/90 ml-0.5">
-							Canvas
+							马良
 						</span>
 					</div>
 					<span className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground/80 uppercase group-hover:text-primary/80 transition-colors pl-0.5">
