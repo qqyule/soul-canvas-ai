@@ -57,8 +57,17 @@ const Index = () => {
 		consumeGeneration,
 		upgradeQuota,
 	} = useDailyLimit()
-	const { history, addToHistory, deleteFromHistory, clearAllHistory } =
-		useHistory()
+	const {
+		history,
+		filteredHistory,
+		filter,
+		setFilter,
+		availableStyles,
+		addToHistory,
+		deleteFromHistory,
+		deleteMultiple,
+		clearAllHistory,
+	} = useHistory()
 	const { saveStatus, saveDraft, checkLatestDraft, deleteDraft } = useDrafts()
 
 	const handleUpgrade = useCallback(() => {
@@ -400,7 +409,7 @@ const Index = () => {
 									isGenerating={
 										status === 'analyzing' || status === 'generating'
 									}
-onCanvasChange={handleCanvasChange}
+									onCanvasChange={handleCanvasChange}
 								/>
 							</div>
 						</div>
@@ -471,18 +480,23 @@ onCanvasChange={handleCanvasChange}
 				open={showHistory}
 				onClose={() => setShowHistory(false)}
 				history={history}
+				filteredHistory={filteredHistory}
+				filter={filter}
+				onFilterChange={setFilter}
+				availableStyles={availableStyles}
 				onDelete={deleteFromHistory}
+				onDeleteMultiple={deleteMultiple}
 				onClearAll={clearAllHistory}
 			/>
 
-{/* 草稿恢复对话框 */}
-<DraftRecoveryDialog
-draft={draftToRecover}
-open={showRecoveryDialog}
-onClose={() => setShowRecoveryDialog(false)}
-onRecover={handleRecoverDraft}
-onDiscard={handleDiscardDraft}
-/>
+			{/* 草稿恢复对话框 */}
+			<DraftRecoveryDialog
+				draft={draftToRecover}
+				open={showRecoveryDialog}
+				onClose={() => setShowRecoveryDialog(false)}
+				onRecover={handleRecoverDraft}
+				onDiscard={handleDiscardDraft}
+			/>
 		</div>
 	)
 }
