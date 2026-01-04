@@ -19,6 +19,7 @@
 | P2-3   | 作品集 & 社区画廊 | `feature/community-gallery`  | ⚪ 待开始 | ⭐⭐⭐⭐ |
 | P2-4   | 国际化支持 (i18n) | `feature/i18n`               | ⚪ 待开始 | ⭐⭐⭐   |
 | P2-5   | PWA 离线支持      | `feature/pwa`                | ⚪ 待开始 | ⭐⭐⭐   |
+| P2-6   | 多 API 节点切换   | `feature/multi-api-node`     | 🔵 进行中 | ⭐⭐⭐   |
 
 ---
 
@@ -31,15 +32,17 @@ graph TD
     E[P2-3 社区画廊] --> F[用户生态建设]
     G[P2-4 国际化] --> H[全球用户覆盖]
     I[P2-5 PWA] --> J[离线体验]
+    K[P2-6 多 API 节点切换] --> L[服务稳定性 & 成本优化]
 ```
 
 > [!IMPORTANT] > **推荐开发顺序**:
 >
-> 1. **随机灵感生成器**: 提升创意体验，帮助用户快速开始创作。
-> 2. **Logo 科技化重设计**: 增强品牌识别度，体现产品技术属性。
-> 3. **社区画廊**: 构建用户社区，增加产品粘性。
-> 4. **国际化支持**: 拓展全球用户群体。
-> 5. **PWA 离线支持**: 提升移动端体验。
+> 1. **多 API 节点切换**: 提升服务稳定性，优化成本控制，**优先完成**。
+> 2. **随机灵感生成器**: 提升创意体验，帮助用户快速开始创作。
+> 3. **Logo 科技化重设计**: 增强品牌识别度，体现产品技术属性。
+> 4. **社区画廊**: 构建用户社区，增加产品粘性。
+> 5. **国际化支持**: 拓展全球用户群体。
+> 6. **PWA 离线支持**: 提升移动端体验。
 
 ---
 
@@ -343,6 +346,330 @@ interface CommunityArtwork {
 
 ---
 
+## 6️⃣ 多 API 节点切换
+
+**分支**: `feature/multi-api-node`
+
+**状态**: 🔵 进行中
+
+### 功能范围
+
+- [ ] **多节点配置**: 支持配置多个 API 服务节点
+- [ ] **客户端测速**: 用户端自动 ping 测试各节点延迟
+- [ ] **智能路由**: 根据测速结果自动选择最优节点
+- [ ] **故障转移**: 主节点不可用时自动切换到备用节点
+- [ ] **成本优化**: 根据服务商定价策略合理分配请求
+
+### 设计理念
+
+> 通过多节点策略提升服务稳定性和响应速度，同时实现成本优化。以 kie.ai 节点为主，OpenRouter 为稳定备用。
+
+### 节点配置
+
+| 节点       | 服务商     | 角色     | API 端点                       | 说明                   |
+| ---------- | ---------- | -------- | ------------------------------ | ---------------------- |
+| **主节点** | kie.ai     | Primary  | `https://api.kie.ai/api/v1`    | 异步任务模式，成本更低 |
+| **备用**   | OpenRouter | Fallback | `https://openrouter.ai/api/v1` | 同步模式，模型丰富     |
+
+### kie.ai API 说明
+
+> **官方文档**: [https://docs.kie.ai/market/google/nano-banana-edit](https://docs.kie.ai/market/google/nano-banana-edit)
+
+**模型**: `google/nano-banana-edit` (Nano Banana Edit - 图像编辑模型)
+
+**API 模式**: **异步任务** (需轮询或回调获取结果)
+
+#### 创建任务请求
+
+```bash
+curl --request POST \
+  --url https://api.kie.ai/api/v1/jobs/createTask \
+  --header 'Authorization: Bearer ${API_KEY}' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "google/nano-banana-edit",
+    "callBackUrl": "https://your-domain.com/api/callback",
+    "input": {
+      "prompt": "your style prompt here",
+      "image_urls": ["https://example.com/sketch.png"],
+      "output_format": "png",
+      "image_size": "1:1"
+    }
+  }'
+```
+
+#### 响应示例
+
+```json
+{
+	"code": 200,
+	"msg": "success",
+	"data": {
+		"taskId": "task_google_1765178615729"
+	}
+}
+```
+
+#### 响应码说明
+
+| 状态码 | 含义                  |
+| ------ | --------------------- |
+| 200    | 成功                  |
+| 401    | 未授权 - 认证信息无效 |
+| 402    | 余额不足              |
+| 429    | 请求过频              |
+| 500    | 服务器错误            |
+| 501    | 生成失败              |
+
+#### 轮询任务结果
+
+由于 kie.ai 为**异步任务模式**，创建任务后需要轮询 `/api/v1/jobs/recordInfo` 接口获取生成结果：
+
+```bash
+curl --request GET \
+  --url "https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${TASK_ID}" \
+  --header 'Authorization: Bearer ${API_KEY}'
+```
+
+**响应示例（生成中）**:
+
+```json
+{
+	"code": 200,
+	"msg": "success",
+	"data": {
+		"taskId": "task_google_1765178615729",
+		"status": "processing"
+	}
+}
+```
+
+**响应示例（生成完成）**:
+
+```json
+{
+	"code": 200,
+	"msg": "success",
+	"data": {
+		"taskId": "task_google_1765178615729",
+		"status": "completed",
+		"output": {
+			"image_urls": ["https://...generated-image.png"]
+		}
+	}
+}
+```
+
+**轮询策略建议**:
+
+- 首次延迟：2 秒后开始轮询
+- 轮询间隔：每 3 秒查询一次
+- 最大轮询时间：60 秒
+- 超时处理：显示生成超时提示
+
+### 测速接口
+
+```bash
+# kie.ai 节点测速（使用 credit 查询接口）
+curl --request GET \
+  --url https://api.kie.ai/api/v1/chat/credit \
+  --header 'Authorization: Bearer ${API_KEY}'
+
+# OpenRouter 节点测速
+curl https://openrouter.ai/api/v1/credits \
+  -H "Authorization: Bearer ${API_KEY}"
+```
+
+### 技术方案
+
+```typescript
+/**
+ * API 节点配置
+ */
+interface APINode {
+	id: string // 节点唯一标识
+	name: string // 显示名称
+	baseUrl: string // API 基础 URL
+	healthEndpoint: string // 测速/健康检查端点
+	priority: number // 优先级（越小越优先）
+	enabled: boolean // 是否启用
+	mode: 'sync' | 'async' // 同步/异步模式
+	model?: string // 使用的模型
+}
+
+/**
+ * kie.ai 异步任务创建请求
+ */
+interface KieCreateTaskRequest {
+	model: string // 模型名称，如 "google/nano-banana-edit"
+	callBackUrl?: string // 可选回调 URL
+	input: {
+		prompt: string // 提示词
+		image_urls: string[] // 输入图像 URL 列表
+		output_format?: 'png' | 'jpeg' | 'webp'
+		image_size?: '1:1' | '16:9' | '9:16' | '4:3' | '3:4'
+	}
+}
+
+/**
+ * kie.ai 任务创建响应
+ */
+interface KieCreateTaskResponse {
+	code: number
+	msg: string
+	data: {
+		taskId: string // 任务 ID，用于后续轮询
+	}
+}
+
+/**
+ * 节点健康状态
+ */
+interface NodeHealth {
+	nodeId: string
+	latency: number // 延迟（ms）
+	isAvailable: boolean // 是否可用
+	lastChecked: Date // 最后检测时间
+	consecutiveFailures: number // 连续失败次数
+}
+
+/**
+ * 节点选择策略
+ */
+type NodeSelectionStrategy = 'latency' | 'priority' | 'round-robin'
+
+/**
+ * 节点管理器配置
+ */
+interface NodeManagerConfig {
+	nodes: APINode[]
+	strategy: NodeSelectionStrategy
+	healthCheckInterval: number // 健康检查间隔（ms）
+	failoverThreshold: number // 故障转移阈值（连续失败次数）
+	cacheTimeout: number // 测速结果缓存时间（ms）
+}
+```
+
+### 节点管理器实现
+
+```typescript
+/**
+ * API 节点管理器
+ * 负责测速、选择、故障转移
+ */
+class APINodeManager {
+	private nodes: Map<string, APINode>
+	private health: Map<string, NodeHealth>
+	private config: NodeManagerConfig
+
+	/**
+	 * 测速单个节点
+	 */
+	async pingNode(nodeId: string): Promise<NodeHealth> {
+		const node = this.nodes.get(nodeId)
+		const startTime = performance.now()
+
+		try {
+			const response = await fetch(node.healthEndpoint, {
+				method: 'GET',
+				headers: { Authorization: `Bearer ${getApiKey(nodeId)}` },
+				signal: AbortSignal.timeout(5000), // 5秒超时
+			})
+
+			const latency = performance.now() - startTime
+			return {
+				nodeId,
+				latency,
+				isAvailable: response.ok,
+				lastChecked: new Date(),
+				consecutiveFailures: 0,
+			}
+		} catch (error) {
+			return {
+				nodeId,
+				latency: Infinity,
+				isAvailable: false,
+				lastChecked: new Date(),
+				consecutiveFailures:
+					(this.health.get(nodeId)?.consecutiveFailures ?? 0) + 1,
+			}
+		}
+	}
+
+	/**
+	 * 测速所有节点并返回最优节点
+	 */
+	async selectBestNode(): Promise<APINode> {
+		const healthResults = await Promise.all(
+			Array.from(this.nodes.values())
+				.filter((n) => n.enabled)
+				.map((n) => this.pingNode(n.id))
+		)
+
+		// 更新健康状态缓存
+		healthResults.forEach((h) => this.health.set(h.nodeId, h))
+
+		// 根据策略选择节点
+		const availableNodes = healthResults
+			.filter((h) => h.isAvailable)
+			.sort((a, b) => {
+				if (this.config.strategy === 'latency') {
+					return a.latency - b.latency
+				}
+				const nodeA = this.nodes.get(a.nodeId)!
+				const nodeB = this.nodes.get(b.nodeId)!
+				return nodeA.priority - nodeB.priority
+			})
+
+		if (availableNodes.length === 0) {
+			throw new Error('所有 API 节点均不可用')
+		}
+
+		return this.nodes.get(availableNodes[0].nodeId)!
+	}
+}
+```
+
+### 环境变量配置
+
+```bash
+# .env.local
+
+# kie.ai（主节点）
+VITE_KIE_API_KEY=your_kie_api_key_here
+VITE_KIE_BASE_URL=https://api.kie.ai/api/v1
+
+# OpenRouter（备用节点）
+VITE_OPENROUTER_API_KEY=your_openrouter_key_here
+VITE_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+
+# 节点选择策略: latency | priority | round-robin
+VITE_NODE_SELECTION_STRATEGY=priority
+```
+
+### 开发步骤
+
+1. 创建 `src/lib/api-node-manager.ts` 实现节点管理逻辑
+2. 创建 `src/lib/kie-client.ts` 封装 kie.ai API 调用
+3. 重构 `src/lib/openrouter.ts` 为通用 API 客户端接口
+4. 创建 `src/lib/api-client-factory.ts` 统一客户端工厂
+5. 修改 `src/lib/ai-service.ts` 集成节点选择逻辑
+6. 实现测速结果本地缓存（localStorage / sessionStorage）
+7. 添加节点状态 UI 指示器（可选）
+
+### 验收标准
+
+- [ ] 应用启动时自动测速所有配置节点
+- [ ] 以 kie.ai 为主节点，OpenRouter 为备用
+- [ ] 主节点不可用时自动切换到备用节点
+- [ ] 测速结果缓存，避免频繁请求
+- [ ] 提供控制台日志显示当前使用节点
+- [ ] 所有现有图像生成功能正常工作
+
+> [!WARNING] > **安全提示**: kie.ai 的 API_KEY 为敏感信息，请确保只在 `.env.local` 中配置，切勿提交到 Git 仓库。
+
+---
+
 ## 📎 相关资源
 
 - **P0 开发指南**: [P0-DEV-GUIDE.md](./P0-DEV-GUIDE.md)
@@ -355,4 +682,5 @@ interface CommunityArtwork {
 
 | 日期       | 更新内容                                                     |
 | ---------- | ------------------------------------------------------------ |
+| 2026-01-04 | 添加 P2-6 多 API 节点切换功能，以 kie.ai 为主节点            |
 | 2026-01-04 | 初始化 P2 阶段开发指南，添加随机灵感生成器和 Logo 重设计功能 |
