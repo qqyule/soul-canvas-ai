@@ -1,5 +1,6 @@
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
+import ThreeBackground from '@/components/effects/ThreeBackground'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -26,6 +27,7 @@ const AppContent = () => {
 
 	return (
 		<TooltipProvider>
+			<ThreeBackground />
 			<Toaster />
 			<Sonner />
 			<BrowserRouter>

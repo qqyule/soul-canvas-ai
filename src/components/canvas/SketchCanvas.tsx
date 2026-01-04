@@ -3,6 +3,7 @@ import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas'
 import { motion } from 'framer-motion'
 import { Pencil, Eraser, Undo2, Redo2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { MotionButton } from '@/components/ui/motion-button'
 import {
 	Tooltip,
 	TooltipContent,
@@ -177,12 +178,9 @@ const SketchCanvas = ({
 			</div>
 
 			{/* Export Button */}
-			<motion.div
-				whileHover={{ scale: 1.02 }}
-				whileTap={{ scale: 0.98 }}
-				className="fixed bottom-6 left-6 right-6 z-30 md:static md:w-full"
-			>
-				<Button
+			{/* Export Button */}
+			<div className="fixed bottom-6 left-6 right-6 z-30 md:static md:w-full">
+				<MotionButton
 					variant="glow"
 					size="xl"
 					onClick={handleExport}
@@ -201,8 +199,8 @@ const SketchCanvas = ({
 							生成图像 (Generate)
 						</>
 					)}
-				</Button>
-			</motion.div>
+				</MotionButton>
+			</div>
 		</motion.div>
 	)
 }

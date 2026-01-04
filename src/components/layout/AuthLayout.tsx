@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import PageTransition from '@/components/layout/page-transition'
 
 /**
  * 认证页面布局组件
@@ -6,7 +7,7 @@ import { Outlet } from 'react-router-dom'
  */
 const AuthLayout = () => {
 	return (
-		<div className="flex min-h-screen w-full items-center justify-center bg-background">
+		<div className="flex min-h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
 			<div className="w-full max-w-md space-y-8 px-4 py-8 sm:px-0">
 				{/* 可以在这里添加 Logo */}
 				<div className="text-center">
@@ -18,7 +19,9 @@ const AuthLayout = () => {
 
 				{/* 子路由内容 (SignIn/SignUp) */}
 				<div className="flex justify-center">
-					<Outlet />
+					<PageTransition className="w-full">
+						<Outlet />
+					</PageTransition>
 				</div>
 			</div>
 		</div>

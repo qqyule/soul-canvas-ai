@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { History, Sparkles } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
 import StyleSelector from '@/components/canvas/StyleSelector'
+import { fadeIn, slideUp, staggerChildren } from '@/config/animations'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import HistoryPanel from '@/components/canvas/HistoryPanel'
@@ -12,6 +13,8 @@ import DraftStatusIndicator from '@/components/drafts/DraftStatusIndicator'
 import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { MotionButton } from '@/components/ui/motion-button'
+import PageTransition from '@/components/layout/page-transition'
 import {
 	STYLE_PRESETS,
 	type StylePreset,
@@ -257,7 +260,7 @@ const Index = () => {
 			<div className="fixed inset-0 bg-grid-pattern bg-grid opacity-5 pointer-events-none" />
 
 			{/* Main Content */}
-			<main className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+			<PageTransition className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
 					{/* Hero Section */}
 					<motion.div
@@ -277,21 +280,45 @@ const Index = () => {
 						</motion.div>
 
 						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-							画出想法
+							<motion.span
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.2, duration: 0.5 }}
+								className="inline-block"
+							>
+								画出想法
+							</motion.span>
 							<span className="text-gradient">，</span>
 							<br />
-							<span className="text-gradient">AI 来实现</span>
+							<motion.span
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.4, duration: 0.5 }}
+								className="inline-block text-gradient"
+							>
+								AI 来实现
+							</motion.span>
 						</h2>
 
-						<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.6 }}
+							className="text-lg text-muted-foreground max-w-2xl mx-auto"
+						>
 							无需复杂提示词，简单几笔涂鸦，让 AI 理解你的创意并生成专业级图像
-						</p>
+						</motion.p>
 					</motion.div>
 
 					{/* Main App Grid */}
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+					<motion.div
+						variants={staggerChildren}
+						initial="initial"
+						animate="animate"
+						className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+					>
 						{/* Canvas Section */}
-						<div className="lg:col-span-2 space-y-4">
+						<motion.div variants={slideUp} className="lg:col-span-2 space-y-4">
 							{/* 顶部工具栏：剩余次数 + 历史记录 */}
 							<motion.div
 								initial={{ opacity: 0 }}
@@ -338,7 +365,7 @@ const Index = () => {
 									</TooltipProvider>
 
 									{/* 历史记录按钮 */}
-									<Button
+									<MotionButton
 										variant="outline"
 										size="sm"
 										className="gap-2"
@@ -354,7 +381,7 @@ const Index = () => {
 												{history.length}
 											</span>
 										)}
-									</Button>
+									</MotionButton>
 								</div>
 							</motion.div>
 
@@ -412,10 +439,10 @@ const Index = () => {
 									onCanvasChange={handleCanvasChange}
 								/>
 							</div>
-						</div>
+						</motion.div>
 
 						{/* Style Selector */}
-						<div className="lg:col-span-1">
+						<motion.div variants={slideUp} className="lg:col-span-1">
 							<div id="tour-style">
 								<StyleSelector
 									selectedStyle={selectedStyle}
@@ -449,10 +476,10 @@ const Index = () => {
 									</li>
 								</ul>
 							</motion.div>
-						</div>
-					</div>
+						</motion.div>
+					</motion.div>
 				</div>
-			</main>
+			</PageTransition>
 
 			<footer className="pt-6 pb-24 md:py-6 text-center">
 				<p className="text-sm text-muted-foreground/60">
