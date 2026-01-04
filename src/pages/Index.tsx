@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { History, Sparkles, Github } from 'lucide-react'
+import { History, Sparkles, Github, HelpCircle } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
 import StyleSelector from '@/components/canvas/StyleSelector'
@@ -12,6 +12,7 @@ import HistoryPanel from '@/components/canvas/HistoryPanel'
 import OnboardingTour from '@/components/OnboardingTour'
 import DraftStatusIndicator from '@/components/drafts/DraftStatusIndicator'
 import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
+import MaLiangIntroduction from '@/components/story/MaLiangIntroduction'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { MotionButton } from '@/components/ui/motion-button'
@@ -48,6 +49,7 @@ const Index = () => {
 	const [status, setStatus] = useState<GenerationStatus>('idle')
 	const [results, setResults] = useState<GenerationResult[] | null>(null)
 	const [batchSize, setBatchSize] = useState(1)
+	const [showStory, setShowStory] = useState(false)
 	const [userPrompt, setUserPrompt] = useState('')
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
@@ -272,7 +274,7 @@ const Index = () => {
 	return (
 		<div className="min-h-screen animated-gradient">
 			<OnboardingTour />
-			<Header />
+			<Header onLogoClick={() => setShowStory(true)} />
 
 			{/* Background Grid */}
 			<div className="fixed inset-0 bg-grid-pattern bg-grid opacity-5 pointer-events-none" />
@@ -315,6 +317,17 @@ const Index = () => {
 								className="inline-block text-gradient"
 							>
 								AI 来实现
+							</motion.span>
+							<motion.span
+								initial={{ opacity: 0, scale: 0 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={{ delay: 0.8, type: 'spring' }}
+								className="ml-3 inline-flex align-top"
+								onMouseEnter={() => setShowStory(true)}
+							>
+								<div className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center cursor-help transition-colors">
+									<HelpCircle className="h-4 w-4 text-primary" />
+								</div>
 							</motion.span>
 						</h2>
 
@@ -570,6 +583,12 @@ const Index = () => {
 				onClose={() => setShowRecoveryDialog(false)}
 				onRecover={handleRecoverDraft}
 				onDiscard={handleDiscardDraft}
+			/>
+
+			{/* 神笔马良故事弹窗 */}
+			<MaLiangIntroduction
+				open={showStory}
+				onClose={() => setShowStory(false)}
 			/>
 		</div>
 	)

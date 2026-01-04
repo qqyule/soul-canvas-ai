@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import UserProfile from '@/components/auth/UserProfile'
 
-const Header = () => {
+interface HeaderProps {
+	onLogoClick?: () => void
+}
+
+const Header = ({ onLogoClick }: HeaderProps) => {
 	const [isScrolled, setIsScrolled] = useState(false)
 
 	useEffect(() => {
@@ -31,7 +35,8 @@ const Header = () => {
 				{/* Logo */}
 				<motion.div
 					whileHover={{ scale: 1.02 }}
-					className="flex items-center gap-3"
+					className="flex items-center gap-3 cursor-pointer"
+					onClick={onLogoClick}
 				>
 					<div className="relative">
 						<div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow-sm">
