@@ -105,10 +105,27 @@ const Index = () => {
 	const handleRandomInspiration = useCallback(async () => {
 		try {
 			// 随机配置
-			const categories = ['geometric', 'organic', 'sketch', 'pattern'] as const
+			// 随机配置 (加权随机：偏好 sketch 和 organic)
+			const weightedCategories: InspirationCategory[] = [
+				'sketch',
+				'sketch',
+				'sketch',
+				'sketch', // 40%
+				'organic',
+				'organic',
+				'organic', // 30%
+				'pattern',
+				'pattern', // 20%
+				'geometric', // 10%
+			]
+			const category =
+				weightedCategories[
+					Math.floor(Math.random() * weightedCategories.length)
+				]
+
 			const complexities = ['simple', 'medium', 'complex'] as const
 			const config: InspirationConfig = {
-				category: categories[Math.floor(Math.random() * categories.length)],
+				category,
 				complexity:
 					complexities[Math.floor(Math.random() * complexities.length)],
 				canvasWidth: 800,
@@ -126,8 +143,8 @@ const Index = () => {
 				result.animationDuration
 			)
 
-			// 填充推荐提示词（如果输入框为空）
-			if (!userPrompt && result.suggestedPrompts.length > 0) {
+			// 填充推荐提示词
+			if (result.suggestedPrompts.length > 0) {
 				setUserPrompt(result.suggestedPrompts[0])
 			}
 

@@ -467,6 +467,205 @@ function generateSimpleBird(
 }
 
 /**
+ * 生成简笔画兔子
+ */
+function generateSimpleRabbit(
+	centerX: number,
+	centerY: number,
+	scale: number
+): CanvasPath[] {
+	const paths: CanvasPath[] = []
+
+	// 身体 (椭圆)
+	const bodyPoints: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		bodyPoints.push({
+			x: centerX + Math.cos(angle) * 35 * scale,
+			y: centerY + 20 * scale + Math.sin(angle) * 25 * scale,
+		})
+	}
+	paths.push(createPath(bodyPoints))
+
+	// 头部 (圆形)
+	const headPoints: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		headPoints.push({
+			x: centerX + Math.cos(angle) * 22 * scale,
+			y: centerY - 15 * scale + Math.sin(angle) * 22 * scale,
+		})
+	}
+	paths.push(createPath(headPoints))
+
+	// 耳朵 (长椭圆)
+	const leftEar: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		leftEar.push({
+			x: centerX - 10 * scale + Math.cos(angle) * 8 * scale,
+			y: centerY - 50 * scale + Math.sin(angle) * 25 * scale,
+		})
+	}
+	paths.push(createPath(leftEar))
+
+	const rightEar: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		rightEar.push({
+			x: centerX + 10 * scale + Math.cos(angle) * 8 * scale,
+			y: centerY - 50 * scale + Math.sin(angle) * 25 * scale,
+		})
+	}
+	paths.push(createPath(rightEar))
+
+	// 眼睛
+	paths.push(
+		createPath(
+			[
+				{ x: centerX - 8 * scale, y: centerY - 20 * scale },
+				{ x: centerX - 8 * scale, y: centerY - 20 * scale },
+			],
+			'#1a1a2e',
+			3
+		)
+	)
+	paths.push(
+		createPath(
+			[
+				{ x: centerX + 8 * scale, y: centerY - 20 * scale },
+				{ x: centerX + 8 * scale, y: centerY - 20 * scale },
+			],
+			'#1a1a2e',
+			3
+		)
+	)
+
+	// 尾巴
+	const tailPoints: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		tailPoints.push({
+			x: centerX + 35 * scale + Math.cos(angle) * 8 * scale,
+			y: centerY + 25 * scale + Math.sin(angle) * 8 * scale,
+		})
+	}
+	paths.push(createPath(tailPoints))
+
+	return paths
+}
+
+/**
+ * 生成简笔画鱼
+ */
+function generateSimpleFish(
+	centerX: number,
+	centerY: number,
+	scale: number
+): CanvasPath[] {
+	const paths: CanvasPath[] = []
+
+	// 身体
+	const bodyPoints: { x: number; y: number }[] = []
+	for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+		bodyPoints.push({
+			x: centerX + Math.cos(angle) * 45 * scale,
+			y: centerY + Math.sin(angle) * 25 * scale,
+		})
+	}
+	paths.push(createPath(bodyPoints))
+
+	// 尾巴 (三角形)
+	paths.push(
+		createPath([
+			{ x: centerX - 42 * scale, y: centerY },
+			{ x: centerX - 65 * scale, y: centerY - 15 * scale },
+			{ x: centerX - 65 * scale, y: centerY + 15 * scale },
+			{ x: centerX - 42 * scale, y: centerY },
+		])
+	)
+
+	// 眼睛
+	paths.push(
+		createPath(
+			[
+				{ x: centerX + 25 * scale, y: centerY - 5 * scale },
+				{ x: centerX + 25 * scale, y: centerY - 5 * scale },
+			],
+			'#1a1a2e',
+			4
+		)
+	)
+
+	// 鱼鳍
+	paths.push(
+		createPath([
+			{ x: centerX, y: centerY - 25 * scale },
+			{ x: centerX - 10 * scale, y: centerY - 35 * scale },
+			{ x: centerX + 10 * scale, y: centerY - 25 * scale },
+		])
+	)
+
+	return paths
+}
+
+/**
+ * 生成简笔画花朵
+ */
+function generateSimpleFlower(
+	centerX: number,
+	centerY: number,
+	scale: number
+): CanvasPath[] {
+	const paths: CanvasPath[] = []
+	const petalCount = 5
+	const petalDistance = 20 * scale
+
+	// 花瓣
+	for (let i = 0; i < petalCount; i++) {
+		const angle = ((Math.PI * 2) / petalCount) * i
+		const cx = centerX + Math.cos(angle) * petalDistance
+		const cy = centerY - 30 * scale + Math.sin(angle) * petalDistance
+
+		const pts: { x: number; y: number }[] = []
+		for (let a = 0; a <= Math.PI * 2; a += 0.2) {
+			pts.push({
+				x: cx + Math.cos(a) * 15 * scale,
+				y: cy + Math.sin(a) * 15 * scale,
+			})
+		}
+		paths.push(createPath(pts))
+	}
+
+	// 花心
+	const centerPts: { x: number; y: number }[] = []
+	for (let a = 0; a <= Math.PI * 2; a += 0.2) {
+		centerPts.push({
+			x: centerX + Math.cos(a) * 10 * scale,
+			y: centerY - 30 * scale + Math.sin(a) * 10 * scale,
+		})
+	}
+	paths.push(createPath(centerPts))
+
+	// 茎
+	paths.push(
+		createPath([
+			{ x: centerX, y: centerY - 20 * scale },
+			{ x: centerX, y: centerY + 60 * scale },
+		])
+	)
+
+	// 叶子
+	const leafStart = { x: centerX, y: centerY + 20 * scale }
+	paths.push(
+		createPath([
+			leafStart,
+			{ x: leafStart.x + 20 * scale, y: leafStart.y - 10 * scale },
+			{ x: leafStart.x + 35 * scale, y: leafStart.y },
+			{ x: leafStart.x + 20 * scale, y: leafStart.y + 10 * scale },
+			leafStart,
+		])
+	)
+
+	return paths
+}
+
+/**
  * 生成几何类型灵感
  */
 function generateGeometric(config: InspirationConfig): CanvasPath[] {
@@ -540,6 +739,9 @@ function generateSketch(config: InspirationConfig): CanvasPath[] {
 	const generators = [
 		() => generateSimpleCat(centerX, centerY, scale),
 		() => generateSimpleBird(centerX, centerY, scale),
+		() => generateSimpleRabbit(centerX, centerY, scale),
+		() => generateSimpleFish(centerX, centerY, scale),
+		() => generateSimpleFlower(centerX, centerY, scale),
 	]
 
 	const randomGenerator =

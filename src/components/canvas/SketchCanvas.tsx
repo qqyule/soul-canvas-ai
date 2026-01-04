@@ -173,17 +173,6 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 								<TooltipContent>{action.label}</TooltipContent>
 							</Tooltip>
 						))}
-
-						{/* 随机灵感按钮 */}
-						{onInspirationClick && (
-							<>
-								<div className="h-6 w-px bg-border/50 mx-1" />
-								<RandomInspirationButton
-									onClick={onInspirationClick}
-									disabled={isGenerating}
-								/>
-							</>
-						)}
 					</div>
 				</div>
 
@@ -194,6 +183,17 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 						isGenerating && 'shimmer'
 					)}
 				>
+					{/* 随机灵感按钮 (悬浮右上角) */}
+					{onInspirationClick && (
+						<div className="absolute top-4 right-4 z-10">
+							<RandomInspirationButton
+								onClick={onInspirationClick}
+								disabled={isGenerating}
+								className="bg-transparent border-black/5 text-muted-foreground/60 hover:text-primary hover:border-primary/20 hover:bg-primary/5 shadow-none"
+							/>
+						</div>
+					)}
+
 					<ReactSketchCanvas
 						ref={canvasRef}
 						width="100%"

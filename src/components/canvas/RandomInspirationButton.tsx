@@ -10,11 +10,13 @@ import { cn } from '@/lib/utils'
 interface RandomInspirationButtonProps {
 	onClick: () => void
 	disabled?: boolean
+	className?: string
 }
 
 export default function RandomInspirationButton({
 	onClick,
 	disabled,
+	className,
 }: RandomInspirationButtonProps) {
 	return (
 		<Tooltip>
@@ -26,7 +28,8 @@ export default function RandomInspirationButton({
 					disabled={disabled}
 					className={cn(
 						'transition-all hover:scale-105',
-						!disabled && 'hover:border-primary/50 hover:shadow-glow-sm'
+						!disabled && 'hover:border-primary/50 hover:shadow-glow-sm',
+						className
 					)}
 				>
 					<Dice5 className="h-4 w-4" />
