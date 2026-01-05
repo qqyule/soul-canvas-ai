@@ -104,33 +104,41 @@ const ArtworkDetailDialog = ({
 
 	/**
 	 * 下载图片
+	 * 由于外部图片可能存在 CORS 限制，使用新标签页打开图片让用户保存
 	 */
 	const handleDownload = useCallback(async () => {
 		if (!artwork) return
 
 		try {
-			const response = await fetch(artwork.resultUrl)
-			const blob = await response.blob()
-			const url = URL.createObjectURL(blob)
-			const a = document.createElement('a')
-			a.href = url
-			a.download = `artwork-${artwork.id}.png`
-			document.body.appendChild(a)
-			a.click()
-			document.body.removeChild(a)
-			URL.revokeObjectURL(url)
+			// 尝试使用 fetch + blob 方式下载（适用于同源或 CORS 允许的图片）
+			const response = await fetch(artwork.resultUrl, { mode: 'cors' })
+			if (response.ok) {
+				const blob = await response.blob()
+				const url = URL.createObjectURL(blob)
+				const a = document.createElement('a')
+				a.href = url
+				a.download = `artwork-${artwork.id}.png`
+				document.body.appendChild(a)
+				a.click()
+				document.body.removeChild(a)
+				URL.revokeObjectURL(url)
 
-			toast({
-				title: '下载成功',
-				description: '图片已保存到本地',
-			})
-		} catch (error) {
-			toast({
-				title: '下载失败',
-				description: '请稍后重试',
-				variant: 'destructive',
-			})
+				toast({
+					title: '下载成功',
+					description: '图片已保存到本地',
+				})
+				return
+			}
+		} catch {
+			// CORS 错误，降级处理
 		}
+
+		// 降级方案：在新标签页打开图片，提示用户右键保存
+		window.open(artwork.resultUrl, '_blank')
+		toast({
+			title: '请右键保存图片',
+			description: '由于跨域限制，已在新标签页打开图片',
+		})
 	}, [artwork, toast])
 
 	/**
@@ -218,6 +226,8 @@ const ArtworkDetailDialog = ({
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+				{/* 可访问性：隐藏的对话框标题 */}
+				<DialogTitle className="sr-only">作品详情</DialogTitle>
 				<div className="flex flex-col lg:flex-row h-full">
 					{/* 左侧：图片 */}
 					<div className="flex-1 bg-black/5 dark:bg-white/5 flex items-center justify-center p-4 min-h-[300px] lg:min-h-[500px]">
