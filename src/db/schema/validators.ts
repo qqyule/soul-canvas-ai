@@ -20,6 +20,7 @@ const { createInsertSchema, createSelectSchema, createUpdateSchema } =
 
 /** 用户插入验证 Schema */
 export const insertUserSchema = createInsertSchema(users, {
+	id: (schema) => schema.min(1, '用户 ID 不能为空'),
 	email: (schema) => schema.email('请输入有效的邮箱地址'),
 	name: (schema) => schema.max(50, '用户名最长50个字符'),
 	provider: z
@@ -76,7 +77,7 @@ export const selectCustomStyleSchema = createSelectSchema(customStyles)
 
 /** 收藏插入验证 Schema */
 export const insertFavoriteSchema = createInsertSchema(favorites, {
-	userId: z.string().uuid('用户 ID 格式无效'),
+	userId: (schema) => schema.min(1, '用户 ID 不能为空'),
 	artworkId: z.string().uuid('作品 ID 格式无效'),
 })
 

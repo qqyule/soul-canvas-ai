@@ -32,7 +32,8 @@ export const generationLogs = pgTable('generation_logs', {
 	/** 日志唯一标识 */
 	id: uuid('id').primaryKey().defaultRandom(),
 	/** 用户 ID（可为空，匿名用户） */
-	userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+	/** 用户 ID（可为空，匿名用户） */
+	userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
 	/** 使用的风格 ID */
 	styleId: text('style_id').notNull(),
 	/** 生成时使用的提示词 */

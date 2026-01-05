@@ -28,6 +28,7 @@ export const useUserSync = () => {
 				}
 
 				await usersRepository.upsertByEmail({
+					id: user.id, // Clerk User ID 作为主键
 					email,
 					name: user.fullName || user.username || 'User',
 					avatarUrl: user.imageUrl,

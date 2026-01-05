@@ -9,8 +9,8 @@ import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
  * 用户表
  */
 export const users = pgTable('users', {
-	/** 用户唯一标识 */
-	id: uuid('id').primaryKey().defaultRandom(),
+	/** 用户唯一标识 (Clerk User ID) */
+	id: text('id').primaryKey(),
 	/** 用户邮箱（唯一） */
 	email: text('email').notNull().unique(),
 	/** 用户名 */

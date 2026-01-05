@@ -282,37 +282,98 @@ const AnimatedLogo = ({ size, animated }: DynamicLogoProps) => {
 
 **分支**: `feature/community-gallery`
 
-**状态**: ⚪ 待开始
+**状态**: 🔵 进行中
 
 ### 功能范围
 
-- [ ] 个人作品集页面
-- [ ] 社区画廊浏览
-- [ ] 作品点赞/收藏
-- [ ] 作品分享功能
-- [ ] 热门/最新作品排行
+- [ ] **社区画廊 (Community Gallery)**:
+  - 瀑布流布局展示公开作品
+  - 支持按"最新"、"热门"、"风格"筛选
+  - 无限滚动加载
+- [ ] **作品详情页 (Artwork Detail)**:
+  - 高清大图查看
+  - 提示词与生成参数展示
+  - "同款生成" (Remix) 按钮
+- [ ] **互动功能**:
+  - 点赞/取消点赞
+  - 浏览量统计
+  - 分享到社交媒体
+- [ ] **个人主页 (User Profile)**:
+  - 展示个人发布的作品
+  - 展示获赞总数
+  - 简单的个人信息编辑
 
-### 技术要点
+### 数据库设计 (Schema Design)
 
 ```typescript
-/**
- * 社区作品数据模型
- */
-interface CommunityArtwork {
-	id: string
-	userId: string
-	imageUrl: string
-	thumbnailUrl: string
-	title?: string
-	description?: string
-	prompt: string
-	styleId: string
-	likes: number
-	views: number
-	isPublic: boolean
-	createdAt: Date
-}
+// schema.ts
+
+// 作品表
+export const artworks = mysqlTable('artworks', {
+	id: varchar('id', { length: 36 }).primaryKey(),
+	userId: varchar('user_id', { length: 255 }).notNull(),
+	imageUrl: varchar('image_url', { length: 500 }).notNull(), // 原图
+	thumbnailUrl: varchar('thumbnail_url', { length: 500 }), // 缩略图
+	prompt: text('prompt').notNull(),
+	styleId: varchar('style_id', { length: 50 }).notNull(),
+	width: int('width').notNull(),
+	height: int('height').notNull(),
+	views: int('views').default(0),
+	likes: int('likes').default(0),
+	isPublic: boolean('is_public').default(true),
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+})
+
+// 点赞关联表
+export const artworkLikes = mysqlTable(
+	'artwork_likes',
+	{
+		id: varchar('id', { length: 36 }).primaryKey(),
+		userId: varchar('user_id', { length: 255 }).notNull(),
+		artworkId: varchar('artwork_id', { length: 36 }).notNull(), // 关联 artworks.id
+		createdAt: timestamp('created_at').defaultNow(),
+	},
+	(t) => ({
+		unq: uniqueIndex('unique_user_artwork_like').on(t.userId, t.artworkId),
+	})
+)
 ```
+
+### API 接口规划
+
+| 方法   | 路径                              | 描述                              |
+| :----- | :-------------------------------- | :-------------------------------- |
+| `GET`  | `/api/community/feed`             | 获取社区动态列表 (支持分页、排序) |
+| `GET`  | `/api/community/artwork/:id`      | 获取作品详情                      |
+| `POST` | `/api/community/artwork/:id/like` | 点赞/取消点赞                     |
+| `POST` | `/api/community/publish`          | 发布作品到社区                    |
+| `GET`  | `/api/user/:id/profile`           | 获取用户资料及作品集              |
+
+### UI 组件架构
+
+```mermaid
+graph TD
+    Page[CommunityPage] --> Filter[FilterBar]
+    Page --> Grid[MasonryGrid]
+    Grid --> Card[ArtworkCard]
+    Card --> Like[LikeButton]
+    Card --> UserInfo[UserAvatar]
+
+    Detail[ArtworkDetailPage] --> Viewer[ImageViewer]
+    Detail --> Stats[StatsPanel]
+    Detail --> Prompt[PromptCard]
+    Detail --> Remix[RemixButton]
+```
+
+### 开发步骤
+
+1.  **数据库层**: 定义 Drizzle Schema (`artworks`, `artwork_likes`) 并执行迁移。
+2.  **API 层**: 实现作品发布、列表查询、点赞 API。
+3.  **UI 层 - 卡片**: 实现 `ArtworkCard` 组件，支持悬停显示基本信息。
+4.  **UI 层 - 画廊**: 实现 `MasonryGrid` 瀑布流布局。
+5.  **UI 层 - 详情**: 实现作品详情页路由与展示。
+6.  **整合**: 将生成结果页的 "公开/分享" 按钮对接发布接口。
 
 ---
 
@@ -350,7 +411,7 @@ interface CommunityArtwork {
 
 **分支**: `feature/multi-api-node`
 
-**状态**: 🔵 进行中
+**状态**: ✅ 已完成
 
 ### 功能范围
 

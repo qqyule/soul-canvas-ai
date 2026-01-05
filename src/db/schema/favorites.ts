@@ -3,7 +3,7 @@
  * @description 存储用户收藏的作品关系
  */
 
-import { pgTable, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core'
+import { pgTable, timestamp, uuid, primaryKey, text } from 'drizzle-orm/pg-core'
 import { users } from './users'
 import { artworks } from './artworks'
 
@@ -14,7 +14,7 @@ export const favorites = pgTable(
 	'favorites',
 	{
 		/** 用户 ID */
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
 		/** 作品 ID */

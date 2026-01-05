@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Link, useLocation } from 'react-router-dom'
+import { Images } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import UserProfile from '@/components/auth/UserProfile'
@@ -11,6 +13,8 @@ interface HeaderProps {
 
 const Header = ({ onLogoClick }: HeaderProps) => {
 	const [isScrolled, setIsScrolled] = useState(false)
+	const location = useLocation()
+	const isCommunityPage = location.pathname.startsWith('/community')
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -38,6 +42,20 @@ const Header = ({ onLogoClick }: HeaderProps) => {
 
 				{/* Nav */}
 				<div className="flex items-center gap-3">
+					{/* 社区画廊入口 */}
+					<Link
+						to="/community"
+						className={cn(
+							'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+							isCommunityPage
+								? 'bg-primary/10 text-primary'
+								: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+						)}
+					>
+						<Images className="w-4 h-4" />
+						<span className="hidden sm:inline">社区</span>
+					</Link>
+
 					<UserProfile />
 				</div>
 			</div>

@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import AuthLayout from './components/layout/AuthLayout'
 import Login from './pages/auth/Login'
 import SignUpPage from './pages/auth/SignUp'
+import CommunityPage from './pages/Community'
 
 const queryClient = new QueryClient()
 
@@ -33,6 +34,10 @@ const AppContent = () => {
 			<BrowserRouter>
 				<Routes>
 					<Route path="/" element={<Index />} />
+
+					{/* 社区画廊 */}
+					<Route path="/community" element={<CommunityPage />} />
+					<Route path="/community/:artworkId" element={<CommunityPage />} />
 
 					{/* 认证路由 */}
 					<Route path="/auth" element={<AuthLayout />}>

@@ -13,7 +13,8 @@ export const customStyles = pgTable('custom_styles', {
 	/** 风格唯一标识 */
 	id: uuid('id').primaryKey().defaultRandom(),
 	/** 创建者用户 ID */
-	userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	/** 创建者用户 ID */
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	/** 风格名称 */
 	name: text('name').notNull(),
 	/** 风格描述 */

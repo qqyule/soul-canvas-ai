@@ -10,6 +10,8 @@ import {
 	uuid,
 	jsonb,
 	boolean,
+	integer,
+	varchar,
 } from 'drizzle-orm/pg-core'
 import { users } from './users'
 
@@ -19,20 +21,30 @@ import { users } from './users'
 export const artworks = pgTable('artworks', {
 	/** 作品唯一标识 */
 	id: uuid('id').primaryKey().defaultRandom(),
-	/** 所属用户 ID */
-	userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	/** 所属用户 ID (Clerk User ID) */
+	userId: varchar('user_id', { length: 255 }).notNull(),
 	/** 作品标题 */
 	title: text('title'),
 	/** 草图存储 URL */
 	sketchUrl: text('sketch_url'),
-	/** 生成结果存储 URL */
-	resultUrl: text('result_url'),
+	/** 生成结果存储 URL (主图) */
+	resultUrl: text('result_url').notNull(),
+	/** 缩略图 URL */
+	thumbnailUrl: text('thumbnail_url'),
 	/** 使用的风格 ID */
 	styleId: text('style_id').notNull(),
 	/** 使用的风格名称 */
 	styleName: text('style_name'),
 	/** 生成时使用的提示词 */
 	prompt: text('prompt'),
+	/** 图片宽度 */
+	width: integer('width'),
+	/** 图片高度 */
+	height: integer('height'),
+	/** 浏览量 */
+	views: integer('views').default(0),
+	/** 点赞数 */
+	likes: integer('likes').default(0),
 	/** 额外元数据（JSON 格式） */
 	metadata: jsonb('metadata'),
 	/** 是否公开展示 */
