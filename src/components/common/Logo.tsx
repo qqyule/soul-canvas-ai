@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Sparkles } from 'lucide-react'
+import { AnimatedLogo } from '@/components/brand'
 
 interface LogoProps {
 	className?: string
@@ -7,6 +7,9 @@ interface LogoProps {
 	onClick?: () => void
 }
 
+/**
+ * Logo 组件 - 使用科技化动态 Logo
+ */
 const Logo = ({ className, showText = true, onClick }: LogoProps) => {
 	return (
 		<div
@@ -16,24 +19,10 @@ const Logo = ({ className, showText = true, onClick }: LogoProps) => {
 			)}
 			onClick={onClick}
 		>
-			{/* Icon Container */}
-			<div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-purple-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300">
-				{/* Inner Glow */}
-				<div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+			{/* 科技化动态 Logo */}
+			<AnimatedLogo size="sm" animated={true} />
 
-				{/* Vector S / Icon */}
-				<Sparkles
-					className="w-5 h-5 text-white filter drop-shadow-sm group-hover:rotate-12 transition-transform duration-300"
-					strokeWidth={2.5}
-				/>
-
-				{/* Decorative Dot */}
-				<div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-background border-2 border-background">
-					<div className="w-full h-full rounded-full bg-green-500 animate-pulse" />
-				</div>
-			</div>
-
-			{/* Text Content */}
+			{/* 文字内容 */}
 			{showText && (
 				<div className="flex flex-col -space-y-0.5">
 					<div className="flex items-center">
