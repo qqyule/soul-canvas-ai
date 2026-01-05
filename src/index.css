@@ -92,6 +92,7 @@
 	body {
 		@apply bg-background text-foreground antialiased;
 		font-family: 'Space Grotesk', system-ui, sans-serif;
+		cursor: url('/cursor-brush.svg') 0 32, auto;
 	}
 
 	/* Custom scrollbar */
