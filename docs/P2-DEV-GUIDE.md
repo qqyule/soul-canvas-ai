@@ -282,98 +282,97 @@ const AnimatedLogo = ({ size, animated }: DynamicLogoProps) => {
 
 **分支**: `feature/community-gallery`
 
-**状态**: 🔵 进行中
+**状态**: ✅ 已完成
 
 ### 功能范围
 
-- [ ] **社区画廊 (Community Gallery)**:
-  - 瀑布流布局展示公开作品
-  - 支持按"最新"、"热门"、"风格"筛选
-  - 无限滚动加载
-- [ ] **作品详情页 (Artwork Detail)**:
-  - 高清大图查看
+- [x] **社区画廊 (Community Gallery)**:
+  - 瀑布流布局展示公开作品 (`MasonryGrid` 组件)
+  - 支持按"最新"、"热门"、"趋势"筛选 (`FilterBar` 组件)
+  - 无限滚动加载 (IntersectionObserver)
+- [x] **作品详情页 (Artwork Detail)**:
+  - 高清大图查看 (`ArtworkDetailDialog` 弹窗)
   - 提示词与生成参数展示
-  - "同款生成" (Remix) 按钮
-- [ ] **互动功能**:
-  - 点赞/取消点赞
+  - "同款生成" (Remix) 按钮（UI 已就绪）
+- [x] **互动功能**:
+  - 点赞/取消点赞（乐观更新）
   - 浏览量统计
-  - 分享到社交媒体
-- [ ] **个人主页 (User Profile)**:
+  - 分享到社交媒体（Web Share API + 剪贴板降级）
+- [x] **个人主页 (User Profile)**:
   - 展示个人发布的作品
   - 展示获赞总数
-  - 简单的个人信息编辑
+  - ~~简单的个人信息编辑~~（未实现，非核心功能）
+
+### 已实现的文件结构
+
+```
+src/
+├── types/community.ts          # 类型定义
+├── lib/community-service.ts    # API 服务
+├── hooks/use-community.ts      # React Hooks
+├── components/community/
+│   ├── index.ts
+│   ├── ArtworkCard.tsx         # 作品卡片
+│   ├── MasonryGrid.tsx         # 瀑布流网格
+│   ├── FilterBar.tsx           # 筛选栏
+│   └── ArtworkDetailDialog.tsx # 详情弹窗
+└── pages/Community.tsx         # 社区页面
+```
 
 ### 数据库设计 (Schema Design)
 
-```typescript
-// schema.ts
+> 实际使用 PostgreSQL (Neon) + Drizzle ORM
 
-// 作品表
-export const artworks = mysqlTable('artworks', {
-	id: varchar('id', { length: 36 }).primaryKey(),
+```typescript
+// src/db/schema/artworks.ts
+export const artworks = pgTable('artworks', {
+	id: uuid('id').primaryKey().defaultRandom(),
 	userId: varchar('user_id', { length: 255 }).notNull(),
-	imageUrl: varchar('image_url', { length: 500 }).notNull(), // 原图
-	thumbnailUrl: varchar('thumbnail_url', { length: 500 }), // 缩略图
-	prompt: text('prompt').notNull(),
-	styleId: varchar('style_id', { length: 50 }).notNull(),
-	width: int('width').notNull(),
-	height: int('height').notNull(),
-	views: int('views').default(0),
-	likes: int('likes').default(0),
-	isPublic: boolean('is_public').default(true),
-	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+	resultUrl: text('result_url').notNull(),
+	thumbnailUrl: text('thumbnail_url'),
+	prompt: text('prompt'),
+	styleId: text('style_id').notNull(),
+	styleName: text('style_name'),
+	width: integer('width'),
+	height: integer('height'),
+	views: integer('views').default(0),
+	likes: integer('likes').default(0),
+	isPublic: boolean('is_public').default(false),
+	isDraft: boolean('is_draft').default(false),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
-// 点赞关联表
-export const artworkLikes = mysqlTable(
-	'artwork_likes',
+// src/db/schema/favorites.ts (点赞表)
+export const favorites = pgTable(
+	'favorites',
 	{
-		id: varchar('id', { length: 36 }).primaryKey(),
-		userId: varchar('user_id', { length: 255 }).notNull(),
-		artworkId: varchar('artwork_id', { length: 36 }).notNull(), // 关联 artworks.id
-		createdAt: timestamp('created_at').defaultNow(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id),
+		artworkId: uuid('artwork_id')
+			.notNull()
+			.references(() => artworks.id),
+		createdAt: timestamp('created_at').notNull().defaultNow(),
 	},
-	(t) => ({
-		unq: uniqueIndex('unique_user_artwork_like').on(t.userId, t.artworkId),
+	(table) => ({
+		pk: primaryKey({ columns: [table.userId, table.artworkId] }),
 	})
 )
 ```
 
-### API 接口规划
+### 路由配置
 
-| 方法   | 路径                              | 描述                              |
-| :----- | :-------------------------------- | :-------------------------------- |
-| `GET`  | `/api/community/feed`             | 获取社区动态列表 (支持分页、排序) |
-| `GET`  | `/api/community/artwork/:id`      | 获取作品详情                      |
-| `POST` | `/api/community/artwork/:id/like` | 点赞/取消点赞                     |
-| `POST` | `/api/community/publish`          | 发布作品到社区                    |
-| `GET`  | `/api/user/:id/profile`           | 获取用户资料及作品集              |
+| 路由               | 组件            | 描述         |
+| :----------------- | :-------------- | :----------- |
+| `/#/community`     | `CommunityPage` | 社区画廊列表 |
+| `/#/community/:id` | `CommunityPage` | 作品详情弹窗 |
+| `/#/user/:userId`  | `CommunityPage` | 用户资料页   |
 
-### UI 组件架构
+### 发布入口
 
-```mermaid
-graph TD
-    Page[CommunityPage] --> Filter[FilterBar]
-    Page --> Grid[MasonryGrid]
-    Grid --> Card[ArtworkCard]
-    Card --> Like[LikeButton]
-    Card --> UserInfo[UserAvatar]
-
-    Detail[ArtworkDetailPage] --> Viewer[ImageViewer]
-    Detail --> Stats[StatsPanel]
-    Detail --> Prompt[PromptCard]
-    Detail --> Remix[RemixButton]
-```
-
-### 开发步骤
-
-1.  **数据库层**: 定义 Drizzle Schema (`artworks`, `artwork_likes`) 并执行迁移。
-2.  **API 层**: 实现作品发布、列表查询、点赞 API。
-3.  **UI 层 - 卡片**: 实现 `ArtworkCard` 组件，支持悬停显示基本信息。
-4.  **UI 层 - 画廊**: 实现 `MasonryGrid` 瀑布流布局。
-5.  **UI 层 - 详情**: 实现作品详情页路由与展示。
-6.  **整合**: 将生成结果页的 "公开/分享" 按钮对接发布接口。
+- `GenerationResultView` 组件新增 **"发布到社区"** 按钮
+- 发布成功后按钮变为 **"已发布"** 状态
 
 ---
 

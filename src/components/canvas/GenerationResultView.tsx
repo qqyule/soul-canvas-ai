@@ -1,6 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, X, Sparkles } from 'lucide-react'
+import { Download, X, Sparkles, Share2, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { usePublishArtwork } from '@/hooks/use-community'
 import type { GenerationResult, GenerationStatus } from '@/types/canvas'
 
 interface GenerationResultViewProps {
@@ -18,8 +21,6 @@ const statusMessages: Record<GenerationStatus, string> = {
 	error: '❌ 生成失败，请重试',
 }
 
-import { useState, useEffect } from 'react'
-
 const GenerationResultView = ({
 	results,
 	status,
@@ -27,15 +28,40 @@ const GenerationResultView = ({
 	onClose,
 }: GenerationResultViewProps) => {
 	const [selectedIndex, setSelectedIndex] = useState(0)
+	const [publishedIds, setPublishedIds] = useState<Set<number>>(new Set())
+	const { toast } = useToast()
+	const { publish, isPublishing } = usePublishArtwork()
 
 	// 当结果更新时，重置选中项
 	useEffect(() => {
 		if (results && results.length > 0) {
 			setSelectedIndex(0)
+			setPublishedIds(new Set())
 		}
 	}, [results])
 
 	const activeResult = results ? results[selectedIndex] : null
+
+	/**
+	 * 发布当前作品到社区
+	 */
+	const handlePublish = useCallback(async () => {
+		if (!activeResult) return
+
+		const result = await publish({
+			resultUrl: activeResult.generatedImageUrl,
+			sketchUrl: activeResult.sketchDataUrl,
+			styleId: activeResult.style.id,
+			styleName: activeResult.style.nameZh,
+			prompt: activeResult.prompt,
+		})
+
+		if (result) {
+			setPublishedIds((prev) => new Set(prev).add(selectedIndex))
+		}
+	}, [activeResult, publish, selectedIndex])
+
+	const isCurrentPublished = publishedIds.has(selectedIndex)
 
 	const handleDownload = async (
 		targetUrl: string = activeResult?.generatedImageUrl || ''
@@ -286,20 +312,46 @@ const GenerationResultView = ({
 
 						{/* Footer Actions - Sticky Bottom */}
 						{status === 'complete' && activeResult && (
-							<div className="p-4 border-t border-border bg-card/95 backdrop-blur-sm sticky bottom-0 z-10 flex items-center justify-end gap-3">
+							<div className="p-4 border-t border-border bg-card/95 backdrop-blur-sm sticky bottom-0 z-10 flex items-center justify-between gap-3">
 								<Button variant="outline" onClick={onClose}>
 									继续创作
 								</Button>
-								<Button variant="glow" onClick={() => handleDownload()}>
-									<Download className="h-4 w-4 mr-2" />
-									下载图像
-								</Button>
-								{results && results.length > 1 && (
-									<Button variant="outline" onClick={handleDownloadAll}>
-										<Download className="h-4 w-4 mr-2" />
-										下载全部 ({results.length})
+								<div className="flex items-center gap-2">
+									{/* 发布到社区按钮 */}
+									<Button
+										variant={isCurrentPublished ? 'outline' : 'default'}
+										onClick={handlePublish}
+										disabled={isPublishing || isCurrentPublished}
+										className="gap-2"
+									>
+										{isPublishing ? (
+											<>
+												<Loader2 className="h-4 w-4 animate-spin" />
+												发布中...
+											</>
+										) : isCurrentPublished ? (
+											<>
+												<Share2 className="h-4 w-4" />
+												已发布
+											</>
+										) : (
+											<>
+												<Share2 className="h-4 w-4" />
+												发布到社区
+											</>
+										)}
 									</Button>
-								)}
+									<Button variant="glow" onClick={() => handleDownload()}>
+										<Download className="h-4 w-4 mr-2" />
+										下载图像
+									</Button>
+									{results && results.length > 1 && (
+										<Button variant="outline" onClick={handleDownloadAll}>
+											<Download className="h-4 w-4 mr-2" />
+											下载全部 ({results.length})
+										</Button>
+									)}
+								</div>
 							</div>
 						)}
 					</motion.div>

@@ -3,7 +3,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner'
 import ThreeBackground from '@/components/effects/ThreeBackground'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { useUserSync } from '@/hooks/useUserSync'
 import Index from './pages/Index'
@@ -31,13 +31,16 @@ const AppContent = () => {
 			<ThreeBackground />
 			<Toaster />
 			<Sonner />
-			<BrowserRouter>
+			<HashRouter>
 				<Routes>
 					<Route path="/" element={<Index />} />
 
 					{/* 社区画廊 */}
 					<Route path="/community" element={<CommunityPage />} />
 					<Route path="/community/:artworkId" element={<CommunityPage />} />
+
+					{/* 用户资料 */}
+					<Route path="/user/:userId" element={<CommunityPage />} />
 
 					{/* 认证路由 */}
 					<Route path="/auth" element={<AuthLayout />}>
@@ -48,7 +51,7 @@ const AppContent = () => {
 					{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
 					<Route path="*" element={<NotFound />} />
 				</Routes>
-			</BrowserRouter>
+			</HashRouter>
 		</TooltipProvider>
 	)
 }

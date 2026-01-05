@@ -53,7 +53,7 @@ const Header = ({ onLogoClick }: HeaderProps) => {
 						)}
 					>
 						<Images className="w-4 h-4" />
-						<span className="hidden sm:inline">社区</span>
+						<span className="hidden sm:inline">社区画廊</span>
 					</Link>
 
 					<UserProfile />
