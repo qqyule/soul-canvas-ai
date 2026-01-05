@@ -10,7 +10,7 @@
 import { useRef, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { ANIMAL_PATHS, AnimalType } from '@/constants/animal-paths'
+import { ANIMAL_DATA, AnimalType } from '@/constants/animal-paths'
 import {
 	samplePointsFromPath,
 	generateRandomParticles,
@@ -61,14 +61,14 @@ const ParticleNetwork = () => {
 	// 预计算所有动物的粒子位置
 	const animalShapes = useMemo(() => {
 		const shapes: Record<string, Float32Array> = {}
-		const keys = Object.keys(ANIMAL_PATHS) as AnimalType[]
+		const keys = Object.keys(ANIMAL_DATA) as AnimalType[]
 
 		keys.forEach((key) => {
 			// 采样点，缩放 0.015 适应屏幕，向上偏移 0.5 使其位于上半部分
 			// 注意: SVG 坐标系 Y 轴向下，samplePointsFromPath 已经处理了翻转，但可能需要微调位置
 			const offset = new THREE.Vector3(0, 0.8, 0)
 			shapes[key] = samplePointsFromPath(
-				ANIMAL_PATHS[key],
+				ANIMAL_DATA[key].d,
 				PARTICLE_COUNT,
 				0.012,
 				offset
@@ -156,7 +156,7 @@ const ParticleNetwork = () => {
 		switch (animState) {
 			case 'IDLE':
 				if (stateTimerRef.current > 8.0) {
-					const animals = Object.keys(ANIMAL_PATHS) as AnimalType[]
+					const animals = Object.keys(ANIMAL_DATA) as AnimalType[]
 					const nextAnimal = animals[Math.floor(Math.random() * animals.length)]
 					currentAnimalRef.current = nextAnimal
 					particleData.targetPositions = animalShapes[nextAnimal]

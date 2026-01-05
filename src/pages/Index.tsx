@@ -16,6 +16,7 @@ import MaLiangIntroduction from '@/components/story/MaLiangIntroduction'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { MotionButton } from '@/components/ui/motion-button'
+import { MorphingAnimalIcon } from '@/components/ui/morphing-animal-icon'
 import PageTransition from '@/components/layout/page-transition'
 import {
 	STYLE_PRESETS,
@@ -369,9 +370,12 @@ const Index = () => {
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: 0.4, duration: 0.5 }}
-								className="inline-block text-gradient"
+								className="inline-block text-gradient relative"
 							>
-								AI 来实现
+								<span className="inline-flex items-center align-bottom">
+									<MorphingAnimalIcon />
+									AI 来实现
+								</span>
 							</motion.span>
 							<motion.span
 								initial={{ opacity: 0, scale: 0 }}
