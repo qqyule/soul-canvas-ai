@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { CanvasTool } from '@/types/canvas'
 import RandomInspirationButton from './RandomInspirationButton'
+import PaintingLoading from './PaintingLoading'
 
 /**
  * SketchCanvas 暴露的方法接口
@@ -218,12 +219,9 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
-							className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center rounded-lg"
+							className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center rounded-lg"
 						>
-							<div className="flex flex-col items-center gap-3">
-								<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-								<span className="text-sm text-muted-foreground">处理中...</span>
-							</div>
+							<PaintingLoading />
 						</motion.div>
 					)}
 				</div>

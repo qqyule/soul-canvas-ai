@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { usePublishArtwork } from '@/hooks/use-community'
 import type { GenerationResult, GenerationStatus } from '@/types/canvas'
+import PaintingLoading from './PaintingLoading'
 
 interface GenerationResultViewProps {
 	results: GenerationResult[] | null
@@ -119,7 +120,7 @@ const GenerationResultView = ({
 						<div className="flex items-center justify-between p-4 border-b border-border">
 							<div className="flex items-center gap-2">
 								<Sparkles className="h-5 w-5 text-primary" />
-								<span className="font-semibold">AI 生成结果</span>
+								<span className="font-semibold">马良正在创作</span>
 							</div>
 							<Button variant="ghost" size="icon-sm" onClick={onClose}>
 								<X className="h-4 w-4" />
@@ -129,45 +130,26 @@ const GenerationResultView = ({
 						{/* Content */}
 						<div className="p-6 flex-1 overflow-y-auto">
 							{status === 'analyzing' || status === 'generating' ? (
-								<div className="flex flex-col items-center justify-center py-20 gap-6">
-									<div className="relative">
-										<div className="h-16 w-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-										<motion.div
-											animate={{ scale: [1, 1.2, 1] }}
-											transition={{ duration: 2, repeat: Infinity }}
-											className="absolute inset-0 flex items-center justify-center"
-										>
-											<Sparkles className="h-6 w-6 text-primary" />
-										</motion.div>
-									</div>
-									<div className="text-center space-y-2">
-										<p className="text-lg font-medium text-foreground">
-											{status === 'generating' && batchCount > 1
-												? `🎨 正在为您生成 ${batchCount} 张变体...`
-												: statusMessages[status]}
-										</p>
-										<p className="text-sm text-muted-foreground">
-											请稍候，这可能需要几秒钟...
-										</p>
-									</div>
+								<div className="flex flex-col items-center justify-center py-10 gap-8">
+									<PaintingLoading className="scale-125" />
 
 									{/* Progress Steps */}
-									<div className="flex items-center gap-4 mt-4">
+									<div className="flex items-center gap-4 mt-8 opacity-80 scale-90">
 										{['识别中', '构思中', '渲染中'].map((step, i) => (
 											<div
 												key={step}
-												className={`flex items-center gap-2 text-sm ${
+												className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
 													(status === 'analyzing' && i === 0) ||
 													(status === 'generating' && i <= 1)
-														? 'text-primary'
+														? 'text-primary font-medium'
 														: 'text-muted-foreground'
 												}`}
 											>
 												<div
-													className={`h-2 w-2 rounded-full ${
+													className={`h-2 w-2 rounded-full transition-all duration-300 ${
 														(status === 'analyzing' && i === 0) ||
 														(status === 'generating' && i <= 1)
-															? 'bg-primary animate-pulse'
+															? 'bg-primary scale-125'
 															: 'bg-muted'
 													}`}
 												/>
