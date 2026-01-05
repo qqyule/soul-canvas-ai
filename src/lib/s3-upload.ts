@@ -227,8 +227,6 @@ export async function uploadImageToS3(base64DataUrl: string): Promise<string> {
 	)
 	const allHeaders = { ...headers, ...signatureHeaders }
 
-	console.log(`[S3] 正在上传到: ${uploadUrl.toString()}`)
-
 	// 上传
 	const response = await fetch(uploadUrl.toString(), {
 		method: 'PUT',
@@ -246,7 +244,7 @@ export async function uploadImageToS3(base64DataUrl: string): Promise<string> {
 	// 优先使用配置的 publicUrl，否则使用上传 URL
 	const publicBaseUrl = config.publicUrl || uploadBaseUrl
 	const publicUrlResult = `${publicBaseUrl}/${fileName}`
-	console.log(`[S3] 图片上传成功: ${publicUrlResult}`)
+
 	return publicUrlResult
 }
 

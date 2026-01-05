@@ -69,9 +69,9 @@ const prepareImageUrl = async (base64DataUrl: string): Promise<string> => {
 	}
 
 	// 上传到 S3 并返回 URL
-	console.log('[kie.ai] 正在上传图片到 S3...')
+
 	const imageUrl = await uploadImageToS3(base64DataUrl)
-	console.log('[kie.ai] 图片已上传:', imageUrl)
+
 	return imageUrl
 }
 
@@ -135,7 +135,6 @@ async function createTask(
 		throw new KieAPIError(`创建任务失败: ${data.msg}`, data.code)
 	}
 
-	console.log(`[kie.ai] 任务创建成功: ${data.data.taskId}`)
 	return data.data.taskId
 }
 
@@ -196,7 +195,6 @@ async function pollTaskResult(
 
 		// 查询任务状态
 		const result = await getTaskResult(taskId, signal)
-		console.log(`[kie.ai] 任务 ${taskId} 状态: ${result.data.state}`)
 
 		if (result.data.state === 'success') {
 			// 从 resultJson 中提取图片 URL
@@ -206,9 +204,6 @@ async function pollTaskResult(
 						resultUrls?: string[]
 					}
 					if (parsed.resultUrls && parsed.resultUrls.length > 0) {
-						console.log(
-							`[kie.ai] 从 resultJson 解析到图片: ${parsed.resultUrls[0]}`
-						)
 						return parsed.resultUrls[0]
 					}
 				} catch (e) {

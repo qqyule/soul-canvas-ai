@@ -31,7 +31,6 @@ export async function initializeAIService(): Promise<void> {
 	try {
 		const manager = getNodeManager()
 		await manager.pingAllNodes()
-		console.log('[AIService] 节点管理器初始化完成')
 	} catch (error) {
 		console.warn('[AIService] 节点初始化失败，将在首次请求时重试:', error)
 	}
@@ -69,8 +68,6 @@ export async function generateFromSketch(
 
 		generatedImageUrl = result.imageUrl
 		usedNodeName = result.usedNode.name
-
-		console.log(`[AIService] 图像生成成功，使用节点: ${usedNodeName}`)
 	} catch (error) {
 		// 如果是取消请求，直接抛出不包装
 		if (error instanceof DOMException && error.name === 'AbortError') {

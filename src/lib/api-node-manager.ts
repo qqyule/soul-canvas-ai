@@ -138,12 +138,6 @@ class APINodeManager {
 		for (const node of getNodeConfigs()) {
 			this.nodes.set(node.id, node)
 		}
-
-		console.log(
-			`[APINodeManager] 初始化完成，策略: ${this.strategy}，节点: ${Array.from(
-				this.nodes.keys()
-			).join(', ')}`
-		)
 	}
 
 	/**
@@ -197,12 +191,6 @@ class APINodeManager {
 					? 0
 					: (this.health.get(nodeId)?.consecutiveFailures ?? 0) + 1,
 			}
-
-			console.log(
-				`[APINodeManager] 节点 ${node.name} 测速: ${latency.toFixed(
-					0
-				)}ms, 可用: ${response.ok}`
-			)
 
 			return health
 		} catch (error) {
@@ -304,9 +292,6 @@ class APINodeManager {
 				break
 		}
 
-		console.log(
-			`[APINodeManager] 选择节点: ${selected.name} (策略: ${this.strategy})`
-		)
 		return selected
 	}
 

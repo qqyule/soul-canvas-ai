@@ -129,10 +129,9 @@ export async function generateImageWithFallback(
 	// 顺序尝试每个节点（不是同时执行）
 	for (const node of nodes) {
 		try {
-			console.log(`[ClientFactory] 尝试使用节点: ${node.name}`)
 			const client = getClientById(node.id)
 			const imageUrl = await client.generateImage(params)
-			console.log(`[ClientFactory] 节点 ${node.name} 成功`)
+
 			return { imageUrl, usedNode: node }
 		} catch (error) {
 			lastError = error instanceof Error ? error : new Error(String(error))
@@ -147,7 +146,6 @@ export async function generateImageWithFallback(
 			}
 
 			// 继续尝试下一个节点
-			console.log(`[ClientFactory] 将尝试下一个节点...`)
 		}
 	}
 

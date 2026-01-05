@@ -170,7 +170,6 @@ const Index = () => {
 			try {
 				// TODO: 将草稿数据恢复到画布
 				// 需要 SketchCanvas 暴露 loadPaths 方法
-				console.log('Recovering draft:', draft)
 
 				// 恢复提示词和风格
 				if (draft.prompt) setUserPrompt(draft.prompt)
@@ -285,7 +284,6 @@ const Index = () => {
 			} catch (error) {
 				// 请求被取消时静默处理
 				if (error instanceof DOMException && error.name === 'AbortError') {
-					console.log('[Index] 请求已取消')
 					return
 				}
 

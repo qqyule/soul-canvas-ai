@@ -37,7 +37,6 @@ export const useUserSync = () => {
 				})
 
 				setIsSynced(true)
-				console.log('User synced to Neon database:', email)
 			} catch (error) {
 				console.error('Failed to sync user to database:', error)
 				toast({
