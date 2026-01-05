@@ -9,15 +9,13 @@ import {
 	Clock,
 	Share2,
 	X,
-	Github,
 	ArrowUpCircle,
+	LogIn,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-	GITHUB_REPO_URL,
-	STARRED_DAILY_LIMIT,
-	BASE_DAILY_LIMIT,
-} from '@/lib/storage'
+import { AUTHENTICATED_DAILY_LIMIT, BASE_DAILY_LIMIT } from '@/lib/storage'
+import { useUser } from '@clerk/clerk-react'
+import { useNavigate } from 'react-router-dom'
 
 interface LimitExceededDialogProps {
 	/** 是否显示弹窗 */
@@ -26,8 +24,6 @@ interface LimitExceededDialogProps {
 	onClose: () => void
 	/** 当前每日限制 */
 	dailyLimit?: number
-	/** 升级权益回调 */
-	onUpgrade?: () => void
 }
 
 /**
@@ -37,17 +33,16 @@ const LimitExceededDialog = ({
 	open,
 	onClose,
 	dailyLimit = BASE_DAILY_LIMIT,
-	onUpgrade,
 }: LimitExceededDialogProps) => {
-	const canUpgrade = dailyLimit < STARRED_DAILY_LIMIT && onUpgrade
+	const { isSignedIn } = useUser()
+	const navigate = useNavigate()
 
-	const handleUpgrade = () => {
-		// 1. 打开 GitHub
-		window.open(GITHUB_REPO_URL, '_blank')
-		// 2. 升级权益 (假设用户去 Star 了)
-		onUpgrade?.()
-		// 3. 关闭弹窗
+	// 是否可以升级（当前未登录）
+	const canUpgrade = !isSignedIn
+
+	const handleLogin = () => {
 		onClose()
+		navigate('/auth/sign-in')
 	}
 
 	return (
@@ -100,21 +95,22 @@ const LimitExceededDialog = ({
 
 							{/* 标题 */}
 							<h3 className="text-xl font-bold text-foreground mb-2">
-								{canUpgrade ? '解锁每日 1000 次生成' : '今日次数已用完'}
+								{canUpgrade ? '登录解锁更多次数' : '今日次数已用完'}
 							</h3>
 
 							{/* 描述 */}
 							<p className="text-muted-foreground mb-6">
 								{canUpgrade ? (
 									<span>
-										当前每日限制为 {BASE_DAILY_LIMIT} 次。
+										当前为游客模式，每日仅限 {BASE_DAILY_LIMIT} 次。
 										<br />
-										在 GitHub 上为我们要一颗 Star ⭐️
-										<br />
-										即可永久免费升级至每日 {STARRED_DAILY_LIMIT} 次！
+										<span className="text-foreground font-medium">
+											登录账号
+										</span>
+										即可升级至每日 {AUTHENTICATED_DAILY_LIMIT} 次生成机会！
 									</span>
 								) : (
-									'您今天的免费生成次数已全部用完，请明天再来继续创作！'
+									`您今天的 ${dailyLimit} 次生成机会已全部用完，请明天再来继续创作！`
 								)}
 							</p>
 
@@ -123,14 +119,14 @@ const LimitExceededDialog = ({
 								<div className="mb-8">
 									<Button
 										size="lg"
-										className="w-full gap-2 bg-gradient-to-r from-gray-900 to-gray-700 hover:from-black hover:to-gray-800 text-white dark:from-white dark:to-gray-200 dark:text-black dark:hover:from-gray-100 dark:hover:to-gray-300"
-										onClick={handleUpgrade}
+										className="w-full gap-2"
+										onClick={handleLogin}
 									>
-										<Github className="h-5 w-5" />
-										<span>去 GitHub Star 并升级权益</span>
+										<LogIn className="h-5 w-5" />
+										<span>立即登录升级权益</span>
 									</Button>
 									<p className="text-xs text-muted-foreground mt-3">
-										* 点击跳转后，权益将自动生效
+										* 登录即刻生效，无需等待
 									</p>
 								</div>
 							) : (
@@ -153,7 +149,7 @@ const LimitExceededDialog = ({
 							{/* 底部按钮组 */}
 							<div className="flex flex-col sm:flex-row gap-3">
 								<Button variant="outline" className="flex-1" onClick={onClose}>
-									{canUpgrade ? '暂不升级' : '我知道了'}
+									{canUpgrade ? '暂不登录' : '我知道了'}
 								</Button>
 
 								{/* 只有不可升级时才显示分享按钮作为主要操作之一 */}

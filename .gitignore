@@ -11,12 +11,14 @@ node_modules
 dist
 dist-ssr
 *.local
+.env.product
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .claude
+drizzle
 .DS_Store
 *.suo
 *.ntvs*
@@ -26,3 +28,6 @@ dist-ssr
 
 # Cloudflare Workers secrets (本地开发)
 workers/.dev.vars
+
+# Vitest coverage
+coverage/

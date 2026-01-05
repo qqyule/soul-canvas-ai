@@ -1,15 +1,23 @@
-import { useState, useCallback, useRef } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { History, Sparkles } from 'lucide-react'
+import { History, Sparkles, Github, HelpCircle } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
 import StyleSelector from '@/components/canvas/StyleSelector'
+import BatchSelector from '@/components/canvas/BatchSelector'
+import { fadeIn, slideUp, staggerChildren } from '@/config/animations'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import HistoryPanel from '@/components/canvas/HistoryPanel'
 import OnboardingTour from '@/components/OnboardingTour'
+import DraftStatusIndicator from '@/components/drafts/DraftStatusIndicator'
+import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
+import MaLiangIntroduction from '@/components/story/MaLiangIntroduction'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { MotionButton } from '@/components/ui/motion-button'
+import { MorphingAnimalIcon } from '@/components/ui/morphing-animal-icon'
+import PageTransition from '@/components/layout/page-transition'
 import {
 	STYLE_PRESETS,
 	type StylePreset,
@@ -22,54 +30,216 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { STARRED_DAILY_LIMIT } from '@/lib/storage'
+import {
+	STARRED_DAILY_LIMIT,
+	GITHUB_REPO_URL,
+	AUTHENTICATED_DAILY_LIMIT,
+} from '@/lib/storage'
 import { useToast } from '@/hooks/use-toast'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useHistory } from '@/hooks/use-history'
+import { useDrafts } from '@/hooks/use-drafts'
 import { generateFromSketch, AIServiceError } from '@/lib/ai-service'
+import { useUser } from '@clerk/clerk-react'
+import type { Draft } from '@/lib/draft-db'
+import type { InspirationConfig } from '@/lib/inspiration-generator'
+import { generateRandomInspiration } from '@/lib/inspiration-generator'
+import { animatePathsDrawing } from '@/lib/inspiration-animation'
+import type { SketchCanvasRef } from '@/components/canvas/SketchCanvas'
 
 const Index = () => {
 	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(
 		STYLE_PRESETS[0]
 	)
 	const [status, setStatus] = useState<GenerationStatus>('idle')
-	const [result, setResult] = useState<GenerationResult | null>(null)
+	const [results, setResults] = useState<GenerationResult[] | null>(null)
+	const [batchSize, setBatchSize] = useState(1)
+	const [showStory, setShowStory] = useState(false)
 	const [userPrompt, setUserPrompt] = useState('')
 	const [showLimitDialog, setShowLimitDialog] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
+	const [showRecoveryDialog, setShowRecoveryDialog] = useState(false)
+	const [draftToRecover, setDraftToRecover] = useState<Draft | null>(null)
 
 	// 用于取消请求的 AbortController
 	const abortControllerRef = useRef<AbortController | null>(null)
+	// SketchCanvas ref
+	const sketchCanvasRef = useRef<SketchCanvasRef>(null)
 
 	const { toast } = useToast()
+	const { isSignedIn } = useUser()
+	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } =
+		useDailyLimit()
 	const {
-		remainingCount,
-		dailyLimit,
-		isLimitReached,
-		consumeGeneration,
-		upgradeQuota,
-	} = useDailyLimit()
-	const { history, addToHistory, deleteFromHistory, clearAllHistory } =
-		useHistory()
+		history,
+		filteredHistory,
+		filter,
+		setFilter,
+		availableStyles,
+		addToHistory,
+		deleteFromHistory,
+		deleteMultiple,
+		clearAllHistory,
+	} = useHistory()
+	const { saveStatus, saveDraft, checkLatestDraft, deleteDraft } = useDrafts()
 
-	const handleUpgrade = useCallback(() => {
-		upgradeQuota()
-		toast({
-			title: '权益升级成功！🎉',
-			description: `感谢您的支持，您已获得每日 ${dailyLimit} -> 1000 次生成次数`,
-		})
-	}, [upgradeQuota, dailyLimit, toast])
+	/**
+	 * 处理画布数据变化，触发自动保存
+	 */
+	const handleCanvasChange = useCallback(
+		(canvasData: string) => {
+			saveDraft({
+				canvasData,
+				styleId: selectedStyle.id,
+				prompt: userPrompt,
+			})
+		},
+		[saveDraft, selectedStyle.id, userPrompt]
+	)
+
+	/**
+	 * 处理灵感生成
+	 */
+	/**
+	 * 直接生成随机灵感
+	 */
+	const handleRandomInspiration = useCallback(async () => {
+		try {
+			// 随机配置
+			// 随机配置 (加权随机：偏好 sketch 和 organic)
+			const weightedCategories: InspirationCategory[] = [
+				'sketch',
+				'sketch',
+				'sketch',
+				'sketch', // 40%
+				'organic',
+				'organic',
+				'organic', // 30%
+				'pattern',
+				'pattern', // 20%
+				'geometric', // 10%
+			]
+			const category =
+				weightedCategories[
+					Math.floor(Math.random() * weightedCategories.length)
+				]
+
+			const complexities = ['simple', 'medium', 'complex'] as const
+			const config: InspirationConfig = {
+				category,
+				complexity:
+					complexities[Math.floor(Math.random() * complexities.length)],
+				canvasWidth: 800,
+				canvasHeight: 400,
+			}
+
+			// 生成灵感
+			const result = generateRandomInspiration(config)
+
+			// 清空画布并加载新路径
+			sketchCanvasRef.current?.clearCanvas()
+			await animatePathsDrawing(
+				sketchCanvasRef,
+				result.paths,
+				result.animationDuration
+			)
+
+			// 填充推荐提示词
+			if (result.suggestedPrompts.length > 0) {
+				setUserPrompt(result.suggestedPrompts[0])
+			}
+
+			toast({
+				title: '灵感已生成！✨',
+				description: 'AI 已为您绘制了草图并填写了提示词',
+			})
+		} catch (error) {
+			console.error('Failed to generate inspiration:', error)
+			toast({
+				title: '生成失败',
+				description: '无法生成灵感，请重试',
+				variant: 'destructive',
+			})
+		}
+	}, [userPrompt, toast])
+
+	/**
+	 * 恢复草稿
+	 */
+	const handleRecoverDraft = useCallback(
+		async (draft: Draft) => {
+			try {
+				// TODO: 将草稿数据恢复到画布
+				// 需要 SketchCanvas 暴露 loadPaths 方法
+
+				// 恢复提示词和风格
+				if (draft.prompt) setUserPrompt(draft.prompt)
+				const style = STYLE_PRESETS.find((s) => s.id === draft.styleId)
+				if (style) setSelectedStyle(style)
+
+				toast({
+					title: '草稿已恢复',
+					description: '已恢复上次未完成的作品',
+				})
+			} catch (error) {
+				console.error('Failed to recover draft:', error)
+				toast({
+					title: '恢复失败',
+					description: '无法恢复草稿，请重新开始',
+					variant: 'destructive',
+				})
+			}
+		},
+		[toast]
+	)
+
+	/**
+	 * 放弃草稿
+	 */
+	const handleDiscardDraft = useCallback(
+		async (draft: Draft) => {
+			try {
+				await deleteDraft(draft.id)
+				toast({
+					title: '已放弃草稿',
+					description: '草稿已删除',
+				})
+			} catch (error) {
+				console.error('Failed to discard draft:', error)
+			}
+		},
+		[deleteDraft, toast]
+	)
+
+	/**
+	 * 页面加载时检查是否有未完成的草稿
+	 */
+	useEffect(() => {
+		const checkDraft = async () => {
+			const latest = await checkLatestDraft()
+			if (latest) {
+				setDraftToRecover(latest)
+				setShowRecoveryDialog(true)
+			}
+		}
+		checkDraft()
+	}, [checkLatestDraft])
 
 	const handleGenerate = useCallback(
 		async (sketchDataUrl: string) => {
-			// 检查是否达到限制（仅检查，不扣分）
-			if (isLimitReached) {
+			// 检查是否达到限制（预检查）
+			if (checkLatestDraft === undefined) {
+				// skip
+			}
+
+			// 检查剩余次数是否足够
+			if (isLimitReached || remainingCount < batchSize) {
 				setShowLimitDialog(true)
 				return
 			}
 
 			setStatus('analyzing')
-			setResult(null)
+			setResults(null)
 
 			// 创建新的 AbortController
 			abortControllerRef.current = new AbortController()
@@ -84,35 +254,37 @@ const Index = () => {
 
 				// 调用真实 AI 服务（图生图模式）
 				setStatus('generating')
-				const aiResult = await generateFromSketch(
-					sketchDataUrl,
-					selectedStyle,
-					finalPrompt,
-					signal
+
+				// 批量生成：创建 batchSize 个并行请求
+				// 每个请求独立调用，确保生成不同的变体
+				const actualPromises = Array.from({ length: batchSize }).map(() =>
+					generateFromSketch(sketchDataUrl, selectedStyle, finalPrompt, signal)
 				)
 
-				// 成功后才扣分
-				const success = consumeGeneration()
+				const results = await Promise.all(actualPromises)
+
+				// 批量扣分
+				const success = consumeGeneration(batchSize)
 				if (!success) {
-					// 理论上不会走到这里，因为前面已检查过
 					setShowLimitDialog(true)
-					return
+					// 虽然生成成功了但扣分失败（并发边界情况），展示结果但提示耗尽
 				}
 
-				setResult(aiResult)
+				setResults(results)
 				setStatus('complete')
 
-				// 保存到历史记录
-				addToHistory(sketchDataUrl, aiResult.generatedImageUrl, selectedStyle)
+				// 批量保存到历史记录
+				results.forEach((res) => {
+					addToHistory(sketchDataUrl, res.generatedImageUrl, selectedStyle)
+				})
 
 				toast({
 					title: '生成成功! ✨',
-					description: '您的 AI 艺术作品已准备就绪',
+					description: `已为您生成 ${batchSize} 张 AI 艺术作品`,
 				})
 			} catch (error) {
 				// 请求被取消时静默处理
 				if (error instanceof DOMException && error.name === 'AbortError') {
-					console.log('[Index] 请求已取消')
 					return
 				}
 
@@ -138,6 +310,8 @@ const Index = () => {
 			userPrompt,
 			toast,
 			isLimitReached,
+			remainingCount,
+			batchSize,
 			consumeGeneration,
 			addToHistory,
 		]
@@ -150,19 +324,19 @@ const Index = () => {
 			abortControllerRef.current = null
 		}
 		setStatus('idle')
-		setResult(null)
+		setResults(null)
 	}, [])
 
 	return (
 		<div className="min-h-screen animated-gradient">
 			<OnboardingTour />
-			<Header />
+			<Header onLogoClick={() => setShowStory(true)} />
 
 			{/* Background Grid */}
 			<div className="fixed inset-0 bg-grid-pattern bg-grid opacity-5 pointer-events-none" />
 
 			{/* Main Content */}
-			<main className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+			<PageTransition className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
 					{/* Hero Section */}
 					<motion.div
@@ -182,21 +356,59 @@ const Index = () => {
 						</motion.div>
 
 						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-							画出想法
+							<motion.span
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.2, duration: 0.5 }}
+								className="inline-block"
+							>
+								画出想法
+							</motion.span>
 							<span className="text-gradient">，</span>
 							<br />
-							<span className="text-gradient">AI 来实现</span>
+							<motion.span
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.4, duration: 0.5 }}
+								className="inline-block text-gradient relative"
+							>
+								<span className="inline-flex items-center align-bottom">
+									<MorphingAnimalIcon />
+									AI 来实现
+								</span>
+							</motion.span>
+							<motion.span
+								initial={{ opacity: 0, scale: 0 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={{ delay: 0.8, type: 'spring' }}
+								className="ml-3 inline-flex align-top"
+								onMouseEnter={() => setShowStory(true)}
+							>
+								<div className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center cursor-help transition-colors">
+									<HelpCircle className="h-4 w-4 text-primary" />
+								</div>
+							</motion.span>
 						</h2>
 
-						<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.6 }}
+							className="text-lg text-muted-foreground max-w-2xl mx-auto"
+						>
 							无需复杂提示词，简单几笔涂鸦，让 AI 理解你的创意并生成专业级图像
-						</p>
+						</motion.p>
 					</motion.div>
 
 					{/* Main App Grid */}
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+					<motion.div
+						variants={staggerChildren}
+						initial="initial"
+						animate="animate"
+						className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+					>
 						{/* Canvas Section */}
-						<div className="lg:col-span-2 space-y-4">
+						<motion.div variants={slideUp} className="lg:col-span-2 space-y-4">
 							{/* 顶部工具栏：剩余次数 + 历史记录 */}
 							<motion.div
 								initial={{ opacity: 0 }}
@@ -210,6 +422,14 @@ const Index = () => {
 								</div>
 
 								<div className="flex items-center gap-3">
+									{/* 批量生成选择器 */}
+									<BatchSelector
+										value={batchSize}
+										onChange={setBatchSize}
+										disabled={remainingCount < 1}
+										maxBatchSize={4}
+									/>
+
 									{/* 剩余次数显示 */}
 									<TooltipProvider delayDuration={0}>
 										<Tooltip>
@@ -231,19 +451,29 @@ const Index = () => {
 													</span>
 												</div>
 											</TooltipTrigger>
-											{dailyLimit < STARRED_DAILY_LIMIT && (
-												<TooltipContent>
+											<TooltipContent>
+												{isSignedIn ? (
 													<p>
-														前往右上角 GitHub 点个 Star ⭐️
-														支持一下，解锁更多生成次数！
+														每日享有 {dailyLimit} 次生成机会
+														{dailyLimit < STARRED_DAILY_LIMIT &&
+															' (Star 项目可解锁 1000 次)'}
 													</p>
-												</TooltipContent>
-											)}
+												) : (
+													<p>
+														当前为游客模式 (每日 {dailyLimit} 次)
+														<br />
+														<span className="font-bold text-primary">
+															登录
+														</span>{' '}
+														立即升级至每日 {AUTHENTICATED_DAILY_LIMIT} 次！
+													</p>
+												)}
+											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
 
 									{/* 历史记录按钮 */}
-									<Button
+									<MotionButton
 										variant="outline"
 										size="sm"
 										className="gap-2"
@@ -259,7 +489,7 @@ const Index = () => {
 												{history.length}
 											</span>
 										)}
-									</Button>
+									</MotionButton>
 								</div>
 							</motion.div>
 
@@ -310,16 +540,19 @@ const Index = () => {
 
 							<div id="tour-canvas">
 								<SketchCanvas
+									ref={sketchCanvasRef}
 									onExport={handleGenerate}
 									isGenerating={
 										status === 'analyzing' || status === 'generating'
 									}
+									onCanvasChange={handleCanvasChange}
+									onInspirationClick={handleRandomInspiration}
 								/>
 							</div>
-						</div>
+						</motion.div>
 
 						{/* Style Selector */}
-						<div className="lg:col-span-1">
+						<motion.div variants={slideUp} className="lg:col-span-1">
 							<div id="tour-style">
 								<StyleSelector
 									selectedStyle={selectedStyle}
@@ -353,21 +586,33 @@ const Index = () => {
 									</li>
 								</ul>
 							</motion.div>
-						</div>
-					</div>
+						</motion.div>
+					</motion.div>
 				</div>
-			</main>
+			</PageTransition>
 
-			<footer className="pt-6 pb-24 md:py-6 text-center">
+			<footer className="pt-6 pb-24 md:py-6 text-center space-y-4">
 				<p className="text-sm text-muted-foreground/60">
 					大模型版本：Google Nano Banana Pro
 				</p>
+				<div className="flex justify-center">
+					<a
+						href={GITHUB_REPO_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-2 text-sm text-muted-foreground/80 hover:text-foreground transition-colors"
+					>
+						<Github className="h-4 w-4" />
+						<span>GitHub</span>
+					</a>
+				</div>
 			</footer>
 
 			{/* Generation Result Modal */}
 			<GenerationResultView
-				result={result}
+				results={results}
 				status={status}
+				batchCount={batchSize}
 				onClose={handleCloseResult}
 			/>
 
@@ -376,7 +621,6 @@ const Index = () => {
 				open={showLimitDialog}
 				onClose={() => setShowLimitDialog(false)}
 				dailyLimit={dailyLimit}
-				onUpgrade={handleUpgrade}
 			/>
 
 			{/* 历史记录面板 */}
@@ -384,8 +628,28 @@ const Index = () => {
 				open={showHistory}
 				onClose={() => setShowHistory(false)}
 				history={history}
+				filteredHistory={filteredHistory}
+				filter={filter}
+				onFilterChange={setFilter}
+				availableStyles={availableStyles}
 				onDelete={deleteFromHistory}
+				onDeleteMultiple={deleteMultiple}
 				onClearAll={clearAllHistory}
+			/>
+
+			{/* 草稿恢复对话框 */}
+			<DraftRecoveryDialog
+				draft={draftToRecover}
+				open={showRecoveryDialog}
+				onClose={() => setShowRecoveryDialog(false)}
+				onRecover={handleRecoverDraft}
+				onDiscard={handleDiscardDraft}
+			/>
+
+			{/* 神笔马良故事弹窗 */}
+			<MaLiangIntroduction
+				open={showStory}
+				onClose={() => setShowStory(false)}
 			/>
 		</div>
 	)

@@ -10,14 +10,16 @@ import { buildFinalPrompt } from '@/prompts'
 
 // ==================== 配置 ====================
 
+import { withRetry } from './utils/retry'
+
 /** OpenRouter API 基础 URL */
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
-/** 最大重试次数 */
-const MAX_RETRIES = 1
+/** 单次请求超时时间 (ms) */
+const REQUEST_TIMEOUT_MS = 30000
 
-/** 重试延迟时间（毫秒） */
-const RETRY_DELAY_MS = 1000
+/** 最大重试次数 (由 retry 工具控制，此处仅作备注文档) */
+// const MAX_RETRIES = 2
 
 /**
  * 获取 OpenRouter API Key
@@ -160,12 +162,6 @@ export class APIError extends Error {
 // ==================== 工具函数 ====================
 
 /**
- * 延迟函数
- */
-const delay = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(resolve, ms))
-
-/**
  * 判断错误是否可重试
  */
 const isRetryableError = (error: unknown): boolean => {
@@ -229,17 +225,27 @@ export async function generateImageFromSketch(
 		stream: false, // 确保返回完整响应
 	}
 
-	// 带重试的 API 请求
-	let lastError: Error | null = null
-	let retryCount = 0
+	// 封装单次请求逻辑
+	const makeRequest = async () => {
+		// 创建超时控制器
+		const timeoutController = new AbortController()
+		const timeoutId = setTimeout(
+			() => timeoutController.abort(),
+			REQUEST_TIMEOUT_MS
+		)
 
-	while (retryCount <= MAX_RETRIES) {
-		// 检查是否已取消
-		if (signal?.aborted) {
-			throw new DOMException('请求已取消', 'AbortError')
+		// 合并信号处理
+		const onUserAbort = () => timeoutController.abort()
+		if (signal) {
+			signal.addEventListener('abort', onUserAbort)
 		}
 
 		try {
+			// 检查是否已取消（在重试开始前）
+			if (signal?.aborted) {
+				throw new DOMException('请求已取消', 'AbortError')
+			}
+
 			const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
 				method: 'POST',
 				headers: {
@@ -249,8 +255,10 @@ export async function generateImageFromSketch(
 					'X-Title': 'SoulCanvas AI',
 				},
 				body: JSON.stringify(request),
-				signal, // 传递 AbortSignal
+				signal: timeoutController.signal,
 			})
+
+			clearTimeout(timeoutId)
 
 			if (!response.ok) {
 				const errorText = await response.text()
@@ -260,45 +268,58 @@ export async function generateImageFromSketch(
 						`服务器错误: ${response.status} - ${errorText}`
 					)
 				}
+				// 429 Too Many Requests 通常也可重试，视情况而定
+				if (response.status === 429) {
+					throw new NetworkError(`请求过频 (429): ${errorText}`)
+				}
 				throw new APIError(
 					`图像生成失败: ${response.status} - ${errorText}`,
 					response.status
 				)
 			}
 
-			const data: ChatCompletionsResponse = await response.json()
+			let data: ChatCompletionsResponse
+			try {
+				data = await response.json()
+			} catch (parseError) {
+				throw new APIError(`API 响应非 JSON 格式: ${parseError}`)
+			}
 
 			if (data.error) {
 				throw new APIError(`图像生成错误: ${data.error.message}`)
 			}
 
-			// 成功，跳出循环继续处理响应
 			return parseImageFromResponse(data)
 		} catch (error) {
-			lastError = error instanceof Error ? error : new Error(String(error))
-
-			// 判断是否可重试
-			if (isRetryableError(error) && retryCount < MAX_RETRIES) {
-				retryCount++
-				console.warn(
-					`[OpenRouter] 请求失败，正在重试 (${retryCount}/${MAX_RETRIES})...`,
-					error
-				)
-				await delay(RETRY_DELAY_MS)
-				continue
+			clearTimeout(timeoutId)
+			// 如果是超时导致的 AbortError，转换为 NetworkError 以便重试（或者 TimeoutError）
+			// 注意：如果是用户主动取消，则不应重试
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				if (signal?.aborted) {
+					throw error // 用户取消，直接抛出
+				}
+				throw new NetworkError('请求超时')
 			}
-
-			// 不可重试或已达最大重试次数
-			break
+			throw error
+		} finally {
+			if (signal) {
+				signal.removeEventListener('abort', onUserAbort)
+			}
 		}
 	}
 
-	// 重试失败，抛出最后的错误
-	if (lastError) {
-		throw lastError
-	}
-
-	throw new Error('未知错误')
+	// 使用重试工具执行
+	return withRetry(makeRequest, {
+		maxRetries: 2, // 用户指定
+		baseDelay: 1000,
+		shouldRetry: isRetryableError,
+		onRetry: (attempt, delayMs, error) => {
+			console.warn(
+				`[OpenRouter] 请求失败，正在重试 (${attempt}/2)... 延迟: ${delayMs}ms`,
+				error
+			)
+		},
+	})
 }
 
 /**
