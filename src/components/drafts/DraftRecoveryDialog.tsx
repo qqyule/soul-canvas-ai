@@ -3,9 +3,10 @@
  * @description 在检测到未完成草稿时显示，提供恢复或放弃选项
  */
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FileWarning, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
@@ -14,7 +15,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import type { Draft } from '@/lib/draft-db'
 
 interface DraftRecoveryDialogProps {

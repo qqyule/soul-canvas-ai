@@ -74,8 +74,7 @@ export interface GetFeedResponse {
 /**
  * 作品详情数据
  */
-export interface ArtworkDetailData
-	extends Omit<Artwork, 'createdAt' | 'updatedAt'> {
+export interface ArtworkDetailData extends Omit<Artwork, 'createdAt' | 'updatedAt'> {
 	createdAt: string
 	updatedAt: string
 	/** 作者信息 */

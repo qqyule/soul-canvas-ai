@@ -3,10 +3,10 @@
  * @description 显示在画布工具栏旁，实时反馈自动保存状态
  */
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { Cloud, HardDrive, Check, Loader2, AlertCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
+import { AlertCircle, Check, Cloud, HardDrive, Loader2 } from 'lucide-react'
 import type { SaveStatus } from '@/hooks/use-drafts'
+import { cn } from '@/lib/utils'
 
 interface DraftStatusIndicatorProps {
 	/** 保存状态 */

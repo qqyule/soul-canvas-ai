@@ -96,10 +96,7 @@ async function createSignatureV4(
 	const encoder = new TextEncoder()
 
 	// 辅助函数：HMAC-SHA256
-	async function hmacSha256(
-		key: ArrayBuffer,
-		message: string
-	): Promise<ArrayBuffer> {
+	async function hmacSha256(key: ArrayBuffer, message: string): Promise<ArrayBuffer> {
 		const cryptoKey = await crypto.subtle.importKey(
 			'raw',
 			key,
@@ -136,13 +133,12 @@ async function createSignatureV4(
 
 	// 规范请求
 	const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date'
-	const canonicalHeaders =
-		[
-			`content-type:${headers['Content-Type']}`,
-			`host:${host}`,
-			`x-amz-content-sha256:${payloadHash}`,
-			`x-amz-date:${amzDate}`,
-		].join('\n') + '\n'
+	const canonicalHeaders = `${[
+		`content-type:${headers['Content-Type']}`,
+		`host:${host}`,
+		`x-amz-content-sha256:${payloadHash}`,
+		`x-amz-date:${amzDate}`,
+	].join('\n')}\n`
 
 	const canonicalRequest = [
 		method,
@@ -156,18 +152,12 @@ async function createSignatureV4(
 	// 待签字符串
 	const algorithm = 'AWS4-HMAC-SHA256'
 	const credentialScope = `${dateStamp}/${config.region}/${service}/aws4_request`
-	const stringToSign = [
-		algorithm,
-		amzDate,
-		credentialScope,
-		await sha256(canonicalRequest),
-	].join('\n')
+	const stringToSign = [algorithm, amzDate, credentialScope, await sha256(canonicalRequest)].join(
+		'\n'
+	)
 
 	// 签名密钥
-	const kDate = await hmacSha256(
-		encoder.encode(`AWS4${config.secretAccessKey}`),
-		dateStamp
-	)
+	const kDate = await hmacSha256(encoder.encode(`AWS4${config.secretAccessKey}`), dateStamp)
 	const kRegion = await hmacSha256(kDate, config.region)
 	const kService = await hmacSha256(kRegion, service)
 	const kSigning = await hmacSha256(kService, 'aws4_request')
@@ -218,13 +208,7 @@ export async function uploadImageToS3(base64DataUrl: string): Promise<string> {
 	}
 
 	// 创建签名
-	const signatureHeaders = await createSignatureV4(
-		'PUT',
-		uploadUrl,
-		headers,
-		body,
-		config
-	)
+	const signatureHeaders = await createSignatureV4('PUT', uploadUrl, headers, body, config)
 	const allHeaders = { ...headers, ...signatureHeaders }
 
 	// 上传

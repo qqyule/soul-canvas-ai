@@ -1,9 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { Download, X, Sparkles, Share2, Loader2 } from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Download, Loader2, Share2, Sparkles, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
 import { usePublishArtwork } from '@/hooks/use-community'
+import { useToast } from '@/hooks/use-toast'
 import type { GenerationResult, GenerationStatus } from '@/types/canvas'
 import PaintingLoading from './PaintingLoading'
 
@@ -64,9 +64,7 @@ const GenerationResultView = ({
 
 	const isCurrentPublished = publishedIds.has(selectedIndex)
 
-	const handleDownload = async (
-		targetUrl: string = activeResult?.generatedImageUrl || ''
-	) => {
+	const handleDownload = async (targetUrl: string = activeResult?.generatedImageUrl || '') => {
 		if (!targetUrl) return
 
 		try {
@@ -139,8 +137,7 @@ const GenerationResultView = ({
 											<div
 												key={step}
 												className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
-													(status === 'analyzing' && i === 0) ||
-													(status === 'generating' && i <= 1)
+													(status === 'analyzing' && i === 0) || (status === 'generating' && i <= 1)
 														? 'text-primary font-medium'
 														: 'text-muted-foreground'
 												}`}
@@ -164,9 +161,7 @@ const GenerationResultView = ({
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										{/* Original Sketch */}
 										<div className="space-y-2">
-											<h4 className="text-sm font-medium text-muted-foreground">
-												您的草图
-											</h4>
+											<h4 className="text-sm font-medium text-muted-foreground">您的草图</h4>
 											<div className="aspect-[4/3] rounded-xl overflow-hidden bg-canvas-bg border border-border">
 												<img
 													src={activeResult.sketchDataUrl}
@@ -192,6 +187,7 @@ const GenerationResultView = ({
 													<div className="flex gap-1">
 														{results.map((_, idx) => (
 															<button
+																type="button"
 																key={idx}
 																onClick={() => setSelectedIndex(idx)}
 																className={`w-2 h-2 rounded-full transition-all ${
@@ -213,7 +209,7 @@ const GenerationResultView = ({
 											>
 												<img
 													src={activeResult.generatedImageUrl}
-													alt="Generated image"
+													alt="AI 生成的艺术作品"
 													className="w-full h-full object-cover"
 												/>
 												<div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
@@ -221,9 +217,7 @@ const GenerationResultView = ({
 														size="sm"
 														variant="secondary"
 														className="h-8 text-xs backdrop-blur-md bg-white/10 hover:bg-white/20 text-white border-white/20"
-														onClick={() =>
-															handleDownload(activeResult.generatedImageUrl)
-														}
+														onClick={() => handleDownload(activeResult.generatedImageUrl)}
 													>
 														<Download className="h-3 w-3 mr-1.5" />
 														下载
@@ -236,12 +230,11 @@ const GenerationResultView = ({
 									{/* Thumbnails Grid (Only if > 1) */}
 									{results && results.length > 1 && (
 										<div className="space-y-2">
-											<h4 className="text-sm font-medium text-muted-foreground">
-												变体预览
-											</h4>
+											<h4 className="text-sm font-medium text-muted-foreground">变体预览</h4>
 											<div className="grid grid-cols-4 gap-3">
 												{results.map((res, idx) => (
 													<button
+														type="button"
 														key={idx}
 														onClick={() => setSelectedIndex(idx)}
 														className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${
@@ -279,12 +272,8 @@ const GenerationResultView = ({
 									<div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
 										<X className="h-8 w-8 text-destructive" />
 									</div>
-									<p className="text-lg font-medium text-foreground">
-										生成失败
-									</p>
-									<p className="text-sm text-muted-foreground">
-										请检查网络连接后重试
-									</p>
+									<p className="text-lg font-medium text-foreground">生成失败</p>
+									<p className="text-sm text-muted-foreground">请检查网络连接后重试</p>
 									<Button variant="outline" onClick={onClose}>
 										返回
 									</Button>

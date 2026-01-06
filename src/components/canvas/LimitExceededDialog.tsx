@@ -3,19 +3,12 @@
  * 当用户达到每日生成限制时显示
  */
 
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-	AlertTriangle,
-	Clock,
-	Share2,
-	X,
-	ArrowUpCircle,
-	LogIn,
-} from 'lucide-react'
+import { useUser } from '@clerk/clerk-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { AlertTriangle, ArrowUpCircle, Clock, LogIn, Share2, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { AUTHENTICATED_DAILY_LIMIT, BASE_DAILY_LIMIT } from '@/lib/storage'
-import { useUser } from '@clerk/clerk-react'
-import { useNavigate } from 'react-router-dom'
 
 interface LimitExceededDialogProps {
 	/** 是否显示弹窗 */
@@ -104,9 +97,7 @@ const LimitExceededDialog = ({
 									<span>
 										当前为游客模式，每日仅限 {BASE_DAILY_LIMIT} 次。
 										<br />
-										<span className="text-foreground font-medium">
-											登录账号
-										</span>
+										<span className="text-foreground font-medium">登录账号</span>
 										即可升级至每日 {AUTHENTICATED_DAILY_LIMIT} 次生成机会！
 									</span>
 								) : (
@@ -117,17 +108,11 @@ const LimitExceededDialog = ({
 							{/* 升级按钮 或 倒计时 */}
 							{canUpgrade ? (
 								<div className="mb-8">
-									<Button
-										size="lg"
-										className="w-full gap-2"
-										onClick={handleLogin}
-									>
+									<Button size="lg" className="w-full gap-2" onClick={handleLogin}>
 										<LogIn className="h-5 w-5" />
 										<span>立即登录升级权益</span>
 									</Button>
-									<p className="text-xs text-muted-foreground mt-3">
-										* 登录即刻生效，无需等待
-									</p>
+									<p className="text-xs text-muted-foreground mt-3">* 登录即刻生效，无需等待</p>
 								</div>
 							) : (
 								<>

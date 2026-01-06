@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { ANIMAL_DATA } from '@/constants/animal-paths'
 
 const ANIMALS = [
@@ -28,13 +28,7 @@ export const MorphingAnimalIcon = () => {
 			{/* Shared Gradient Definition */}
 			<svg width="0" height="0" className="absolute">
 				<defs>
-					<linearGradient
-						id="animal-gradient-shared"
-						x1="0%"
-						y1="0%"
-						x2="100%"
-						y2="100%"
-					>
+					<linearGradient id="animal-gradient-shared" x1="0%" y1="0%" x2="100%" y2="100%">
 						<stop offset="0%" stopColor="hsl(192 95% 55%)" />
 						<stop offset="100%" stopColor="hsl(260 80% 60%)" />
 					</linearGradient>
@@ -53,10 +47,7 @@ export const MorphingAnimalIcon = () => {
 						ease: 'easeInOut',
 					}}
 				>
-					<svg
-						viewBox={currentAnimal.viewBox}
-						className="w-full h-full overflow-visible"
-					>
+					<svg viewBox={currentAnimal.viewBox} className="w-full h-full overflow-visible">
 						<path d={currentAnimal.d} fill="url(#animal-gradient-shared)" />
 					</svg>
 				</motion.div>

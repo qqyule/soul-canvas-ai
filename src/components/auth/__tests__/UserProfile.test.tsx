@@ -1,24 +1,29 @@
 // @vitest-environment jsdom
+
+import { useUser } from '@clerk/clerk-react'
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import UserProfile from '../UserProfile'
-import { SignedIn, SignedOut, useUser } from '@clerk/clerk-react'
 import '@testing-library/jest-dom'
 
 // Mock Clerk components
 vi.mock('@clerk/clerk-react', () => ({
 	useUser: vi.fn(),
-	UserButton: () => <button data-testid="user-button">User Btn</button>,
+	UserButton: () => (
+		<button type="button" data-testid="user-button">
+			User Btn
+		</button>
+	),
 	SignInButton: ({ children }: { children: React.ReactNode }) => (
 		<div data-testid="sign-in-btn">{children}</div>
 	),
 	SignedIn: ({ children }: { children: React.ReactNode }) => {
 		const { isSignedIn } = useUser()
-		return isSignedIn ? <>{children}</> : null
+		return isSignedIn ? children : null
 	},
 	SignedOut: ({ children }: { children: React.ReactNode }) => {
 		const { isSignedIn } = useUser()
-		return !isSignedIn ? <>{children}</> : null
+		return !isSignedIn ? children : null
 	},
 }))
 

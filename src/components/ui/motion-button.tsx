@@ -3,10 +3,10 @@
  * @description 带动效的按钮组件 (封装 Shadcn Button)
  */
 
-import { motion, HTMLMotionProps } from 'framer-motion'
-import { Button, ButtonProps } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { type HTMLMotionProps, motion } from 'framer-motion'
 import { forwardRef } from 'react'
+import { Button, type ButtonProps } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 // 结合 ButtonProps 和 HTMLMotionProps
 // 注意: Button 的 ref 通常是 HTMLButtonElement

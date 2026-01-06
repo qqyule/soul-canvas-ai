@@ -1,10 +1,4 @@
-import {
-	UserButton,
-	useUser,
-	SignedIn,
-	SignedOut,
-	SignInButton,
-} from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react'
 import { Button } from '@/components/ui/button'
 
 /**

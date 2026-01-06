@@ -4,18 +4,17 @@
  */
 
 import { neon } from '@neondatabase/serverless'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/neon-http'
-import { desc, eq, sql, and, asc } from 'drizzle-orm'
-import { artworks, users, favorites } from '@/db/schema'
+import { artworks, favorites, users } from '@/db/schema'
 import type {
-	GetFeedParams,
-	GetFeedResponse,
 	ArtworkCardData,
 	ArtworkDetailData,
-	PublishArtworkParams,
+	GetFeedParams,
+	GetFeedResponse,
 	LikeResponse,
+	PublishArtworkParams,
 	UserProfileResponse,
-	PaginationInfo,
 } from '@/types/community'
 
 // ==================== 数据库连接 ====================
@@ -37,9 +36,7 @@ const getDb = () => {
 /**
  * 获取社区动态列表
  */
-export const getCommunityFeed = async (
-	params: GetFeedParams = {}
-): Promise<GetFeedResponse> => {
+export const getCommunityFeed = async (params: GetFeedParams = {}): Promise<GetFeedResponse> => {
 	const { page = 1, limit = 20, sortBy = 'latest', styleId } = params
 	const db = getDb()
 	const offset = (page - 1) * limit
@@ -55,8 +52,8 @@ export const getCommunityFeed = async (
 		sortBy === 'popular'
 			? [desc(artworks.likes), desc(artworks.createdAt)]
 			: sortBy === 'trending'
-			? [desc(artworks.views), desc(artworks.createdAt)]
-			: [desc(artworks.createdAt)]
+				? [desc(artworks.views), desc(artworks.createdAt)]
+				: [desc(artworks.createdAt)]
 
 	// 查询作品列表
 	const artworkList = await db
@@ -155,12 +152,7 @@ export const getArtworkDetail = async (
 		const likeResult = await db
 			.select()
 			.from(favorites)
-			.where(
-				and(
-					eq(favorites.userId, currentUserId),
-					eq(favorites.artworkId, artworkId)
-				)
-			)
+			.where(and(eq(favorites.userId, currentUserId), eq(favorites.artworkId, artworkId)))
 			.limit(1)
 		isLiked = likeResult.length > 0
 	}
@@ -242,9 +234,7 @@ export const toggleArtworkLike = async (
 	const existing = await db
 		.select()
 		.from(favorites)
-		.where(
-			and(eq(favorites.userId, userId), eq(favorites.artworkId, artworkId))
-		)
+		.where(and(eq(favorites.userId, userId), eq(favorites.artworkId, artworkId)))
 		.limit(1)
 
 	let liked: boolean
@@ -253,9 +243,7 @@ export const toggleArtworkLike = async (
 		// 取消点赞
 		await db
 			.delete(favorites)
-			.where(
-				and(eq(favorites.userId, userId), eq(favorites.artworkId, artworkId))
-			)
+			.where(and(eq(favorites.userId, userId), eq(favorites.artworkId, artworkId)))
 		await db
 			.update(artworks)
 			.set({ likes: sql`GREATEST(${artworks.likes} - 1, 0)` })
@@ -295,11 +283,7 @@ export const getUserProfile = async (
 	const offset = (page - 1) * limit
 
 	// 获取用户信息
-	const [user] = await db
-		.select()
-		.from(users)
-		.where(eq(users.id, userId))
-		.limit(1)
+	const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
 
 	if (!user) {
 		return null

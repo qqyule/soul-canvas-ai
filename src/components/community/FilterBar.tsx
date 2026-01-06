@@ -3,10 +3,9 @@
  * @description 提供排序和风格筛选功能
  */
 
-import { memo } from 'react'
 import { motion } from 'framer-motion'
-import { Flame, Clock, TrendingUp, Filter } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Clock, Filter, Flame, TrendingUp } from 'lucide-react'
+import { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import {
 	DropdownMenu,
@@ -14,6 +13,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import type { FeedSortBy } from '@/types/community'
 
 interface FilterBarProps {
@@ -32,12 +32,11 @@ interface FilterBarProps {
 /**
  * 排序选项配置
  */
-const SORT_OPTIONS: { value: FeedSortBy; label: string; icon: typeof Clock }[] =
-	[
-		{ value: 'latest', label: '最新', icon: Clock },
-		{ value: 'popular', label: '最热', icon: Flame },
-		{ value: 'trending', label: '趋势', icon: TrendingUp },
-	]
+const SORT_OPTIONS: { value: FeedSortBy; label: string; icon: typeof Clock }[] = [
+	{ value: 'latest', label: '最新', icon: Clock },
+	{ value: 'popular', label: '最热', icon: Flame },
+	{ value: 'trending', label: '趋势', icon: TrendingUp },
+]
 
 /**
  * 社区画廊筛选栏
@@ -60,6 +59,7 @@ const FilterBar = memo(
 
 						return (
 							<button
+								type="button"
 								key={option.value}
 								onClick={() => onSortChange(option.value)}
 								className={cn(
@@ -91,16 +91,12 @@ const FilterBar = memo(
 							<Button
 								variant="outline"
 								size="sm"
-								className={cn(
-									'gap-2',
-									selectedStyleId && 'border-primary/50 text-primary'
-								)}
+								className={cn('gap-2', selectedStyleId && 'border-primary/50 text-primary')}
 							>
 								<Filter className="w-4 h-4" />
 								<span>
 									{selectedStyleId
-										? availableStyles.find((s) => s.id === selectedStyleId)
-												?.name || '筛选风格'
+										? availableStyles.find((s) => s.id === selectedStyleId)?.name || '筛选风格'
 										: '筛选风格'}
 								</span>
 							</Button>
@@ -109,10 +105,7 @@ const FilterBar = memo(
 							{/* 全部选项 */}
 							<DropdownMenuItem
 								onClick={() => onStyleChange(undefined)}
-								className={cn(
-									'cursor-pointer',
-									!selectedStyleId && 'bg-primary/10 text-primary'
-								)}
+								className={cn('cursor-pointer', !selectedStyleId && 'bg-primary/10 text-primary')}
 							>
 								全部风格
 							</DropdownMenuItem>

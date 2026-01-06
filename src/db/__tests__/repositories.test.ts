@@ -3,12 +3,8 @@
  * @description 测试 Repository 的导出和基本结构
  */
 
-import { describe, it, expect } from 'vitest'
-import {
-	usersRepository,
-	artworksRepository,
-	generationLogsRepository,
-} from '../repositories'
+import { describe, expect, it } from 'vitest'
+import { artworksRepository, generationLogsRepository, usersRepository } from '../repositories'
 
 describe('Repository 导出验证', () => {
 	describe('usersRepository', () => {

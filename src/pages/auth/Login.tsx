@@ -13,8 +13,7 @@ const Login = () => {
 					card: 'shadow-none border border-border bg-card',
 					headerTitle: 'text-foreground',
 					headerSubtitle: 'text-muted-foreground',
-					socialButtonsBlockButton:
-						'text-foreground border-border hover:bg-accent',
+					socialButtonsBlockButton: 'text-foreground border-border hover:bg-accent',
 					dividerLine: 'bg-border',
 					dividerText: 'text-muted-foreground',
 					formFieldLabel: 'text-foreground',

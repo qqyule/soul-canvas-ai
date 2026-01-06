@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { renderHook, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useUserSync } from '../useUserSync'
-import { usersRepository } from '@/db/repositories/users'
+
 import { useUser } from '@clerk/clerk-react'
+import { renderHook, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { usersRepository } from '@/db/repositories/users'
+import { useUserSync } from '../useUserSync'
 
 // Mock dependencies
 vi.mock('@/db/repositories/users', () => ({
@@ -106,9 +107,7 @@ describe('useUserSync', () => {
 		} as unknown as ReturnType<typeof useUser>)
 
 		const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-		vi.mocked(usersRepository.upsertByEmail).mockRejectedValueOnce(
-			new Error('DB Error')
-		)
+		vi.mocked(usersRepository.upsertByEmail).mockRejectedValueOnce(new Error('DB Error'))
 
 		renderHook(() => useUserSync())
 

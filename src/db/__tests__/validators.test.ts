@@ -3,14 +3,14 @@
  * @description 测试数据验证规则和错误提示
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
-	insertUserSchema,
-	updateUserSchema,
 	insertArtworkSchema,
 	insertCustomStyleSchema,
-	insertGenerationLogSchema,
 	insertFavoriteSchema,
+	insertGenerationLogSchema,
+	insertUserSchema,
+	updateUserSchema,
 } from '../schema/validators'
 
 describe('用户验证 Schema', () => {
@@ -205,9 +205,7 @@ describe('生成日志验证 Schema', () => {
 			})
 
 			const invalidStatus = { styleId: 'anime', status: 'invalid' }
-			expect(insertGenerationLogSchema.safeParse(invalidStatus).success).toBe(
-				false
-			)
+			expect(insertGenerationLogSchema.safeParse(invalidStatus).success).toBe(false)
 		})
 
 		it('应该拒绝负数的 durationMs', () => {
@@ -216,9 +214,7 @@ describe('生成日志验证 Schema', () => {
 				status: 'success' as const,
 				durationMs: -100,
 			}
-			expect(
-				insertGenerationLogSchema.safeParse(negativeDuration).success
-			).toBe(false)
+			expect(insertGenerationLogSchema.safeParse(negativeDuration).success).toBe(false)
 		})
 	})
 })

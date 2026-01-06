@@ -3,7 +3,7 @@
  * @description 全局动效配置 (Framer Motion)
  */
 
-import { Variants } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 
 // -----------------------------------------------------------------------------
 // Transition Defaults

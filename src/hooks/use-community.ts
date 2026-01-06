@@ -3,23 +3,22 @@
  * @description 封装社区数据的获取和操作逻辑
  */
 
-import { useState, useCallback, useEffect } from 'react'
 import { useUser } from '@clerk/clerk-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useToast } from '@/hooks/use-toast'
 import {
-	getCommunityFeed,
 	getArtworkDetail,
+	getCommunityFeed,
 	publishArtwork,
 	toggleArtworkLike,
 } from '@/lib/community-service'
 import type {
-	GetFeedParams,
 	ArtworkCardData,
 	ArtworkDetailData,
-	PublishArtworkParams,
-	PaginationInfo,
 	FeedSortBy,
+	PaginationInfo,
+	PublishArtworkParams,
 } from '@/types/community'
-import { useToast } from '@/hooks/use-toast'
 
 // ==================== useCommunityFeed ====================
 
@@ -56,9 +55,7 @@ interface UseCommunityFeedReturn {
 /**
  * 社区动态列表 Hook
  */
-export const useCommunityFeed = (
-	options: UseCommunityFeedOptions = {}
-): UseCommunityFeedReturn => {
+export const useCommunityFeed = (options: UseCommunityFeedOptions = {}): UseCommunityFeedReturn => {
 	const { initialSortBy = 'latest', pageSize = 20, styleId } = options
 
 	const [artworks, setArtworks] = useState<ArtworkCardData[]>([])
@@ -124,16 +121,11 @@ export const useCommunityFeed = (
 	/**
 	 * 更新某个作品的点赞状态
 	 */
-	const updateArtworkLike = useCallback(
-		(artworkId: string, liked: boolean, likes: number) => {
-			setArtworks((prev) =>
-				prev.map((art) =>
-					art.id === artworkId ? { ...art, isLiked: liked, likes } : art
-				)
-			)
-		},
-		[]
-	)
+	const updateArtworkLike = useCallback((artworkId: string, liked: boolean, likes: number) => {
+		setArtworks((prev) =>
+			prev.map((art) => (art.id === artworkId ? { ...art, isLiked: liked, likes } : art))
+		)
+	}, [])
 
 	// 初始加载和排序变更时刷新
 	useEffect(() => {
@@ -268,9 +260,7 @@ export const usePublishArtwork = (): UsePublishArtworkReturn => {
 
 interface UseLikeArtworkReturn {
 	/** 切换点赞状态 */
-	toggleLike: (
-		artworkId: string
-	) => Promise<{ liked: boolean; likes: number } | null>
+	toggleLike: (artworkId: string) => Promise<{ liked: boolean; likes: number } | null>
 	/** 点赞操作中的作品 ID */
 	likingIds: Set<string>
 }
@@ -284,9 +274,7 @@ export const useLikeArtwork = (): UseLikeArtworkReturn => {
 	const [likingIds, setLikingIds] = useState<Set<string>>(new Set())
 
 	const toggleLike = useCallback(
-		async (
-			artworkId: string
-		): Promise<{ liked: boolean; likes: number } | null> => {
+		async (artworkId: string): Promise<{ liked: boolean; likes: number } | null> => {
 			if (!isSignedIn || !user?.id) {
 				toast({
 					title: '请先登录',

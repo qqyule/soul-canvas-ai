@@ -16,16 +16,13 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 /**
  * 检查请求来源是否被允许
  */
-function isOriginAllowed(
-	origin: string | null,
-	allowedOrigins: string
-): boolean {
+function isOriginAllowed(origin: string | null, allowedOrigins: string): boolean {
 	if (!origin) return false
 	const origins = allowedOrigins.split(',').map((o) => o.trim())
 	return origins.some((allowed) => {
 		// 支持通配符匹配，如 *.github.io
 		if (allowed.includes('*')) {
-			const regex = new RegExp('^' + allowed.replace(/\*/g, '.*') + '$')
+			const regex = new RegExp(`^${allowed.replace(/\*/g, '.*')}$`)
 			return regex.test(origin)
 		}
 		return origin === allowed
@@ -35,10 +32,7 @@ function isOriginAllowed(
 /**
  * 创建 CORS 响应头
  */
-function getCorsHeaders(
-	origin: string | null,
-	allowedOrigins: string
-): HeadersInit {
+function getCorsHeaders(origin: string | null, allowedOrigins: string): HeadersInit {
 	const headers: HeadersInit = {
 		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 		'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -110,19 +104,16 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 		console.log('[Worker] API Key length:', env.OPENROUTER_API_KEY?.length || 0)
 
 		// 转发请求到 OpenRouter
-		const openRouterResponse = await fetch(
-			`${OPENROUTER_BASE_URL}/chat/completions`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-					'HTTP-Referer': origin || 'https://soul-canvas.app',
-					'X-Title': 'SoulCanvas AI',
-				},
-				body,
-			}
-		)
+		const openRouterResponse = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+				'HTTP-Referer': origin || 'https://soul-canvas.app',
+				'X-Title': 'SoulCanvas AI',
+			},
+			body,
+		})
 
 		// 获取响应
 		const responseText = await openRouterResponse.text()

@@ -3,24 +3,16 @@
  * @description 展示用户公开发布的 AI 艺术作品
  */
 
-import { useCallback, useState, useEffect } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Sparkles, ArrowLeft, User as UserIcon } from 'lucide-react'
+import { ArrowLeft, Sparkles, User as UserIcon } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ArtworkDetailDialog, FilterBar, MasonryGrid } from '@/components/community'
 import Header from '@/components/layout/Header'
 import PageTransition from '@/components/layout/page-transition'
-import {
-	MasonryGrid,
-	FilterBar,
-	ArtworkDetailDialog,
-} from '@/components/community'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-	useCommunityFeed,
-	useLikeArtwork,
-	useArtworkDetail,
-} from '@/hooks/use-community'
+import { Button } from '@/components/ui/button'
+import { useArtworkDetail, useCommunityFeed, useLikeArtwork } from '@/hooks/use-community'
 import { getUserProfile } from '@/lib/community-service'
 import type { ArtworkCardData, UserProfileData } from '@/types/community'
 
@@ -45,20 +37,11 @@ const CommunityPage = () => {
 	const [isLoadingProfile, setIsLoadingProfile] = useState(false)
 
 	// 社区动态 Hook
-	const {
-		artworks,
-		pagination,
-		isLoading,
-		error,
-		sortBy,
-		setSortBy,
-		loadMore,
-		updateArtworkLike,
-	} = useCommunityFeed()
+	const { artworks, pagination, isLoading, error, sortBy, setSortBy, loadMore, updateArtworkLike } =
+		useCommunityFeed()
 
 	// 作品详情 Hook
-	const { artwork: artworkDetail, isLoading: isLoadingDetail } =
-		useArtworkDetail(artworkId || '')
+	const { artwork: artworkDetail, isLoading: isLoadingDetail } = useArtworkDetail(artworkId || '')
 
 	// 点赞 Hook
 	const { toggleLike, likingIds } = useLikeArtwork()
@@ -198,21 +181,15 @@ const CommunityPage = () => {
 									>
 										<Sparkles className="w-5 h-5 text-white" />
 									</motion.div>
-									<h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-										社区画廊
-									</h1>
+									<h1 className="text-3xl sm:text-4xl font-bold text-foreground">社区画廊</h1>
 								</div>
-								<p className="text-muted-foreground">
-									发现来自全球创作者的 AI 艺术作品，获取灵感
-								</p>
+								<p className="text-muted-foreground">发现来自全球创作者的 AI 艺术作品，获取灵感</p>
 							</>
 						)}
 					</motion.div>
 
 					{/* 筛选栏 (仅社区模式显示) */}
-					{!isUserProfileMode && (
-						<FilterBar sortBy={sortBy} onSortChange={setSortBy} />
-					)}
+					{!isUserProfileMode && <FilterBar sortBy={sortBy} onSortChange={setSortBy} />}
 
 					{/* 错误提示 */}
 					{error && (

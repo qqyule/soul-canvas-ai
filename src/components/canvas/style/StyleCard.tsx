@@ -1,8 +1,8 @@
-import { forwardRef } from 'react'
 import { motion } from 'framer-motion'
+import { Check } from 'lucide-react'
+import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 import type { StylePreset } from '@/prompts/style-presets'
-import { Check } from 'lucide-react'
 
 interface StyleCardProps {
 	style: StylePreset

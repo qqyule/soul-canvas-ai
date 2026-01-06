@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Sparkles } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Sparkles, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface MaLiangIntroductionProps {
@@ -38,11 +38,7 @@ const MaLiangIntroduction = ({ open, onClose }: MaLiangIntroductionProps) => {
 						<div className="grid md:grid-cols-2 gap-0">
 							{/* Left: Image */}
 							<div className="relative h-64 md:h-auto bg-muted">
-								<img
-									src="/ma-liang.png"
-									alt="神笔马良"
-									className="w-full h-full object-cover"
-								/>
+								<img src="/ma-liang.png" alt="神笔马良" className="w-full h-full object-cover" />
 								<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-card" />
 								<div className="absolute bottom-4 left-4 text-white md:hidden">
 									<h3 className="text-xl font-bold">神笔马良的故事</h3>
@@ -68,10 +64,7 @@ const MaLiangIntroduction = ({ open, onClose }: MaLiangIntroductionProps) => {
 										<span className="text-foreground font-medium">AI 画板</span>{' '}
 										就是你手中的“神笔”。
 									</p>
-									<p>
-										只要简单几笔勾勒轮廓，AI
-										就能为你“注入灵魂”，让创意跃然纸上。
-									</p>
+									<p>只要简单几笔勾勒轮廓，AI 就能为你“注入灵魂”，让创意跃然纸上。</p>
 								</div>
 
 								<div className="mt-8">

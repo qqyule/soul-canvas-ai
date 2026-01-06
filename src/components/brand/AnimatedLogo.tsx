@@ -26,11 +26,7 @@ interface AnimatedLogoProps {
  * 科技化动态 Logo 组件
  * 融合毛笔笔尖 + AI 神经网络节点的抽象图形
  */
-const AnimatedLogo = ({
-	size = 'md',
-	animated = true,
-	className,
-}: AnimatedLogoProps) => {
+const AnimatedLogo = ({ size = 'md', animated = true, className }: AnimatedLogoProps) => {
 	const config = sizeConfig[size]
 
 	// 节点脉冲动画配置
@@ -132,13 +128,7 @@ const AnimatedLogo = ({
 			>
 				<defs>
 					{/* 渐变定义 */}
-					<linearGradient
-						id="logo-gradient"
-						x1="0%"
-						y1="0%"
-						x2="100%"
-						y2="100%"
-					>
+					<linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
 						<stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
 						<stop offset="100%" stopColor="#e0e7ff" stopOpacity="0.9" />
 					</linearGradient>

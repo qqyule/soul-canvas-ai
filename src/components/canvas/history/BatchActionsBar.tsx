@@ -3,8 +3,8 @@
  * @description 提供全选、批量删除、批量下载功能
  */
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { CheckSquare, Square, Trash2, Download, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CheckSquare, Download, Square, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface BatchActionsBarProps {
@@ -62,9 +62,7 @@ const BatchActionsBar = ({
 							)}
 							{isAllSelected ? '取消全选' : '全选'}
 						</Button>
-						<span className="text-sm font-medium text-primary">
-							已选择 {selectedCount} 项
-						</span>
+						<span className="text-sm font-medium text-primary">已选择 {selectedCount} 项</span>
 					</div>
 
 					{/* 右侧：操作按钮 */}
@@ -87,12 +85,7 @@ const BatchActionsBar = ({
 							<Trash2 className="h-4 w-4 mr-1.5" />
 							删除
 						</Button>
-						<Button
-							variant="ghost"
-							size="icon-sm"
-							onClick={onClearSelection}
-							aria-label="清除选择"
-						>
+						<Button variant="ghost" size="icon-sm" onClick={onClearSelection} aria-label="清除选择">
 							<X className="h-4 w-4" />
 						</Button>
 					</div>

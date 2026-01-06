@@ -3,14 +3,7 @@
  * @description 记录每次 AI 生成的参数和结果，用于问题排查和数据分析
  */
 
-import {
-	pgTable,
-	text,
-	timestamp,
-	uuid,
-	jsonb,
-	integer,
-} from 'drizzle-orm/pg-core'
+import { integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { users } from './users'
 
 /**
@@ -22,8 +15,7 @@ export const GENERATION_STATUS = {
 	TIMEOUT: 'timeout',
 } as const
 
-export type GenerationStatus =
-	(typeof GENERATION_STATUS)[keyof typeof GENERATION_STATUS]
+export type GenerationStatus = (typeof GENERATION_STATUS)[keyof typeof GENERATION_STATUS]
 
 /**
  * 生成日志表

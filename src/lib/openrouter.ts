@@ -55,8 +55,7 @@ const _getApiProxyUrl = (): string => {
 /** 获取图像生成模型 */
 const getImageModel = (): string => {
 	return (
-		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL ||
-		'google/gemini-2.5-flash-image' // 使用支持图像输出的模型
+		import.meta.env.VITE_OPENROUTER_IMAGE_MODEL || 'google/gemini-2.5-flash-image' // 使用支持图像输出的模型
 	)
 }
 
@@ -87,17 +86,7 @@ interface ChatMessage {
 
 /** 图像配置选项（Gemini 模型支持） */
 interface ImageConfig {
-	aspect_ratio?:
-		| '1:1'
-		| '2:3'
-		| '3:2'
-		| '3:4'
-		| '4:3'
-		| '4:5'
-		| '5:4'
-		| '9:16'
-		| '16:9'
-		| '21:9'
+	aspect_ratio?: '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9'
 	image_size?: '1K' | '2K' | '4K'
 }
 
@@ -142,7 +131,10 @@ interface ChatCompletionsResponse {
  * 用于标识可重试的网络错误
  */
 export class NetworkError extends Error {
-	constructor(message: string, public readonly originalError?: Error) {
+	constructor(
+		message: string,
+		public readonly originalError?: Error
+	) {
 		super(message)
 		this.name = 'NetworkError'
 	}
@@ -153,7 +145,10 @@ export class NetworkError extends Error {
  * 用于标识不可重试的 API 错误
  */
 export class APIError extends Error {
-	constructor(message: string, public readonly statusCode?: number) {
+	constructor(
+		message: string,
+		public readonly statusCode?: number
+	) {
 		super(message)
 		this.name = 'APIError'
 	}
@@ -229,10 +224,7 @@ export async function generateImageFromSketch(
 	const makeRequest = async () => {
 		// 创建超时控制器
 		const timeoutController = new AbortController()
-		const timeoutId = setTimeout(
-			() => timeoutController.abort(),
-			REQUEST_TIMEOUT_MS
-		)
+		const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS)
 
 		// 合并信号处理
 		const onUserAbort = () => timeoutController.abort()
@@ -264,18 +256,13 @@ export async function generateImageFromSketch(
 				const errorText = await response.text()
 				// 5xx 错误可重试，4xx 错误不重试
 				if (response.status >= 500) {
-					throw new NetworkError(
-						`服务器错误: ${response.status} - ${errorText}`
-					)
+					throw new NetworkError(`服务器错误: ${response.status} - ${errorText}`)
 				}
 				// 429 Too Many Requests 通常也可重试，视情况而定
 				if (response.status === 429) {
 					throw new NetworkError(`请求过频 (429): ${errorText}`)
 				}
-				throw new APIError(
-					`图像生成失败: ${response.status} - ${errorText}`,
-					response.status
-				)
+				throw new APIError(`图像生成失败: ${response.status} - ${errorText}`, response.status)
 			}
 
 			let data: ChatCompletionsResponse
@@ -314,10 +301,7 @@ export async function generateImageFromSketch(
 		baseDelay: 1000,
 		shouldRetry: isRetryableError,
 		onRetry: (attempt, delayMs, error) => {
-			console.warn(
-				`[OpenRouter] 请求失败，正在重试 (${attempt}/2)... 延迟: ${delayMs}ms`,
-				error
-			)
+			console.warn(`[OpenRouter] 请求失败，正在重试 (${attempt}/2)... 延迟: ${delayMs}ms`, error)
 		},
 	})
 }
@@ -335,11 +319,7 @@ function parseImageFromResponse(data: ChatCompletionsResponse): string {
 
 	// 1. 优先检查标准 images 字段 (OpenRouter/Gemini 视觉模型标准)
 
-	if (
-		message.images &&
-		Array.isArray(message.images) &&
-		message.images.length > 0
-	) {
+	if (message.images && Array.isArray(message.images) && message.images.length > 0) {
 		const firstImage = message.images[0]
 		if (firstImage.image_url?.url) {
 			return firstImage.image_url.url
@@ -363,24 +343,19 @@ function parseImageFromResponse(data: ChatCompletionsResponse): string {
 		const trimmedContent = content.trim()
 
 		// 情况 A: 纯 URL 或 Base64
-		if (
-			trimmedContent.startsWith('http') ||
-			trimmedContent.startsWith('data:image')
-		) {
+		if (trimmedContent.startsWith('http') || trimmedContent.startsWith('data:image')) {
 			return trimmedContent
 		}
 
 		// 情况 B: Markdown 图片语法 ![alt](url)
 		const markdownMatch = trimmedContent.match(/!\[.*?\]\((.*?)\)/)
-		if (markdownMatch && markdownMatch[1]) {
+		if (markdownMatch?.[1]) {
 			return markdownMatch[1]
 		}
 
 		// 情况 C: 文本中包含 URL (http/https)
 		// 排除结尾可能的标点符号
-		const urlMatch = trimmedContent.match(
-			/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i
-		)
+		const urlMatch = trimmedContent.match(/https?:\/\/[^\s"']+\.(png|jpg|jpeg|webp|gif)/i)
 		if (urlMatch) {
 			return urlMatch[0]
 		}
@@ -400,10 +375,7 @@ function parseImageFromResponse(data: ChatCompletionsResponse): string {
 		}
 
 		throw new Error(
-			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(
-				0,
-				100
-			)}...`
+			`模型返回了文本但未检测到图像。响应内容预览: ${trimmedContent.substring(0, 100)}...`
 		)
 	}
 

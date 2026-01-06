@@ -1,5 +1,5 @@
-import { config } from 'dotenv'
 import { neon } from '@neondatabase/serverless'
+import { config } from 'dotenv'
 
 // Load env vars
 config({ path: '.env.local' })
