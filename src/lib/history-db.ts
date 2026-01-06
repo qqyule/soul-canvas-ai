@@ -3,7 +3,7 @@
  * 使用 idb 库封装，提供异步非阻塞的存储操作
  */
 
-import { openDB, type IDBPDatabase } from 'idb'
+import { type IDBPDatabase, openDB } from 'idb'
 import type { StylePreset } from '@/types/canvas'
 
 // ==================== 类型定义 ====================

@@ -3,8 +3,8 @@
  * @description 初始化 Drizzle ORM 与 Neon PostgreSQL 的连接
  */
 
-import { drizzle } from 'drizzle-orm/neon-http'
 import { neon } from '@neondatabase/serverless'
+import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
 
 /**

@@ -3,16 +3,12 @@
  * @description 单个历史记录的卡片展示，支持悬停详情、选择、操作
  */
 
-import { useState, forwardRef } from 'react'
 import { motion } from 'framer-motion'
-import { Download, Trash2, Clock, Palette, Info } from 'lucide-react'
+import { Clock, Download, Info, Palette, Trash2 } from 'lucide-react'
+import { forwardRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { HistoryItem } from '@/lib/history-db'
 
 interface HistoryGridCardProps {
@@ -58,18 +54,7 @@ const formatDate = (timestamp: number): string => {
  * 历史记录网格卡片组件
  */
 const HistoryGridCard = forwardRef<HTMLDivElement, HistoryGridCardProps>(
-	(
-		{
-			item,
-			isSelected,
-			isSelectionMode,
-			onToggleSelect,
-			onDelete,
-			onPreview,
-			onDownload,
-		},
-		ref
-	) => {
+	({ item, isSelected, isSelectionMode, onToggleSelect, onDelete, onPreview, onDownload }, ref) => {
 		const [isHovered, setIsHovered] = useState(false)
 
 		return (
@@ -189,6 +174,7 @@ const HistoryGridCard = forwardRef<HTMLDivElement, HistoryGridCardProps>(
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<button
+									type="button"
 									className="flex items-center gap-1 hover:text-foreground transition-colors"
 									aria-label="查看生成参数"
 								>
@@ -204,8 +190,7 @@ const HistoryGridCard = forwardRef<HTMLDivElement, HistoryGridCardProps>(
 										<strong>风格 ID:</strong> {item.styleId}
 									</p>
 									<p>
-										<strong>生成时间:</strong>{' '}
-										{new Date(item.createdAt).toLocaleString('zh-CN')}
+										<strong>生成时间:</strong> {new Date(item.createdAt).toLocaleString('zh-CN')}
 									</p>
 								</div>
 							</TooltipContent>

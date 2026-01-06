@@ -11,9 +11,7 @@ const AuthLayout = () => {
 			<div className="w-full max-w-md space-y-8 px-4 py-8 sm:px-0">
 				{/* 可以在这里添加 Logo */}
 				<div className="text-center">
-					<h2 className="text-2xl font-bold tracking-tight text-foreground">
-						Soul Canvas AI
-					</h2>
+					<h2 className="text-2xl font-bold tracking-tight text-foreground">Soul Canvas AI</h2>
 					<p className="mt-2 text-sm text-muted-foreground">释放你的创意灵魂</p>
 				</div>
 

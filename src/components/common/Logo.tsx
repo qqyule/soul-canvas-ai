@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import { AnimatedLogo } from '@/components/brand'
+import { cn } from '@/lib/utils'
 
 interface LogoProps {
 	className?: string
@@ -13,10 +13,7 @@ interface LogoProps {
 const Logo = ({ className, showText = true, onClick }: LogoProps) => {
 	return (
 		<div
-			className={cn(
-				'flex items-center gap-2.5 select-none cursor-pointer group',
-				className
-			)}
+			className={cn('flex items-center gap-2.5 select-none cursor-pointer group', className)}
 			onClick={onClick}
 		>
 			{/* 科技化动态 Logo */}

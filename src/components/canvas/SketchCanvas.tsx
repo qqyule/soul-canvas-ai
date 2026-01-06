@@ -1,26 +1,16 @@
-import {
-	useRef,
-	useState,
-	useCallback,
-	forwardRef,
-	useImperativeHandle,
-} from 'react'
-import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas'
-import type { CanvasPath } from 'react-sketch-canvas'
 import { motion } from 'framer-motion'
-import { Pencil, Eraser, Undo2, Redo2, Trash2 } from 'lucide-react'
+import { Eraser, Pencil, Redo2, Trash2, Undo2 } from 'lucide-react'
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
+import type { CanvasPath } from 'react-sketch-canvas'
+import { ReactSketchCanvas, type ReactSketchCanvasRef } from 'react-sketch-canvas'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { MotionButton } from '@/components/ui/motion-button'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 import type { CanvasTool } from '@/types/canvas'
-import RandomInspirationButton from './RandomInspirationButton'
 import PaintingLoading from './PaintingLoading'
+import RandomInspirationButton from './RandomInspirationButton'
 
 /**
  * SketchCanvas 暴露的方法接口
@@ -130,10 +120,7 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 											setCurrentTool(tool.id)
 											canvasRef.current?.eraseMode(tool.id === 'eraser')
 										}}
-										className={cn(
-											'transition-all',
-											currentTool === tool.id && 'shadow-glow-sm'
-										)}
+										className={cn('transition-all', currentTool === tool.id && 'shadow-glow-sm')}
 									>
 										<tool.icon className="h-4 w-4" />
 									</Button>
@@ -149,6 +136,7 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 							{[2, 4, 8].map((width) => (
 								<button
 									key={width}
+									type="button"
 									onClick={() => setStrokeWidth(width)}
 									className={cn(
 										'rounded-full bg-foreground transition-all',
@@ -178,12 +166,7 @@ const SketchCanvas = forwardRef<SketchCanvasRef, SketchCanvasProps>(
 				</div>
 
 				{/* Canvas */}
-				<div
-					className={cn(
-						'canvas-container overflow-hidden relative',
-						isGenerating && 'shimmer'
-					)}
-				>
+				<div className={cn('canvas-container overflow-hidden relative', isGenerating && 'shimmer')}>
 					{/* 随机灵感按钮 (悬浮右上角) */}
 					{onInspirationClick && (
 						<div className="absolute top-4 right-4 z-10">

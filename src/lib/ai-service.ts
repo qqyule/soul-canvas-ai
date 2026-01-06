@@ -7,15 +7,18 @@
  * - 备用节点：OpenRouter（同步模式）
  */
 
+import type { GenerationResult, StylePreset } from '@/types/canvas'
 import { generateImageWithFallback } from './api-client-factory'
 import { getNodeManager } from './api-node-manager'
-import type { StylePreset, GenerationResult } from '@/types/canvas'
 
 // ==================== 类型定义 ====================
 
 /** AI 服务错误 */
 export class AIServiceError extends Error {
-	constructor(message: string, public readonly originalError?: Error) {
+	constructor(
+		message: string,
+		public readonly originalError?: Error
+	) {
 		super(message)
 		this.name = 'AIServiceError'
 	}
@@ -73,10 +76,7 @@ export async function generateFromSketch(
 		if (error instanceof DOMException && error.name === 'AbortError') {
 			throw error
 		}
-		throw new AIServiceError(
-			'图像生成失败，请稍后重试',
-			error instanceof Error ? error : undefined
-		)
+		throw new AIServiceError('图像生成失败，请稍后重试', error instanceof Error ? error : undefined)
 	}
 
 	// 构建返回结果

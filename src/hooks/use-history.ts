@@ -3,17 +3,17 @@
  * @description 管理用户生成历史的异步存储，支持过滤与批量操作
  */
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import type { StylePreset } from '@/types/canvas'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-	getHistory,
 	addHistory as addHistoryToDB,
-	deleteHistory as deleteHistoryFromDB,
 	clearHistory as clearHistoryFromDB,
-	revokeObjectUrls,
+	deleteHistory as deleteHistoryFromDB,
+	getHistory,
 	type HistoryItem,
+	revokeObjectUrls,
 } from '@/lib/history-db'
-import { type HistoryFilter, DEFAULT_HISTORY_FILTER } from '@/types/history'
+import type { StylePreset } from '@/types/canvas'
+import { DEFAULT_HISTORY_FILTER, type HistoryFilter } from '@/types/history'
 
 interface UseHistoryReturn {
 	/** 历史记录列表（原始） */
@@ -76,11 +76,7 @@ export const useHistory = (): UseHistoryReturn => {
 	 * 添加历史记录
 	 */
 	const addToHistory = useCallback(
-		async (
-			sketchDataUrl: string,
-			resultUrl: string,
-			style: StylePreset
-		): Promise<HistoryItem> => {
+		async (sketchDataUrl: string, resultUrl: string, style: StylePreset): Promise<HistoryItem> => {
 			const newItem = await addHistoryToDB(sketchDataUrl, resultUrl, style)
 			setHistory((prev) => {
 				// 更新引用
@@ -161,9 +157,7 @@ export const useHistory = (): UseHistoryReturn => {
 		// 关键词搜索（匹配风格名称）
 		if (filter.searchQuery) {
 			const query = filter.searchQuery.toLowerCase()
-			result = result.filter((item) =>
-				item.styleName.toLowerCase().includes(query)
-			)
+			result = result.filter((item) => item.styleName.toLowerCase().includes(query))
 		}
 
 		// 排序

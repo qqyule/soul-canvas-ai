@@ -3,12 +3,12 @@
  * @description 使用 @tanstack/react-virtual 实现高性能长列表渲染
  */
 
-import { useRef, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { AnimatePresence } from 'framer-motion'
 import { ImageIcon } from 'lucide-react'
-import HistoryGridCard from './HistoryGridCard'
+import { useMemo, useRef } from 'react'
 import type { HistoryItem } from '@/lib/history-db'
+import HistoryGridCard from './HistoryGridCard'
 
 interface VirtualizedHistoryListProps {
 	/** 历史记录列表 */
@@ -135,9 +135,9 @@ const VirtualizedHistoryList = ({
 								</AnimatePresence>
 								{/* 填充空白格子保持对齐 */}
 								{rowItems.length < columns &&
-									Array.from({ length: columns - rowItems.length }).map(
-										(_, i) => <div key={`empty-${i}`} />
-									)}
+									Array.from({ length: columns - rowItems.length }).map((_, i) => (
+										<div key={`empty-${i}`} />
+									))}
 							</div>
 						</div>
 					)

@@ -3,9 +3,9 @@
  * @description 带悬停浮起效果的卡片容器
  */
 
-import { motion, HTMLMotionProps } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { type HTMLMotionProps, motion } from 'framer-motion'
 import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
 
 interface MotionCardProps extends HTMLMotionProps<'div'> {
 	hoverScale?: number
@@ -16,10 +16,7 @@ const MotionCard = forwardRef<HTMLDivElement, MotionCardProps>(
 		return (
 			<motion.div
 				ref={ref}
-				className={cn(
-					'bg-card text-card-foreground rounded-xl border shadow-sm',
-					className
-				)}
+				className={cn('bg-card text-card-foreground rounded-xl border shadow-sm', className)}
 				whileHover={{
 					scale: hoverScale,
 					y: -4,

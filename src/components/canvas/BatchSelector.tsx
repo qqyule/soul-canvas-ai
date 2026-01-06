@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion'
-import { Layers, Copy, ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { ChevronDown, Copy } from 'lucide-react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 
 interface BatchSelectorProps {
 	value: number
@@ -34,6 +34,7 @@ const BatchSelector = ({
 				<div className="flex items-center gap-1">
 					{options.map((num) => (
 						<button
+							type="button"
 							key={num}
 							onClick={() => onChange(num)}
 							disabled={disabled}
@@ -63,6 +64,7 @@ const BatchSelector = ({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button
+							type="button"
 							disabled={disabled}
 							className={cn(
 								'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30 border border-border/50 text-xs font-medium transition-colors',
@@ -82,8 +84,7 @@ const BatchSelector = ({
 								onClick={() => onChange(num)}
 								className={cn(
 									'justify-between cursor-pointer',
-									value === num &&
-										'bg-primary/10 text-primary focus:bg-primary/15'
+									value === num && 'bg-primary/10 text-primary focus:bg-primary/15'
 								)}
 							>
 								<span>生成 {num} 张</span>

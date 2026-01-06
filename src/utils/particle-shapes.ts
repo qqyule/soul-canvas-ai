@@ -67,8 +67,7 @@ export const samplePointsFromPath = (
 
 	for (let i = 0; i < numPoints; i++) {
 		// Randomly select a valid pixel
-		const pixelIndex =
-			validPixels[Math.floor(Math.random() * validPixels.length)]
+		const pixelIndex = validPixels[Math.floor(Math.random() * validPixels.length)]
 
 		// Convert back to x, y
 		const x = pixelIndex % size

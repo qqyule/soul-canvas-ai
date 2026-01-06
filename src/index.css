@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -47,26 +47,14 @@
 		--canvas-stroke: 222 47% 11%;
 
 		/* Gradients */
-		--gradient-primary: linear-gradient(
-			135deg,
-			hsl(192 95% 55%) 0%,
-			hsl(260 80% 60%) 100%
-		);
+		--gradient-primary: linear-gradient(135deg, hsl(192 95% 55%) 0%, hsl(260 80% 60%) 100%);
 		--gradient-glow: linear-gradient(
 			135deg,
 			hsl(192 95% 55% / 0.3) 0%,
 			hsl(260 80% 60% / 0.3) 100%
 		);
-		--gradient-dark: linear-gradient(
-			180deg,
-			hsl(222 47% 8%) 0%,
-			hsl(222 47% 3%) 100%
-		);
-		--gradient-card: linear-gradient(
-			145deg,
-			hsl(222 47% 10%) 0%,
-			hsl(222 47% 6%) 100%
-		);
+		--gradient-dark: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 3%) 100%);
+		--gradient-card: linear-gradient(145deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
 
 		/* Shadows */
 		--shadow-glow: 0 0 40px hsl(192 95% 55% / 0.25);
@@ -91,8 +79,10 @@
 
 	body {
 		@apply bg-background text-foreground antialiased;
-		font-family: 'Space Grotesk', system-ui, sans-serif;
-		cursor: url('/cursor-brush.svg') 0 32, auto;
+		font-family: "Space Grotesk", system-ui, sans-serif;
+		cursor:
+			url("/cursor-brush.svg") 0 32,
+			auto;
 	}
 
 	/* Custom scrollbar */
@@ -118,7 +108,7 @@
 
 @layer utilities {
 	.font-mono {
-		font-family: 'JetBrains Mono', monospace;
+		font-family: "JetBrains Mono", monospace;
 	}
 
 	.text-gradient {
@@ -157,7 +147,7 @@
 	}
 
 	.glow-border::before {
-		content: '';
+		content: "";
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
@@ -176,7 +166,9 @@
 	.canvas-container {
 		background: hsl(var(--canvas-bg));
 		border-radius: var(--radius);
-		box-shadow: 0 0 0 1px hsl(var(--border)), var(--shadow-glow-sm);
+		box-shadow:
+			0 0 0 1px hsl(var(--border)),
+			var(--shadow-glow-sm);
 	}
 
 	/* Animated gradient background */
@@ -226,7 +218,7 @@
 	}
 
 	.shimmer::after {
-		content: '';
+		content: "";
 		position: absolute;
 		inset: 0;
 		background: linear-gradient(

@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link, useLocation } from 'react-router-dom'
 import { Images } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import UserProfile from '@/components/auth/UserProfile'
 import Logo from '@/components/common/Logo'
+import { cn } from '@/lib/utils'
 
 interface HeaderProps {
 	onLogoClick?: () => void
@@ -31,9 +30,7 @@ const Header = ({ onLogoClick }: HeaderProps) => {
 			transition={{ duration: 0.5 }}
 			className={cn(
 				'fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all duration-300',
-				isScrolled
-					? 'bg-background/80 backdrop-blur-md shadow-sm py-3'
-					: 'bg-transparent'
+				isScrolled ? 'bg-background/80 backdrop-blur-md shadow-sm py-3' : 'bg-transparent'
 			)}
 		>
 			<div className="max-w-7xl mx-auto flex items-center justify-between">

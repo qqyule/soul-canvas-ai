@@ -3,14 +3,14 @@
  * @description 封装生成日志相关的数据库操作，用于问题排查和数据分析
  */
 
-import { eq, desc, and, sql } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { getDb } from '../index'
 import {
-	generationLogs,
-	type GenerationLog,
-	type NewGenerationLog,
-	insertGenerationLogSchema,
 	GENERATION_STATUS,
+	type GenerationLog,
+	generationLogs,
+	insertGenerationLogSchema,
+	type NewGenerationLog,
 } from '../schema'
 
 /**
@@ -38,11 +38,7 @@ export const generationLogsRepository = {
 	 * @param offset 偏移量
 	 * @returns 日志列表
 	 */
-	async getByUserId(
-		userId: string,
-		limit = 50,
-		offset = 0
-	): Promise<GenerationLog[]> {
+	async getByUserId(userId: string, limit = 50, offset = 0): Promise<GenerationLog[]> {
 		const db = getDb()
 		return db
 			.select()
@@ -75,27 +71,18 @@ export const generationLogsRepository = {
 	 */
 	async getStats(userId?: string) {
 		const db = getDb()
-		const baseQuery = userId
-			? and(eq(generationLogs.userId, userId))
-			: undefined
+		const baseQuery = userId ? and(eq(generationLogs.userId, userId)) : undefined
 
 		const [total, success, failed] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(generationLogs).where(baseQuery),
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(generationLogs)
-				.where(baseQuery),
+				.where(and(baseQuery, eq(generationLogs.status, GENERATION_STATUS.SUCCESS))),
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(generationLogs)
-				.where(
-					and(baseQuery, eq(generationLogs.status, GENERATION_STATUS.SUCCESS))
-				),
-			db
-				.select({ count: sql<number>`count(*)` })
-				.from(generationLogs)
-				.where(
-					and(baseQuery, eq(generationLogs.status, GENERATION_STATUS.FAILED))
-				),
+				.where(and(baseQuery, eq(generationLogs.status, GENERATION_STATUS.FAILED))),
 		])
 
 		return {
@@ -141,9 +128,7 @@ export const generationLogsRepository = {
 	 * @param data 生成数据
 	 * @returns 创建的日志
 	 */
-	async logTimeout(
-		data: Omit<NewGenerationLog, 'status'>
-	): Promise<GenerationLog> {
+	async logTimeout(data: Omit<NewGenerationLog, 'status'>): Promise<GenerationLog> {
 		return this.create({
 			...data,
 			status: GENERATION_STATUS.TIMEOUT,

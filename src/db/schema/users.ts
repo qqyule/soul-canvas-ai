@@ -3,7 +3,7 @@
  * @description 存储用户基本信息和 OAuth 认证信息
  */
 
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 /**
  * 用户表

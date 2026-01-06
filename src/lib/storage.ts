@@ -48,7 +48,7 @@ export const getUsedCount = (): number => {
 	if (typeof window === 'undefined') return 0
 	checkDateAndReset()
 	const count = parseInt(localStorage.getItem(KEY_USAGE_COUNT) || '0', 10)
-	return isNaN(count) ? 0 : count
+	return Number.isNaN(count) ? 0 : count
 }
 
 /**

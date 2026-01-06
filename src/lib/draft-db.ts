@@ -3,7 +3,7 @@
  * @description 管理画布草稿的本地持久化存储
  */
 
-import { openDB, type IDBPDatabase } from 'idb'
+import { type IDBPDatabase, openDB } from 'idb'
 
 // ==================== 类型定义 ====================
 
