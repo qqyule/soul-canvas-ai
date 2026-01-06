@@ -153,11 +153,7 @@ function generateConcentricCircles(
 		const points: { x: number; y: number }[] = []
 		const segments = Math.max(32, params.pointCount)
 
-		for (
-			let angle = 0;
-			angle <= Math.PI * 2;
-			angle += (Math.PI * 2) / segments
-		) {
+		for (let angle = 0; angle <= Math.PI * 2; angle += (Math.PI * 2) / segments) {
 			points.push({
 				x: centerX + Math.cos(angle) * radius,
 				y: centerY + Math.sin(angle) * radius,
@@ -189,8 +185,7 @@ function generateHoneycomb(
 	for (let row = 0; row < rows; row++) {
 		for (let col = 0; col < cols; col++) {
 			const offsetX = col * size * 1.5
-			const offsetY =
-				row * size * Math.sqrt(3) + (col % 2) * (size * Math.sqrt(3) * 0.5)
+			const offsetY = row * size * Math.sqrt(3) + (col % 2) * (size * Math.sqrt(3) * 0.5)
 			const points: { x: number; y: number }[] = []
 
 			for (let i = 0; i <= 6; i++) {
@@ -258,9 +253,7 @@ function generateWaves(
 
 		for (let i = 0; i <= segments; i++) {
 			const x = (i / segments) * canvasWidth
-			const y =
-				yOffset +
-				Math.sin((i / segments) * Math.PI * 2 * frequency + w) * amplitude
+			const y = yOffset + Math.sin((i / segments) * Math.PI * 2 * frequency + w) * amplitude
 			points.push({ x, y })
 		}
 
@@ -284,13 +277,7 @@ function generateTree(
 	const paths: CanvasPath[] = []
 	const maxDepth = Math.min(params.iterations, 6)
 
-	function branch(
-		x: number,
-		y: number,
-		angle: number,
-		length: number,
-		depth: number
-	) {
+	function branch(x: number, y: number, angle: number, length: number, depth: number) {
 		if (depth === 0) return
 
 		const endX = x + Math.cos(angle) * length
@@ -319,11 +306,7 @@ function generateTree(
 /**
  * 生成简笔画猫咪
  */
-function generateSimpleCat(
-	centerX: number,
-	centerY: number,
-	scale: number
-): CanvasPath[] {
+function generateSimpleCat(centerX: number, centerY: number, scale: number): CanvasPath[] {
 	const paths: CanvasPath[] = []
 
 	// 头部（圆形）
@@ -397,11 +380,7 @@ function generateSimpleCat(
 /**
  * 生成简笔画小鸟
  */
-function generateSimpleBird(
-	centerX: number,
-	centerY: number,
-	scale: number
-): CanvasPath[] {
+function generateSimpleBird(centerX: number, centerY: number, scale: number): CanvasPath[] {
 	const paths: CanvasPath[] = []
 
 	// 身体（椭圆）
@@ -469,11 +448,7 @@ function generateSimpleBird(
 /**
  * 生成简笔画兔子
  */
-function generateSimpleRabbit(
-	centerX: number,
-	centerY: number,
-	scale: number
-): CanvasPath[] {
+function generateSimpleRabbit(centerX: number, centerY: number, scale: number): CanvasPath[] {
 	const paths: CanvasPath[] = []
 
 	// 身体 (椭圆)
@@ -553,11 +528,7 @@ function generateSimpleRabbit(
 /**
  * 生成简笔画鱼
  */
-function generateSimpleFish(
-	centerX: number,
-	centerY: number,
-	scale: number
-): CanvasPath[] {
+function generateSimpleFish(centerX: number, centerY: number, scale: number): CanvasPath[] {
 	const paths: CanvasPath[] = []
 
 	// 身体
@@ -607,11 +578,7 @@ function generateSimpleFish(
 /**
  * 生成简笔画花朵
  */
-function generateSimpleFlower(
-	centerX: number,
-	centerY: number,
-	scale: number
-): CanvasPath[] {
+function generateSimpleFlower(centerX: number, centerY: number, scale: number): CanvasPath[] {
 	const paths: CanvasPath[] = []
 	const petalCount = 5
 	const petalDistance = 20 * scale
@@ -674,14 +641,7 @@ function generateGeometric(config: InspirationConfig): CanvasPath[] {
 	const centerY = canvasHeight / 2
 
 	const generators = [
-		() =>
-			generateConcentricCircles(
-				centerX,
-				centerY,
-				complexity,
-				canvasWidth,
-				canvasHeight
-			),
+		() => generateConcentricCircles(centerX, centerY, complexity, canvasWidth, canvasHeight),
 		() =>
 			generateHoneycomb(
 				canvasWidth * 0.2,
@@ -690,12 +650,10 @@ function generateGeometric(config: InspirationConfig): CanvasPath[] {
 				canvasWidth,
 				canvasHeight
 			),
-		() =>
-			generateSpiral(centerX, centerY, complexity, canvasWidth, canvasHeight),
+		() => generateSpiral(centerX, centerY, complexity, canvasWidth, canvasHeight),
 	]
 
-	const randomGenerator =
-		generators[Math.floor(Math.random() * generators.length)]
+	const randomGenerator = generators[Math.floor(Math.random() * generators.length)]
 	return randomGenerator()
 }
 
@@ -708,22 +666,12 @@ function generateOrganic(config: InspirationConfig): CanvasPath[] {
 	const centerY = canvasHeight / 2
 
 	const generators = [
-		() =>
-			generateWaves(canvasHeight * 0.2, complexity, canvasWidth, canvasHeight),
-		() =>
-			generateTree(
-				centerX,
-				canvasHeight * 0.85,
-				complexity,
-				canvasWidth,
-				canvasHeight
-			),
-		() =>
-			generateSpiral(centerX, centerY, complexity, canvasWidth, canvasHeight),
+		() => generateWaves(canvasHeight * 0.2, complexity, canvasWidth, canvasHeight),
+		() => generateTree(centerX, canvasHeight * 0.85, complexity, canvasWidth, canvasHeight),
+		() => generateSpiral(centerX, centerY, complexity, canvasWidth, canvasHeight),
 	]
 
-	const randomGenerator =
-		generators[Math.floor(Math.random() * generators.length)]
+	const randomGenerator = generators[Math.floor(Math.random() * generators.length)]
 	return randomGenerator()
 }
 
@@ -744,8 +692,7 @@ function generateSketch(config: InspirationConfig): CanvasPath[] {
 		() => generateSimpleFlower(centerX, centerY, scale),
 	]
 
-	const randomGenerator =
-		generators[Math.floor(Math.random() * generators.length)]
+	const randomGenerator = generators[Math.floor(Math.random() * generators.length)]
 	return randomGenerator()
 }
 
@@ -861,9 +808,7 @@ function generatePattern(config: InspirationConfig): CanvasPath[] {
 /**
  * 主入口：生成随机灵感
  */
-export function generateRandomInspiration(
-	config: InspirationConfig
-): InspirationResult {
+export function generateRandomInspiration(config: InspirationConfig): InspirationResult {
 	let paths: CanvasPath[] = []
 
 	switch (config.category) {
@@ -883,9 +828,7 @@ export function generateRandomInspiration(
 
 	// 随机选择提示词
 	const categoryPrompts = PROMPT_SUGGESTIONS[config.category]
-	const suggestedPrompts = [
-		categoryPrompts[Math.floor(Math.random() * categoryPrompts.length)],
-	]
+	const suggestedPrompts = [categoryPrompts[Math.floor(Math.random() * categoryPrompts.length)]]
 
 	// 根据路径数量计算动画时长
 	const animationDuration = Math.min(2000, Math.max(800, paths.length * 100))

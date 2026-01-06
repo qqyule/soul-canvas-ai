@@ -16,9 +16,4 @@ export interface GenerationResult {
 	createdAt: Date
 }
 
-export type GenerationStatus =
-	| 'idle'
-	| 'analyzing'
-	| 'generating'
-	| 'complete'
-	| 'error'
+export type GenerationStatus = 'idle' | 'analyzing' | 'generating' | 'complete' | 'error'

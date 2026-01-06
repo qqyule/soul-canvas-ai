@@ -3,9 +3,10 @@
  * @description 提供风格筛选、日期范围、关键词搜索和排序功能
  */
 
-import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, Search, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
 	Select,
 	SelectContent,
@@ -13,11 +14,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover'
 import type { HistoryFilter } from '@/types/history'
 
 interface FilterBarProps {
@@ -70,9 +66,7 @@ const FilterBar = ({
 				<Input
 					placeholder="搜索风格名称..."
 					value={filter.searchQuery ?? ''}
-					onChange={(e) =>
-						updateFilter({ searchQuery: e.target.value || undefined })
-					}
+					onChange={(e) => updateFilter({ searchQuery: e.target.value || undefined })}
 					className="pl-9 bg-muted/30"
 				/>
 			</div>
@@ -82,9 +76,7 @@ const FilterBar = ({
 				{/* 风格筛选 */}
 				<Select
 					value={filter.styleId ?? 'all'}
-					onValueChange={(value) =>
-						updateFilter({ styleId: value === 'all' ? undefined : value })
-					}
+					onValueChange={(value) => updateFilter({ styleId: value === 'all' ? undefined : value })}
 				>
 					<SelectTrigger className="w-32 bg-muted/30">
 						<SelectValue placeholder="全部风格" />
@@ -102,9 +94,7 @@ const FilterBar = ({
 				{/* 排序 */}
 				<Select
 					value={filter.sortBy}
-					onValueChange={(value: 'latest' | 'oldest') =>
-						updateFilter({ sortBy: value })
-					}
+					onValueChange={(value: 'latest' | 'oldest') => updateFilter({ sortBy: value })}
 				>
 					<SelectTrigger className="w-28 bg-muted/30">
 						<ArrowUpDown className="h-3.5 w-3.5 mr-1" />
@@ -132,15 +122,11 @@ const FilterBar = ({
 									<Input
 										type="date"
 										value={
-											filter.startDate
-												? new Date(filter.startDate).toISOString().split('T')[0]
-												: ''
+											filter.startDate ? new Date(filter.startDate).toISOString().split('T')[0] : ''
 										}
 										onChange={(e) =>
 											updateFilter({
-												startDate: e.target.value
-													? new Date(e.target.value).getTime()
-													: undefined,
+												startDate: e.target.value ? new Date(e.target.value).getTime() : undefined,
 											})
 										}
 										className="text-xs"
@@ -149,15 +135,11 @@ const FilterBar = ({
 									<Input
 										type="date"
 										value={
-											filter.endDate
-												? new Date(filter.endDate).toISOString().split('T')[0]
-												: ''
+											filter.endDate ? new Date(filter.endDate).toISOString().split('T')[0] : ''
 										}
 										onChange={(e) =>
 											updateFilter({
-												endDate: e.target.value
-													? new Date(e.target.value).getTime()
-													: undefined,
+												endDate: e.target.value ? new Date(e.target.value).getTime() : undefined,
 											})
 										}
 										className="text-xs"

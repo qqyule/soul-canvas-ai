@@ -3,15 +3,15 @@
  * @description 封装用户相关的数据库操作，集成 Zod 验证
  */
 
-import { eq, and } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { getDb } from '../index'
 import {
-	users,
-	type User,
-	type NewUser,
 	insertUserSchema,
-	updateUserSchema,
+	type NewUser,
 	type UpdateUser,
+	type User,
+	updateUserSchema,
+	users,
 } from '../schema'
 
 /**
@@ -46,17 +46,12 @@ export const usersRepository = {
 	 * @param providerId 提供商用户 ID
 	 * @returns 用户信息或 null
 	 */
-	async getByProvider(
-		provider: string,
-		providerId: string
-	): Promise<User | null> {
+	async getByProvider(provider: string, providerId: string): Promise<User | null> {
 		const db = getDb()
 		const result = await db
 			.select()
 			.from(users)
-			.where(
-				and(eq(users.provider, provider), eq(users.providerId, providerId))
-			)
+			.where(and(eq(users.provider, provider), eq(users.providerId, providerId)))
 		return result[0] ?? null
 	},
 

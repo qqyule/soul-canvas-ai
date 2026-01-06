@@ -4,16 +4,15 @@
  */
 
 import {
+	boolean,
+	integer,
+	jsonb,
 	pgTable,
 	text,
 	timestamp,
 	uuid,
-	jsonb,
-	boolean,
-	integer,
 	varchar,
 } from 'drizzle-orm/pg-core'
-import { users } from './users'
 
 /**
  * 作品表

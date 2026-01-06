@@ -3,11 +3,11 @@
  * @description 社区画廊中的单个作品展示卡片
  */
 
-import { useState, useCallback, memo, forwardRef } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Eye, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Eye, Heart, User } from 'lucide-react'
+import { forwardRef, memo, useCallback, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { cn } from '@/lib/utils'
 import type { ArtworkCardData } from '@/types/community'
 
 interface ArtworkCardProps {
@@ -16,9 +16,7 @@ interface ArtworkCardProps {
 	/** 点击卡片 */
 	onClick?: (artwork: ArtworkCardData) => void
 	/** 点赞操作 */
-	onLike?: (
-		artworkId: string
-	) => Promise<{ liked: boolean; likes: number } | null>
+	onLike?: (artworkId: string) => Promise<{ liked: boolean; likes: number } | null>
 	/** 是否正在点赞 */
 	isLiking?: boolean
 	/** 优先级 (用于懒加载) */
@@ -150,6 +148,7 @@ const ArtworkCard = memo(
 								<div className="flex items-center gap-3 text-sm">
 									{/* 点赞数 */}
 									<button
+										type="button"
 										onClick={handleLike}
 										disabled={isLiking}
 										className={cn(

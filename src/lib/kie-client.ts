@@ -6,7 +6,6 @@
  */
 
 import { buildFinalPrompt } from '@/prompts'
-import { uploadImageToS3, isS3Configured } from './s3-upload'
 import type {
 	APIClient,
 	ImageGenerationParams,
@@ -14,16 +13,15 @@ import type {
 	KieCreateTaskResponse,
 	KieTaskResultResponse,
 } from '@/types/api-node'
+import { isS3Configured, uploadImageToS3 } from './s3-upload'
 
 // ==================== 配置 ====================
 
 /** kie.ai API 基础 URL */
-const KIE_BASE_URL =
-	import.meta.env.VITE_KIE_BASE_URL || 'https://api.kie.ai/api/v1'
+const KIE_BASE_URL = import.meta.env.VITE_KIE_BASE_URL || 'https://api.kie.ai/api/v1'
 
 /** 默认模型 */
-const KIE_MODEL =
-	import.meta.env.VITE_KIE_IMAGE_MODEL || 'google/nano-banana-edit'
+const KIE_MODEL = import.meta.env.VITE_KIE_IMAGE_MODEL || 'google/nano-banana-edit'
 
 /** 轮询配置 */
 const POLL_CONFIG = {
@@ -43,9 +41,7 @@ const POLL_CONFIG = {
 const getKieApiKey = (): string => {
 	const apiKey = import.meta.env.VITE_KIE_API_KEY
 	if (!apiKey) {
-		throw new Error(
-			'VITE_KIE_API_KEY 环境变量未配置。请在 .env.local 文件中配置 kie.ai API Key。'
-		)
+		throw new Error('VITE_KIE_API_KEY 环境变量未配置。请在 .env.local 文件中配置 kie.ai API Key。')
 	}
 	return apiKey
 }
@@ -53,8 +49,7 @@ const getKieApiKey = (): string => {
 /**
  * 延迟函数
  */
-const delay = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(resolve, ms))
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * 将 Base64 图像上传到 S3 并返回公开 URL
@@ -63,9 +58,7 @@ const delay = (ms: number): Promise<void> =>
 const prepareImageUrl = async (base64DataUrl: string): Promise<string> => {
 	// 检查 S3 是否已配置
 	if (!isS3Configured()) {
-		throw new Error(
-			'S3 未配置。kie.ai 需要图像 URL，请在 .env.local 中配置 S3 相关环境变量。'
-		)
+		throw new Error('S3 未配置。kie.ai 需要图像 URL，请在 .env.local 中配置 S3 相关环境变量。')
 	}
 
 	// 上传到 S3 并返回 URL
@@ -81,7 +74,10 @@ const prepareImageUrl = async (base64DataUrl: string): Promise<string> => {
  * kie.ai API 错误
  */
 export class KieAPIError extends Error {
-	constructor(message: string, public readonly code?: number) {
+	constructor(
+		message: string,
+		public readonly code?: number
+	) {
 		super(message)
 		this.name = 'KieAPIError'
 	}
@@ -105,10 +101,7 @@ export class TaskTimeoutError extends Error {
 /**
  * 创建图像生成任务
  */
-async function createTask(
-	request: KieCreateTaskRequest,
-	signal?: AbortSignal
-): Promise<string> {
+async function createTask(request: KieCreateTaskRequest, signal?: AbortSignal): Promise<string> {
 	const apiKey = getKieApiKey()
 
 	const response = await fetch(`${KIE_BASE_URL}/jobs/createTask`, {
@@ -123,10 +116,7 @@ async function createTask(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		throw new KieAPIError(
-			`创建任务失败: ${response.status} - ${errorText}`,
-			response.status
-		)
+		throw new KieAPIError(`创建任务失败: ${response.status} - ${errorText}`, response.status)
 	}
 
 	const data: KieCreateTaskResponse = await response.json()
@@ -141,10 +131,7 @@ async function createTask(
 /**
  * 查询任务结果
  */
-async function getTaskResult(
-	taskId: string,
-	signal?: AbortSignal
-): Promise<KieTaskResultResponse> {
+async function getTaskResult(taskId: string, signal?: AbortSignal): Promise<KieTaskResultResponse> {
 	const apiKey = getKieApiKey()
 
 	const response = await fetch(
@@ -160,10 +147,7 @@ async function getTaskResult(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		throw new KieAPIError(
-			`查询任务失败: ${response.status} - ${errorText}`,
-			response.status
-		)
+		throw new KieAPIError(`查询任务失败: ${response.status} - ${errorText}`, response.status)
 	}
 
 	return response.json()
@@ -172,10 +156,7 @@ async function getTaskResult(
 /**
  * 轮询任务结果直到完成
  */
-async function pollTaskResult(
-	taskId: string,
-	signal?: AbortSignal
-): Promise<string> {
+async function pollTaskResult(taskId: string, signal?: AbortSignal): Promise<string> {
 	const startTime = Date.now()
 
 	// 首次延迟

@@ -3,14 +3,10 @@
  * 根据节点类型返回对应的客户端实例
  */
 
-import type {
-	APIClient,
-	APINode,
-	ImageGenerationParams,
-} from '@/types/api-node'
+import type { APIClient, APINode, ImageGenerationParams } from '@/types/api-node'
+import { getNodeConfigs, getNodeManager } from './api-node-manager'
 import { createKieClient } from './kie-client'
 import { generateImageFromSketch } from './openrouter'
-import { getNodeManager, getNodeConfigs } from './api-node-manager'
 
 // ==================== OpenRouter 客户端适配器 ====================
 
@@ -24,12 +20,7 @@ function createOpenRouterClient(): APIClient {
 
 		async generateImage(params: ImageGenerationParams): Promise<string> {
 			const { sketchDataUrl, stylePrompt, userPrompt, signal } = params
-			return generateImageFromSketch(
-				sketchDataUrl,
-				stylePrompt,
-				userPrompt,
-				signal
-			)
+			return generateImageFromSketch(sketchDataUrl, stylePrompt, userPrompt, signal)
 		},
 
 		async ping(): Promise<number> {
@@ -161,9 +152,7 @@ function getEnabledNodesSorted(): APINode[] {
 	const nodeConfigs = getNodeConfigs()
 
 	// 筛选启用的节点并按优先级排序
-	return nodeConfigs
-		.filter((config) => config.enabled)
-		.sort((a, b) => a.priority - b.priority)
+	return nodeConfigs.filter((config) => config.enabled).sort((a, b) => a.priority - b.priority)
 }
 
 // ==================== 导出 ====================

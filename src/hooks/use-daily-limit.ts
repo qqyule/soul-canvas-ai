@@ -3,13 +3,13 @@
  * 管理用户每日生成次数的限制逻辑
  */
 
-import { useState, useCallback, useEffect } from 'react'
 import { useUser } from '@clerk/clerk-react'
+import { useCallback, useEffect, useState } from 'react'
 import {
+	isLimitReached as checkLimitReached,
 	getDailyLimit,
 	getRemainingCount,
 	incrementDailyUsage,
-	isLimitReached as checkLimitReached,
 	markUserAsStarred,
 } from '@/lib/storage'
 
@@ -62,7 +62,7 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 	// 当登录状态变化时，自动刷新
 	useEffect(() => {
 		refresh()
-	}, [isSignedIn, isLoaded, refresh])
+	}, [refresh])
 
 	/**
 	 * 升级配额

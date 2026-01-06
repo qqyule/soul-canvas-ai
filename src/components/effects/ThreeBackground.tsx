@@ -7,14 +7,11 @@
  * - 鼠标交互 (Mouse Interaction)
  */
 
-import { useRef, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { ANIMAL_DATA, AnimalType } from '@/constants/animal-paths'
-import {
-	samplePointsFromPath,
-	generateRandomParticles,
-} from '@/utils/particle-shapes'
+import { ANIMAL_DATA, type AnimalType } from '@/constants/animal-paths'
+import { generateRandomParticles, samplePointsFromPath } from '@/utils/particle-shapes'
 
 /** 粒子数量 */
 const PARTICLE_COUNT = 1500
@@ -67,12 +64,7 @@ const ParticleNetwork = () => {
 			// 采样点，缩放 0.015 适应屏幕，向上偏移 0.5 使其位于上半部分
 			// 注意: SVG 坐标系 Y 轴向下，samplePointsFromPath 已经处理了翻转，但可能需要微调位置
 			const offset = new THREE.Vector3(0, 0.8, 0)
-			shapes[key] = samplePointsFromPath(
-				ANIMAL_DATA[key].d,
-				PARTICLE_COUNT,
-				0.012,
-				offset
-			)
+			shapes[key] = samplePointsFromPath(ANIMAL_DATA[key].d, PARTICLE_COUNT, 0.012, offset)
 		})
 		return shapes
 	}, [])
@@ -100,10 +92,7 @@ const ParticleNetwork = () => {
 		const maxLines = PARTICLE_COUNT * 8 // 适度减少最大连线数优化性能
 		const linePositions = new Float32Array(maxLines * 6)
 		const lineColors = new Float32Array(maxLines * 6)
-		geometry.setAttribute(
-			'position',
-			new THREE.BufferAttribute(linePositions, 3)
-		)
+		geometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3))
 		geometry.setAttribute('color', new THREE.BufferAttribute(lineColors, 3))
 		return geometry
 	}, [])
@@ -113,11 +102,7 @@ const ParticleNetwork = () => {
 		const handleMouseMove = (event: MouseEvent) => {
 			mouseRef.current.x = (event.clientX / size.width) * 2 - 1
 			mouseRef.current.y = -(event.clientY / size.height) * 2 + 1
-			mouse3DRef.current.set(
-				mouseRef.current.x * 2,
-				mouseRef.current.y * 1.5,
-				0
-			)
+			mouse3DRef.current.set(mouseRef.current.x * 2, mouseRef.current.y * 1.5, 0)
 		}
 
 		const handleMouseLeave = () => {
@@ -149,8 +134,7 @@ const ParticleNetwork = () => {
 	useFrame((state, delta) => {
 		stateTimerRef.current += delta
 		const time = state.clock.elapsedTime
-		const { positions, velocities, randomPositions, targetPositions } =
-			particleData
+		const { positions, velocities, randomPositions, targetPositions } = particleData
 
 		// === 状态转换逻辑 ===
 		switch (animState) {
@@ -327,19 +311,14 @@ const ParticleNetwork = () => {
 				: CONNECTION_DISTANCE
 
 		if (linesRef.current) {
-			const linePositions = lineGeometry.attributes.position
-				.array as Float32Array
+			const linePositions = lineGeometry.attributes.position.array as Float32Array
 			const lineColors = lineGeometry.attributes.color.array as Float32Array
 			let lineIndex = 0
 			// 动态调整遍历数量：HOLDING 状态下增加连线计算量以保证形状清晰，但减少范围
 			const maxLines = linePositions.length / 6
 
 			for (let i = 0; i < PARTICLE_COUNT; i++) {
-				if (
-					Math.abs(positions[i * 3]) > 4 ||
-					Math.abs(positions[i * 3 + 1]) > 3
-				)
-					continue
+				if (Math.abs(positions[i * 3]) > 4 || Math.abs(positions[i * 3 + 1]) > 3) continue
 
 				for (let j = i + 1; j < PARTICLE_COUNT; j++) {
 					if (lineIndex >= maxLines) break

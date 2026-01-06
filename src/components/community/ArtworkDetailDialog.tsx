@@ -3,30 +3,15 @@
  * @description 展示作品的详细信息，支持点赞、分享等操作
  */
 
-import { useState, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-	X,
-	Heart,
-	Eye,
-	Download,
-	Share2,
-	Copy,
-	Check,
-	User,
-	Sparkles,
-} from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Check, Copy, Download, Eye, Heart, Share2, Sparkles, User } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 import type { ArtworkDetailData } from '@/types/community'
 
 interface ArtworkDetailDialogProps {
@@ -37,9 +22,7 @@ interface ArtworkDetailDialogProps {
 	/** 关闭回调 */
 	onClose: () => void
 	/** 点赞回调 */
-	onLike?: (
-		artworkId: string
-	) => Promise<{ liked: boolean; likes: number } | null>
+	onLike?: (artworkId: string) => Promise<{ liked: boolean; likes: number } | null>
 	/** 是否正在点赞 */
 	isLiking?: boolean
 }
@@ -245,6 +228,7 @@ const ArtworkDetailDialog = ({
 						{/* 头部：作者信息 */}
 						<div className="p-4 border-b border-border">
 							<button
+								type="button"
 								onClick={handleAuthorClick}
 								className="flex items-center gap-3 hover:opacity-80 transition-opacity"
 							>
@@ -255,12 +239,8 @@ const ArtworkDetailDialog = ({
 									</AvatarFallback>
 								</Avatar>
 								<div className="text-left">
-									<p className="font-medium text-foreground">
-										{artwork.author.name || '匿名用户'}
-									</p>
-									<p className="text-xs text-muted-foreground">
-										{formatDate(artwork.createdAt)}
-									</p>
+									<p className="font-medium text-foreground">{artwork.author.name || '匿名用户'}</p>
+									<p className="text-xs text-muted-foreground">{formatDate(artwork.createdAt)}</p>
 								</div>
 							</button>
 						</div>
@@ -268,13 +248,12 @@ const ArtworkDetailDialog = ({
 						{/* 统计信息 */}
 						<div className="flex items-center gap-4 p-4 border-b border-border">
 							<button
+								type="button"
 								onClick={handleLike}
 								disabled={isLiking}
 								className={cn(
 									'flex items-center gap-1.5 text-sm transition-colors',
-									localLiked
-										? 'text-rose-500'
-										: 'text-muted-foreground hover:text-rose-500'
+									localLiked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'
 								)}
 							>
 								<Heart
@@ -306,10 +285,9 @@ const ArtworkDetailDialog = ({
 						{artwork.prompt && (
 							<div className="p-4 flex-1 overflow-auto">
 								<div className="flex items-center justify-between mb-2">
-									<span className="text-sm font-medium text-muted-foreground">
-										提示词
-									</span>
+									<span className="text-sm font-medium text-muted-foreground">提示词</span>
 									<button
+										type="button"
 										onClick={handleCopyPrompt}
 										className="text-muted-foreground hover:text-foreground transition-colors"
 										aria-label="复制提示词"
@@ -321,9 +299,7 @@ const ArtworkDetailDialog = ({
 										)}
 									</button>
 								</div>
-								<p className="text-sm text-foreground leading-relaxed">
-									{artwork.prompt}
-								</p>
+								<p className="text-sm text-foreground leading-relaxed">{artwork.prompt}</p>
 							</div>
 						)}
 
@@ -339,12 +315,7 @@ const ArtworkDetailDialog = ({
 									<Download className="w-4 h-4" />
 									下载
 								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									className="flex-1 gap-2"
-									onClick={handleShare}
-								>
+								<Button variant="outline" size="sm" className="flex-1 gap-2" onClick={handleShare}>
 									<Share2 className="w-4 h-4" />
 									分享
 								</Button>

@@ -56,7 +56,7 @@ export async function withRetry<T>(
 			// 计算下一次重试的延迟时间
 			// delay = baseDelay * (backoffFactor ^ attempt)
 			// 例如: 1000ms, 2000ms, 4000ms...
-			let retryDelay = baseDelay * Math.pow(backoffFactor, attempt)
+			let retryDelay = baseDelay * backoffFactor ** attempt
 			// 增加一点随机抖动 (Jitter)，防止惊群效应 (0.8 ~ 1.2 倍)
 			const jitter = 0.8 + Math.random() * 0.4
 			retryDelay = Math.min(retryDelay * jitter, maxDelay)

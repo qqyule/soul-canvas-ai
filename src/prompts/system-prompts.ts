@@ -54,10 +54,7 @@ export const NEGATIVE_INSTRUCTIONS =
  * @param userPrompt - 用户自定义提示词（可选）
  * @returns 完整的提示词字符串
  */
-export const buildFinalPrompt = (
-	stylePrompt: string,
-	userPrompt?: string
-): string => {
+export const buildFinalPrompt = (stylePrompt: string, userPrompt?: string): string => {
 	const sanitizedUserPrompt = userPrompt?.trim().slice(0, 500)
 
 	// 优先展示风格描述，将用户输入作为补充细节
@@ -86,14 +83,10 @@ export const buildFinalPrompt = (
  * @param userPrompt - 用户描述（可选）
  * @returns 简化版提示词
  */
-export const buildCompactPrompt = (
-	stylePrompt: string,
-	userPrompt?: string
-): string => {
+export const buildCompactPrompt = (stylePrompt: string, userPrompt?: string): string => {
 	const sanitizedUserPrompt = userPrompt?.trim().slice(0, 500)
 
-	const base =
-		'Transform sketch into artwork, preserve original structure and shapes'
+	const base = 'Transform sketch into artwork, preserve original structure and shapes'
 
 	if (sanitizedUserPrompt) {
 		return `${base}. ${sanitizedUserPrompt}. Style: ${stylePrompt}. High quality, detailed.`

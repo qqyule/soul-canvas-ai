@@ -6,15 +6,16 @@
 
 import { createSchemaFactory } from 'drizzle-zod'
 import { z } from 'zod/v4'
-import { users } from './users'
 import { artworks } from './artworks'
 import { customStyles } from './custom-styles'
-import { generationLogs, GENERATION_STATUS } from './generation-logs'
 import { favorites } from './favorites'
+import { GENERATION_STATUS, generationLogs } from './generation-logs'
+import { users } from './users'
 
 // 使用 Zod v4 创建 schema factory
-const { createInsertSchema, createSelectSchema, createUpdateSchema } =
-	createSchemaFactory({ zodInstance: z })
+const { createInsertSchema, createSelectSchema, createUpdateSchema } = createSchemaFactory({
+	zodInstance: z,
+})
 
 // ==================== Users ====================
 
@@ -23,10 +24,7 @@ export const insertUserSchema = createInsertSchema(users, {
 	id: (schema) => schema.min(1, '用户 ID 不能为空'),
 	email: (schema) => schema.email('请输入有效的邮箱地址'),
 	name: (schema) => schema.max(50, '用户名最长50个字符'),
-	provider: z
-		.enum(['clerk', 'github', 'google', 'email'])
-		.optional()
-		.nullable(),
+	provider: z.enum(['clerk', 'github', 'google', 'email']).optional().nullable(),
 	avatarUrl: (schema) => schema.url('请输入有效的 URL'),
 })
 
@@ -62,8 +60,7 @@ export const updateArtworkSchema = createUpdateSchema(artworks, {
 
 /** 自定义风格插入验证 Schema */
 export const insertCustomStyleSchema = createInsertSchema(customStyles, {
-	name: (schema) =>
-		schema.min(1, '风格名称不能为空').max(100, '风格名称最长100个字符'),
+	name: (schema) => schema.min(1, '风格名称不能为空').max(100, '风格名称最长100个字符'),
 	description: (schema) => schema.max(500, '描述最长500个字符'),
 	promptTemplate: (schema) =>
 		schema.min(1, '提示词模板不能为空').max(2000, '提示词模板最长2000个字符'),
@@ -88,11 +85,7 @@ export const selectFavoriteSchema = createSelectSchema(favorites)
 
 /** 生成日志插入验证 Schema */
 export const insertGenerationLogSchema = createInsertSchema(generationLogs, {
-	status: z.enum([
-		GENERATION_STATUS.SUCCESS,
-		GENERATION_STATUS.FAILED,
-		GENERATION_STATUS.TIMEOUT,
-	]),
+	status: z.enum([GENERATION_STATUS.SUCCESS, GENERATION_STATUS.FAILED, GENERATION_STATUS.TIMEOUT]),
 	durationMs: (schema) => schema.positive('耗时必须为正整数'),
 	styleId: (schema) => schema.min(1, '风格 ID 不能为空'),
 })

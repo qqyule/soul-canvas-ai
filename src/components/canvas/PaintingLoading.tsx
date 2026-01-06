@@ -2,8 +2,9 @@
  * PaintingLoading - 画笔作画加载动画组件
  * 显示画笔在画布上作画的动效，配合有趣的提示文案
  */
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -81,48 +82,18 @@ const PaintingLoading = ({ className }: PaintingLoadingProps) => {
 					{/* 画笔主体 */}
 					<motion.g transform="translate(32, 32)">
 						{/* 笔杆 */}
-						<rect
-							x="-3"
-							y="-24"
-							width="6"
-							height="28"
-							rx="1"
-							className="fill-amber-700"
-						/>
+						<rect x="-3" y="-24" width="6" height="28" rx="1" className="fill-amber-700" />
 						{/* 笔杆装饰条纹 */}
-						<rect
-							x="-3"
-							y="-20"
-							width="6"
-							height="2"
-							className="fill-amber-600"
-						/>
-						<rect
-							x="-3"
-							y="-14"
-							width="6"
-							height="2"
-							className="fill-amber-600"
-						/>
+						<rect x="-3" y="-20" width="6" height="2" className="fill-amber-600" />
+						<rect x="-3" y="-14" width="6" height="2" className="fill-amber-600" />
 						{/* 笔头金属环 */}
-						<rect
-							x="-4"
-							y="2"
-							width="8"
-							height="4"
-							rx="1"
-							className="fill-gray-400"
-						/>
+						<rect x="-4" y="2" width="8" height="4" rx="1" className="fill-gray-400" />
 						{/* 笔尖/刷毛 */}
 						<motion.path
 							d="M-3 6 L0 16 L3 6 Z"
 							className="fill-gray-800"
 							animate={{
-								d: [
-									'M-3 6 L0 16 L3 6 Z',
-									'M-4 6 L0 18 L4 6 Z',
-									'M-3 6 L0 16 L3 6 Z',
-								],
+								d: ['M-3 6 L0 16 L3 6 Z', 'M-4 6 L0 18 L4 6 Z', 'M-3 6 L0 16 L3 6 Z'],
 							}}
 							transition={{
 								duration: 0.5,
@@ -134,10 +105,7 @@ const PaintingLoading = ({ className }: PaintingLoadingProps) => {
 				</motion.svg>
 
 				{/* 墨迹/笔触效果 */}
-				<svg
-					viewBox="0 0 64 64"
-					className="absolute inset-0 w-full h-full pointer-events-none"
-				>
+				<svg viewBox="0 0 64 64" className="absolute inset-0 w-full h-full pointer-events-none">
 					{/* 动态笔触路径 */}
 					<motion.path
 						d="M 20 44 Q 32 36, 44 40"

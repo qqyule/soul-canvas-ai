@@ -3,9 +3,9 @@
  * @description 存储用户收藏的作品关系
  */
 
-import { pgTable, timestamp, uuid, primaryKey, text } from 'drizzle-orm/pg-core'
-import { users } from './users'
+import { pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { artworks } from './artworks'
+import { users } from './users'
 
 /**
  * 收藏表（多对多关系表）

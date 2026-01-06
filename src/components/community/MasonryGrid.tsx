@@ -3,11 +3,11 @@
  * @description 实现响应式瀑布流布局，用于展示社区作品
  */
 
-import { useRef, useEffect, useState, useCallback, memo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import ArtworkCard from './ArtworkCard'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import type { ArtworkCardData } from '@/types/community'
+import ArtworkCard from './ArtworkCard'
 
 interface MasonryGridProps {
 	/** 作品列表 */
@@ -21,9 +21,7 @@ interface MasonryGridProps {
 	/** 点击作品回调 */
 	onArtworkClick?: (artwork: ArtworkCardData) => void
 	/** 点赞回调 */
-	onLike?: (
-		artworkId: string
-	) => Promise<{ liked: boolean; likes: number } | null>
+	onLike?: (artworkId: string) => Promise<{ liked: boolean; likes: number } | null>
 	/** 正在点赞的作品 ID 集合 */
 	likingIds?: Set<string>
 	/** 列数配置 */
@@ -125,10 +123,7 @@ const MasonryGrid = memo(
 		 * 将作品分配到各列 (简单的轮询分配)
 		 */
 		const columnItems = useCallback((): ArtworkCardData[][] => {
-			const cols: ArtworkCardData[][] = Array.from(
-				{ length: columnCount },
-				() => []
-			)
+			const cols: ArtworkCardData[][] = Array.from({ length: columnCount }, () => [])
 
 			artworks.forEach((artwork, index) => {
 				cols[index % columnCount].push(artwork)
@@ -144,11 +139,7 @@ const MasonryGrid = memo(
 				{/* 网格容器 */}
 				<div className="flex" style={{ gap: `${gap}px` }}>
 					{columnsData.map((column, colIndex) => (
-						<div
-							key={colIndex}
-							className="flex-1 flex flex-col"
-							style={{ gap: `${gap}px` }}
-						>
+						<div key={colIndex} className="flex-1 flex flex-col" style={{ gap: `${gap}px` }}>
 							<AnimatePresence mode="popLayout">
 								{column.map((artwork, itemIndex) => (
 									<ArtworkCard
@@ -167,10 +158,7 @@ const MasonryGrid = memo(
 
 				{/* 加载更多触发器 */}
 				{hasMore && (
-					<div
-						ref={loadMoreRef}
-						className="flex items-center justify-center py-8"
-					>
+					<div ref={loadMoreRef} className="flex items-center justify-center py-8">
 						{isLoading && (
 							<motion.div
 								initial={{ opacity: 0 }}
@@ -194,9 +182,7 @@ const MasonryGrid = memo(
 						<div className="w-20 h-20 rounded-full bg-muted/30 flex items-center justify-center mb-4">
 							<span className="text-4xl">🎨</span>
 						</div>
-						<h3 className="text-lg font-medium text-foreground mb-2">
-							暂无作品
-						</h3>
+						<h3 className="text-lg font-medium text-foreground mb-2">暂无作品</h3>
 						<p className="text-sm text-muted-foreground max-w-sm">
 							社区还没有作品，成为第一个分享创作的人吧！
 						</p>

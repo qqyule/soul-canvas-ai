@@ -3,11 +3,7 @@
  * 负责节点测速、选择、故障转移
  */
 
-import type {
-	APINode,
-	NodeHealth,
-	NodeSelectionStrategy,
-} from '@/types/api-node'
+import type { APINode, NodeHealth, NodeSelectionStrategy } from '@/types/api-node'
 
 // ==================== 默认配置 ====================
 
@@ -40,16 +36,12 @@ export function getNodeConfigs(): APINode[] {
 		{
 			id: 'openrouter',
 			name: 'OpenRouter',
-			baseUrl:
-				import.meta.env.VITE_OPENROUTER_BASE_URL ||
-				'https://openrouter.ai/api/v1',
+			baseUrl: import.meta.env.VITE_OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
 			healthEndpoint: '/credits',
 			priority: 2, // 备用节点
 			enabled: !!import.meta.env.VITE_OPENROUTER_API_KEY,
 			mode: 'sync',
-			model:
-				import.meta.env.VITE_OPENROUTER_IMAGE_MODEL ||
-				'google/gemini-2.5-flash-image',
+			model: import.meta.env.VITE_OPENROUTER_IMAGE_MODEL || 'google/gemini-2.5-flash-image',
 		},
 	]
 }
@@ -59,11 +51,7 @@ export function getNodeConfigs(): APINode[] {
  */
 export function getSelectionStrategy(): NodeSelectionStrategy {
 	const strategy = import.meta.env.VITE_NODE_SELECTION_STRATEGY
-	if (
-		strategy === 'latency' ||
-		strategy === 'priority' ||
-		strategy === 'round-robin'
-	) {
+	if (strategy === 'latency' || strategy === 'priority' || strategy === 'round-robin') {
 		return strategy
 	}
 	return 'priority' // 默认按优先级
@@ -79,10 +67,7 @@ function loadHealthCache(): Map<string, NodeHealth> {
 		const cached = sessionStorage.getItem(CACHE_KEY)
 		if (!cached) return new Map()
 
-		const data = JSON.parse(cached) as Record<
-			string,
-			NodeHealth & { lastChecked: string }
-		>
+		const data = JSON.parse(cached) as Record<string, NodeHealth & { lastChecked: string }>
 		const now = Date.now()
 		const result = new Map<string, NodeHealth>()
 
@@ -199,8 +184,7 @@ class APINodeManager {
 				latency: Infinity,
 				isAvailable: false,
 				lastChecked: new Date(),
-				consecutiveFailures:
-					(this.health.get(nodeId)?.consecutiveFailures ?? 0) + 1,
+				consecutiveFailures: (this.health.get(nodeId)?.consecutiveFailures ?? 0) + 1,
 			}
 
 			console.warn(`[APINodeManager] 节点 ${node.name} 测速失败:`, error)
@@ -212,13 +196,9 @@ class APINodeManager {
 	 * 测速所有启用的节点
 	 */
 	async pingAllNodes(): Promise<void> {
-		const enabledNodes = Array.from(this.nodes.values()).filter(
-			(n) => n.enabled
-		)
+		const enabledNodes = Array.from(this.nodes.values()).filter((n) => n.enabled)
 
-		const results = await Promise.all(
-			enabledNodes.map((n) => this.pingNode(n.id))
-		)
+		const results = await Promise.all(enabledNodes.map((n) => this.pingNode(n.id)))
 
 		// 更新健康状态
 		for (const health of results) {
@@ -234,9 +214,7 @@ class APINodeManager {
 	 */
 	async selectBestNode(): Promise<APINode> {
 		// 获取启用的节点
-		const enabledNodes = Array.from(this.nodes.values()).filter(
-			(n) => n.enabled
-		)
+		const enabledNodes = Array.from(this.nodes.values()).filter((n) => n.enabled)
 
 		if (enabledNodes.length === 0) {
 			throw new Error('没有可用的 API 节点')
@@ -257,9 +235,7 @@ class APINodeManager {
 		const availableNodes = enabledNodes.filter((node) => {
 			const health = this.health.get(node.id)
 			if (!health) return true // 未测速的节点默认可用
-			return (
-				health.isAvailable && health.consecutiveFailures < FAILOVER_THRESHOLD
-			)
+			return health.isAvailable && health.consecutiveFailures < FAILOVER_THRESHOLD
 		})
 
 		if (availableNodes.length === 0) {
@@ -285,8 +261,6 @@ class APINodeManager {
 				selected = availableNodes[this.roundRobinIndex % availableNodes.length]
 				this.roundRobinIndex++
 				break
-
-			case 'priority':
 			default:
 				selected = availableNodes.sort((a, b) => a.priority - b.priority)[0]
 				break

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { driver } from 'driver.js'
+import { useEffect } from 'react'
 import 'driver.js/dist/driver.css'
 
 const HAS_SEEN_ONBOARDING_KEY = 'hasSeenOnboarding'
@@ -29,8 +29,7 @@ const OnboardingTour = () => {
 					element: '#tour-canvas',
 					popover: {
 						title: '创意画布',
-						description:
-							'在这里尽情挥洒您的创意！即使只是简单的线条，AI 也能理解您的意图。',
+						description: '在这里尽情挥洒您的创意！即使只是简单的线条，AI 也能理解您的意图。',
 						side: 'right',
 						align: 'start',
 					},
@@ -39,8 +38,7 @@ const OnboardingTour = () => {
 					element: '#tour-prompt',
 					popover: {
 						title: '创意描述',
-						description:
-							'用文字描述您的想法，帮助 AI 更准确地生成您心目中的画面。',
+						description: '用文字描述您的想法，帮助 AI 更准确地生成您心目中的画面。',
 						side: 'bottom',
 						align: 'start',
 					},
@@ -58,8 +56,7 @@ const OnboardingTour = () => {
 					element: '#tour-history',
 					popover: {
 						title: '历史记录',
-						description:
-							'您生成的所有作品都会保存在这里，随时回顾您的创作历程。',
+						description: '您生成的所有作品都会保存在这里，随时回顾您的创作历程。',
 						side: 'bottom',
 						align: 'end',
 					},

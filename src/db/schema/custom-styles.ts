@@ -3,7 +3,7 @@
  * @description 存储用户创建的自定义风格预设
  */
 
-import { pgTable, text, timestamp, uuid, boolean } from 'drizzle-orm/pg-core'
+import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { users } from './users'
 
 /**

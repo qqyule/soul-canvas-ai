@@ -3,11 +3,9 @@
  * @description 侧边抽屉式显示用户的生成历史，支持虚拟滚动、过滤和批量操作
  */
 
-import { useState, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { History, X, Download, Grid, List, Settings2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Download, Grid, History, List, Settings2, X } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,10 +16,12 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import type { HistoryItem } from '@/lib/history-db'
 import type { HistoryFilter } from '@/types/history'
 import { DEFAULT_SELECTION_STATE, type SelectionState } from '@/types/history'
-import { FilterBar, BatchActionsBar, VirtualizedHistoryList } from './history'
+import { BatchActionsBar, FilterBar, VirtualizedHistoryList } from './history'
 
 interface HistoryPanelProps {
 	/** 是否显示面板 */
@@ -107,9 +107,7 @@ const HistoryPanel = ({
 	// 预览项
 	const [previewItem, setPreviewItem] = useState<HistoryItem | null>(null)
 	// 选择状态
-	const [selection, setSelection] = useState<SelectionState>(
-		DEFAULT_SELECTION_STATE
-	)
+	const [selection, setSelection] = useState<SelectionState>(DEFAULT_SELECTION_STATE)
 	// 视图模式
 	const [columns, setColumns] = useState(2)
 
@@ -173,9 +171,7 @@ const HistoryPanel = ({
 	 * 执行批量下载
 	 */
 	const handleBatchDownloadClick = useCallback(() => {
-		const items = filteredHistory.filter((item) =>
-			selection.selectedIds.has(item.id)
-		)
+		const items = filteredHistory.filter((item) => selection.selectedIds.has(item.id))
 		handleBatchDownload(items)
 	}, [filteredHistory, selection.selectedIds])
 
@@ -293,10 +289,7 @@ const HistoryPanel = ({
 									onDelete={onDelete}
 									onPreview={setPreviewItem}
 									onDownload={(item) =>
-										handleDownload(
-											item.resultUrl,
-											`shenbimaliang-${item.id}.png`
-										)
+										handleDownload(item.resultUrl, `shenbimaliang-${item.id}.png`)
 									}
 									columns={columns}
 								/>
@@ -306,6 +299,7 @@ const HistoryPanel = ({
 							{!isSelectionMode && filteredHistory.length > 0 && (
 								<div className="px-4 pb-4">
 									<button
+										type="button"
 										className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
 										onClick={handleToggleSelectAll}
 									>
@@ -345,16 +339,12 @@ const HistoryPanel = ({
 			</AlertDialog>
 
 			{/* 批量删除确认弹窗 */}
-			<AlertDialog
-				open={showBatchDeleteConfirm}
-				onOpenChange={setShowBatchDeleteConfirm}
-			>
+			<AlertDialog open={showBatchDeleteConfirm} onOpenChange={setShowBatchDeleteConfirm}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>确认删除选中记录？</AlertDialogTitle>
 						<AlertDialogDescription>
-							此操作将删除 {selection.selectedIds.size}{' '}
-							条选中的记录，且无法恢复。
+							此操作将删除 {selection.selectedIds.size} 条选中的记录，且无法恢复。
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
@@ -398,11 +388,7 @@ const HistoryPanel = ({
 							</Button>
 
 							<div className="rounded-2xl overflow-hidden border border-border shadow-2xl">
-								<img
-									src={previewItem.resultUrl}
-									alt="预览图片"
-									className="w-full h-auto"
-								/>
+								<img src={previewItem.resultUrl} alt="预览图片" className="w-full h-auto" />
 							</div>
 
 							{/* 预览信息 */}
@@ -410,9 +396,7 @@ const HistoryPanel = ({
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
 										<span className="text-muted-foreground">风格:</span>
-										<span className="ml-2 font-medium">
-											{previewItem.styleName}
-										</span>
+										<span className="ml-2 font-medium">{previewItem.styleName}</span>
 									</div>
 									<div>
 										<span className="text-muted-foreground">创建时间:</span>
@@ -430,10 +414,7 @@ const HistoryPanel = ({
 								<Button
 									variant="glow"
 									onClick={() =>
-										handleDownload(
-											previewItem.resultUrl,
-											`shenbimaliang-${previewItem.id}.png`
-										)
+										handleDownload(previewItem.resultUrl, `shenbimaliang-${previewItem.id}.png`)
 									}
 								>
 									<Download className="h-4 w-4" />

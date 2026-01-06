@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { generateImageFromSketch } from './openrouter'
 
 describe('generateImageFromSketch', () => {
@@ -51,10 +51,7 @@ describe('generateImageFromSketch', () => {
 			.mockResolvedValueOnce(mockErrorResponse)
 			.mockResolvedValueOnce(mockSuccessResponse)
 
-		const result = await generateImageFromSketch(
-			'data:image/png;base64,abc',
-			'Anime Style'
-		)
+		const result = await generateImageFromSketch('data:image/png;base64,abc', 'Anime Style')
 
 		expect(result).toBe('https://example.com/image.png')
 		expect(global.fetch).toHaveBeenCalledTimes(2)
@@ -67,16 +64,11 @@ describe('generateImageFromSketch', () => {
 			.mockResolvedValueOnce({
 				ok: true,
 				json: async () => ({
-					choices: [
-						{ message: { content: 'https://example.com/success.png' } },
-					],
+					choices: [{ message: { content: 'https://example.com/success.png' } }],
 				}),
 			})
 
-		const result = await generateImageFromSketch(
-			'data:image/png;base64,abc',
-			'Style'
-		)
+		const result = await generateImageFromSketch('data:image/png;base64,abc', 'Style')
 		expect(result).toBe('https://example.com/success.png')
 		expect(global.fetch).toHaveBeenCalledTimes(2)
 	})
@@ -91,9 +83,9 @@ describe('generateImageFromSketch', () => {
 		// All calls fail
 		;(global.fetch as any).mockResolvedValue(mockErrorResponse)
 
-		await expect(
-			generateImageFromSketch('data:image/png;base64,abc', 'Style')
-		).rejects.toThrow('服务器错误: 503')
+		await expect(generateImageFromSketch('data:image/png;base64,abc', 'Style')).rejects.toThrow(
+			'服务器错误: 503'
+		)
 
 		// Initial + 2 Retries = 3 Calls
 		expect(global.fetch).toHaveBeenCalledTimes(3)
@@ -107,9 +99,9 @@ describe('generateImageFromSketch', () => {
 		}
 		;(global.fetch as any).mockResolvedValue(mockResponse)
 
-		await expect(
-			generateImageFromSketch('data:image/png;base64,abc', 'Style')
-		).rejects.toThrow('图像生成失败: 400')
+		await expect(generateImageFromSketch('data:image/png;base64,abc', 'Style')).rejects.toThrow(
+			'图像生成失败: 400'
+		)
 
 		expect(global.fetch).toHaveBeenCalledTimes(1)
 	})

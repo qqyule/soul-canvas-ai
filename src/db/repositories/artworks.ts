@@ -3,15 +3,15 @@
  * @description 封装作品相关的数据库操作，集成 Zod 验证
  */
 
-import { eq, desc, sql } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 import { getDb } from '../index'
 import {
-	artworks,
 	type Artwork,
-	type NewArtwork,
+	artworks,
 	insertArtworkSchema,
-	updateArtworkSchema,
+	type NewArtwork,
 	type UpdateArtwork,
+	updateArtworkSchema,
 } from '../schema'
 
 /**
@@ -36,11 +36,7 @@ export const artworksRepository = {
 	 * @param offset 偏移量
 	 * @returns 作品列表
 	 */
-	async getByUserId(
-		userId: string,
-		limit = 20,
-		offset = 0
-	): Promise<Artwork[]> {
+	async getByUserId(userId: string, limit = 20, offset = 0): Promise<Artwork[]> {
 		const db = getDb()
 		return db
 			.select()
@@ -107,10 +103,7 @@ export const artworksRepository = {
 	 */
 	async delete(id: string): Promise<boolean> {
 		const db = getDb()
-		const result = await db
-			.delete(artworks)
-			.where(eq(artworks.id, id))
-			.returning()
+		const result = await db.delete(artworks).where(eq(artworks.id, id)).returning()
 		return result.length > 0
 	},
 
