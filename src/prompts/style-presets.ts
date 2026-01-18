@@ -114,6 +114,79 @@ export const STYLE_PRESETS: StylePreset[] = [
 		imageUrl: '/styles/3d-render.png',
 		category: '3d',
 	},
+	// ==================== 新增风格 ====================
+	{
+		id: 'watercolor',
+		name: 'Watercolor Art',
+		nameZh: '水彩画风',
+		description: 'Translucent, flowing watercolor painting effect',
+		prompt:
+			'Beautiful watercolor painting, soft transparent washes, delicate paper texture, wet-on-wet technique, gentle color bleeding, artistic composition, fine art watercolor, loose impressionistic style, light and airy atmosphere, delicate brushstrokes, traditional watercolor medium',
+		gradient: 'from-sky-300 via-blue-400 to-indigo-500',
+		icon: '💧',
+		imageUrl: '/styles/watercolor.png',
+		category: 'artistic',
+	},
+	{
+		id: 'claymation',
+		name: 'Claymation',
+		nameZh: '粘土动画',
+		description: 'Stop-motion clay animation style',
+		prompt:
+			'Claymation stop-motion style, Aardman animations aesthetic, plasticine texture, handcrafted clay figurine, fingerprints visible, warm studio lighting, Wallace and Gromit style, tactile 3D model, charming imperfections, playful character design, miniature set design',
+		gradient: 'from-orange-300 via-amber-400 to-yellow-500',
+		icon: '🎭',
+		imageUrl: '/styles/claymation.png',
+		category: '3d',
+	},
+	{
+		id: 'pixel-art',
+		name: 'Pixel Art',
+		nameZh: '像素艺术',
+		description: 'Retro 8-bit/16-bit game pixel style',
+		prompt:
+			'Retro pixel art, 16-bit video game style, limited color palette, clean pixel edges, nostalgic gaming aesthetic, sprite art, dithering technique, NES/SNES era graphics, crisp pixels, indie game art style, detailed pixel work, vibrant retro colors',
+		gradient: 'from-green-400 via-lime-500 to-emerald-600',
+		icon: '🎮',
+		imageUrl: '/styles/pixel-art.png',
+		category: 'artistic',
+	},
+	{
+		id: 'anime',
+		name: 'Modern Anime',
+		nameZh: '现代动漫',
+		description: 'Contemporary Japanese anime character style',
+		prompt:
+			'Modern anime illustration, trending on Pixiv, beautiful anime character, clean lineart, vibrant cel shading, large expressive eyes, dynamic pose, detailed hair rendering, professional anime key visual, light novel cover art style, soft gradient coloring, high quality anime artwork',
+		gradient: 'from-pink-400 via-fuchsia-500 to-purple-600',
+		icon: '✨',
+		imageUrl: '/styles/anime.png',
+		category: 'anime',
+	},
+	{
+		id: 'oil-painting',
+		name: 'Oil Painting',
+		nameZh: '油画大师',
+		description: 'Classic oil painting with rich textures',
+		prompt:
+			'Classical oil painting masterpiece, rich impasto texture, visible brushstrokes, museum quality fine art, dramatic chiaroscuro lighting, Renaissance masters technique, canvas texture, warm color palette, gallery exhibition piece, timeless artistic composition, old masters style',
+		gradient: 'from-amber-600 via-orange-700 to-red-800',
+		icon: '🖼️',
+		imageUrl: '/styles/oil-painting.png',
+		category: 'artistic',
+	},
+	{
+		id: 'christmas',
+		name: 'Christmas Magic',
+		nameZh: '圣诞魔法',
+		description: 'Festive holiday theme with magical atmosphere',
+		prompt:
+			'Magical Christmas scene, festive holiday atmosphere, sparkling snow, warm golden lights, cozy winter wonderland, candy canes and ornaments, enchanted North Pole, twinkling fairy lights, rich red and green colors, heartwarming holiday spirit, whimsical Christmas magic, seasonal celebration',
+		gradient: 'from-red-500 via-green-600 to-red-700',
+		icon: '🎄',
+		imageUrl: '/styles/christmas.png',
+		category: 'artistic',
+	},
 ]
 
 // ==================== 工具函数 ====================

@@ -1,6 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Download, Loader2, Share2, Sparkles, X } from 'lucide-react'
+import {
+	Award,
+	BookOpen,
+	Download,
+	Loader2,
+	Share2,
+	Sparkles,
+	X,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { HeroCardEditor } from '@/components/cards'
+import { StorybookCreator } from '@/components/storybook'
 import { Button } from '@/components/ui/button'
 import { usePublishArtwork } from '@/hooks/use-community'
 import { useToast } from '@/hooks/use-toast'
@@ -30,6 +40,8 @@ const GenerationResultView = ({
 }: GenerationResultViewProps) => {
 	const [selectedIndex, setSelectedIndex] = useState(0)
 	const [publishedIds, setPublishedIds] = useState<Set<number>>(new Set())
+	const [showHeroCardEditor, setShowHeroCardEditor] = useState(false)
+	const [showStorybookCreator, setShowStorybookCreator] = useState(false)
 	const { toast } = useToast()
 	const { publish, isPublishing } = usePublishArtwork()
 
@@ -64,7 +76,9 @@ const GenerationResultView = ({
 
 	const isCurrentPublished = publishedIds.has(selectedIndex)
 
-	const handleDownload = async (targetUrl: string = activeResult?.generatedImageUrl || '') => {
+	const handleDownload = async (
+		targetUrl: string = activeResult?.generatedImageUrl || ''
+	) => {
 		if (!targetUrl) return
 
 		try {
@@ -103,6 +117,7 @@ const GenerationResultView = ({
 		<AnimatePresence mode="wait">
 			{(status !== 'idle' || (results && results.length > 0)) && (
 				<motion.div
+					key="modal-backdrop"
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
 					exit={{ opacity: 0, scale: 0.95 }}
@@ -137,7 +152,8 @@ const GenerationResultView = ({
 											<div
 												key={step}
 												className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
-													(status === 'analyzing' && i === 0) || (status === 'generating' && i <= 1)
+													(status === 'analyzing' && i === 0) ||
+													(status === 'generating' && i <= 1)
 														? 'text-primary font-medium'
 														: 'text-muted-foreground'
 												}`}
@@ -161,7 +177,9 @@ const GenerationResultView = ({
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										{/* Original Sketch */}
 										<div className="space-y-2">
-											<h4 className="text-sm font-medium text-muted-foreground">您的草图</h4>
+											<h4 className="text-sm font-medium text-muted-foreground">
+												您的草图
+											</h4>
 											<div className="aspect-[4/3] rounded-xl overflow-hidden bg-canvas-bg border border-border">
 												<img
 													src={activeResult.sketchDataUrl}
@@ -217,7 +235,9 @@ const GenerationResultView = ({
 														size="sm"
 														variant="secondary"
 														className="h-8 text-xs backdrop-blur-md bg-white/10 hover:bg-white/20 text-white border-white/20"
-														onClick={() => handleDownload(activeResult.generatedImageUrl)}
+														onClick={() =>
+															handleDownload(activeResult.generatedImageUrl)
+														}
 													>
 														<Download className="h-3 w-3 mr-1.5" />
 														下载
@@ -230,7 +250,9 @@ const GenerationResultView = ({
 									{/* Thumbnails Grid (Only if > 1) */}
 									{results && results.length > 1 && (
 										<div className="space-y-2">
-											<h4 className="text-sm font-medium text-muted-foreground">变体预览</h4>
+											<h4 className="text-sm font-medium text-muted-foreground">
+												变体预览
+											</h4>
 											<div className="grid grid-cols-4 gap-3">
 												{results.map((res, idx) => (
 													<button
@@ -272,8 +294,12 @@ const GenerationResultView = ({
 									<div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
 										<X className="h-8 w-8 text-destructive" />
 									</div>
-									<p className="text-lg font-medium text-foreground">生成失败</p>
-									<p className="text-sm text-muted-foreground">请检查网络连接后重试</p>
+									<p className="text-lg font-medium text-foreground">
+										生成失败
+									</p>
+									<p className="text-sm text-muted-foreground">
+										请检查网络连接后重试
+									</p>
 									<Button variant="outline" onClick={onClose}>
 										返回
 									</Button>
@@ -312,6 +338,24 @@ const GenerationResultView = ({
 											</>
 										)}
 									</Button>
+									{/* 制作英雄卡按钮 */}
+									<Button
+										variant="outline"
+										onClick={() => setShowHeroCardEditor(true)}
+										className="gap-2"
+									>
+										<Award className="h-4 w-4" />
+										英雄卡
+									</Button>
+									{/* 创作绘本按钮 */}
+									<Button
+										variant="outline"
+										onClick={() => setShowStorybookCreator(true)}
+										className="gap-2"
+									>
+										<BookOpen className="h-4 w-4" />
+										创作绘本
+									</Button>
 									<Button variant="glow" onClick={() => handleDownload()}>
 										<Download className="h-4 w-4 mr-2" />
 										下载图像
@@ -328,6 +372,26 @@ const GenerationResultView = ({
 					</motion.div>
 				</motion.div>
 			)}
+
+			{/* 英雄卡片编辑器 */}
+			{activeResult && (
+				<HeroCardEditor
+					key="hero-card-editor"
+					open={showHeroCardEditor}
+					onClose={() => setShowHeroCardEditor(false)}
+					imageUrl={activeResult.generatedImageUrl}
+					styleId={activeResult.style.id}
+					styleName={activeResult.style.nameZh}
+				/>
+			)}
+
+			{/* 绘本创作器 */}
+			<StorybookCreator
+				key="storybook-creator"
+				open={showStorybookCreator}
+				onClose={() => setShowStorybookCreator(false)}
+				artworkImages={activeResult ? [activeResult.generatedImageUrl] : []}
+			/>
 		</AnimatePresence>
 	)
 }

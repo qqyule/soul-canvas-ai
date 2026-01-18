@@ -4,7 +4,15 @@
  */
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Download, Grid, History, List, Settings2, X } from 'lucide-react'
+import {
+	BookOpen,
+	Download,
+	Grid,
+	History,
+	List,
+	Settings2,
+	X,
+} from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import {
 	AlertDialog,
@@ -17,10 +25,13 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { HistoryItem } from '@/lib/history-db'
 import type { HistoryFilter } from '@/types/history'
 import { DEFAULT_SELECTION_STATE, type SelectionState } from '@/types/history'
+import { useStorybookHistory } from '@/hooks/use-storybook-history'
+import StorybookHistoryList from '@/components/storybook/StorybookHistoryList'
 import { BatchActionsBar, FilterBar, VirtualizedHistoryList } from './history'
 
 interface HistoryPanelProps {
@@ -100,6 +111,10 @@ const HistoryPanel = ({
 	onDeleteMultiple,
 	onClearAll,
 }: HistoryPanelProps) => {
+	// Tab 状态
+	const [activeTab, setActiveTab] = useState<'artworks' | 'storybooks'>(
+		'artworks'
+	)
 	// 清空确认弹窗
 	const [showClearConfirm, setShowClearConfirm] = useState(false)
 	// 批量删除确认弹窗
@@ -107,9 +122,18 @@ const HistoryPanel = ({
 	// 预览项
 	const [previewItem, setPreviewItem] = useState<HistoryItem | null>(null)
 	// 选择状态
-	const [selection, setSelection] = useState<SelectionState>(DEFAULT_SELECTION_STATE)
+	const [selection, setSelection] = useState<SelectionState>(
+		DEFAULT_SELECTION_STATE
+	)
 	// 视图模式
 	const [columns, setColumns] = useState(2)
+
+	// 绘本历史
+	const {
+		storybooks,
+		isLoading: storybooksLoading,
+		deleteStorybook,
+	} = useStorybookHistory()
 
 	/** 是否处于多选模式 */
 	const isSelectionMode = selection.selectedIds.size > 0
@@ -171,7 +195,9 @@ const HistoryPanel = ({
 	 * 执行批量下载
 	 */
 	const handleBatchDownloadClick = useCallback(() => {
-		const items = filteredHistory.filter((item) => selection.selectedIds.has(item.id))
+		const items = filteredHistory.filter((item) =>
+			selection.selectedIds.has(item.id)
+		)
 		handleBatchDownload(items)
 	}, [filteredHistory, selection.selectedIds])
 
@@ -253,59 +279,112 @@ const HistoryPanel = ({
 								</div>
 							</div>
 
-							{/* 过滤工具栏 */}
+							{/* Tab 切换 */}
 							<div className="p-4 pb-0">
-								<FilterBar
-									filter={filter}
-									onFilterChange={onFilterChange}
-									availableStyles={availableStyles}
-									totalCount={history.length}
-									filteredCount={filteredHistory.length}
-								/>
+								<Tabs
+									value={activeTab}
+									onValueChange={(v) =>
+										setActiveTab(v as 'artworks' | 'storybooks')
+									}
+								>
+									<TabsList className="w-full">
+										<TabsTrigger value="artworks" className="flex-1 gap-1.5">
+											<History className="h-3.5 w-3.5" />
+											画作
+											{history.length > 0 && (
+												<span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-[10px]">
+													{history.length}
+												</span>
+											)}
+										</TabsTrigger>
+										<TabsTrigger value="storybooks" className="flex-1 gap-1.5">
+											<BookOpen className="h-3.5 w-3.5" />
+											绘本
+											{storybooks.length > 0 && (
+												<span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-[10px]">
+													{storybooks.length}
+												</span>
+											)}
+										</TabsTrigger>
+									</TabsList>
+								</Tabs>
 							</div>
 
-							{/* 批量操作栏 */}
-							{isSelectionMode && (
-								<div className="px-4 pt-3">
-									<BatchActionsBar
-										selectedCount={selection.selectedIds.size}
-										totalCount={filteredHistory.length}
-										isAllSelected={selection.isAllSelected}
-										onToggleSelectAll={handleToggleSelectAll}
-										onBatchDelete={() => setShowBatchDeleteConfirm(true)}
-										onBatchDownload={handleBatchDownloadClick}
-										onClearSelection={handleClearSelection}
-									/>
-								</div>
+							{/* 画作 Tab 内容 */}
+							{activeTab === 'artworks' && (
+								<>
+									{/* 过滤工具栏 */}
+									<div className="p-4 pb-0">
+										<FilterBar
+											filter={filter}
+											onFilterChange={onFilterChange}
+											availableStyles={availableStyles}
+											totalCount={history.length}
+											filteredCount={filteredHistory.length}
+										/>
+									</div>
+
+									{/* 批量操作栏 */}
+									{isSelectionMode && (
+										<div className="px-4 pt-3">
+											<BatchActionsBar
+												selectedCount={selection.selectedIds.size}
+												totalCount={filteredHistory.length}
+												isAllSelected={selection.isAllSelected}
+												onToggleSelectAll={handleToggleSelectAll}
+												onBatchDelete={() => setShowBatchDeleteConfirm(true)}
+												onBatchDownload={handleBatchDownloadClick}
+												onClearSelection={handleClearSelection}
+											/>
+										</div>
+									)}
+
+									{/* 主内容区 - 虚拟滚动列表 */}
+									<div className="flex-1 overflow-hidden p-4">
+										<VirtualizedHistoryList
+											items={filteredHistory}
+											selectedIds={selection.selectedIds}
+											isSelectionMode={isSelectionMode}
+											onToggleSelect={handleToggleSelect}
+											onDelete={onDelete}
+											onPreview={setPreviewItem}
+											onDownload={(item) =>
+												handleDownload(
+													item.resultUrl,
+													`shenbimaliang-${item.id}.png`
+												)
+											}
+											columns={columns}
+										/>
+									</div>
+
+									{/* 多选提示 (未选中时) */}
+									{!isSelectionMode &&
+										filteredHistory.length > 0 &&
+										activeTab === 'artworks' && (
+											<div className="px-4 pb-4">
+												<button
+													type="button"
+													className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+													onClick={handleToggleSelectAll}
+												>
+													<Settings2 className="h-3 w-3 inline-block mr-1" />
+													长按或点击此处进入多选模式
+												</button>
+											</div>
+										)}
+								</>
 							)}
 
-							{/* 主内容区 - 虚拟滚动列表 */}
-							<div className="flex-1 overflow-hidden p-4">
-								<VirtualizedHistoryList
-									items={filteredHistory}
-									selectedIds={selection.selectedIds}
-									isSelectionMode={isSelectionMode}
-									onToggleSelect={handleToggleSelect}
-									onDelete={onDelete}
-									onPreview={setPreviewItem}
-									onDownload={(item) =>
-										handleDownload(item.resultUrl, `shenbimaliang-${item.id}.png`)
-									}
-									columns={columns}
-								/>
-							</div>
-
-							{/* 多选提示 (未选中时) */}
-							{!isSelectionMode && filteredHistory.length > 0 && (
-								<div className="px-4 pb-4">
-									<button
-										type="button"
-										className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
-										onClick={handleToggleSelectAll}
-									>
-										<Settings2 className="h-3 w-3 inline-block mr-1" />
-										长按或点击此处进入多选模式
-									</button>
+							{/* 绘本 Tab 内容 */}
+							{activeTab === 'storybooks' && (
+								<div className="flex-1 overflow-hidden p-4">
+									<StorybookHistoryList
+										storybooks={storybooks}
+										isLoading={storybooksLoading}
+										onDelete={deleteStorybook}
+										onClose={onClose}
+									/>
 								</div>
 							)}
 						</motion.div>
@@ -339,12 +418,16 @@ const HistoryPanel = ({
 			</AlertDialog>
 
 			{/* 批量删除确认弹窗 */}
-			<AlertDialog open={showBatchDeleteConfirm} onOpenChange={setShowBatchDeleteConfirm}>
+			<AlertDialog
+				open={showBatchDeleteConfirm}
+				onOpenChange={setShowBatchDeleteConfirm}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>确认删除选中记录？</AlertDialogTitle>
 						<AlertDialogDescription>
-							此操作将删除 {selection.selectedIds.size} 条选中的记录，且无法恢复。
+							此操作将删除 {selection.selectedIds.size}{' '}
+							条选中的记录，且无法恢复。
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
@@ -388,7 +471,11 @@ const HistoryPanel = ({
 							</Button>
 
 							<div className="rounded-2xl overflow-hidden border border-border shadow-2xl">
-								<img src={previewItem.resultUrl} alt="预览图片" className="w-full h-auto" />
+								<img
+									src={previewItem.resultUrl}
+									alt="预览图片"
+									className="w-full h-auto"
+								/>
 							</div>
 
 							{/* 预览信息 */}
@@ -396,7 +483,9 @@ const HistoryPanel = ({
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
 										<span className="text-muted-foreground">风格:</span>
-										<span className="ml-2 font-medium">{previewItem.styleName}</span>
+										<span className="ml-2 font-medium">
+											{previewItem.styleName}
+										</span>
 									</div>
 									<div>
 										<span className="text-muted-foreground">创建时间:</span>
@@ -414,7 +503,10 @@ const HistoryPanel = ({
 								<Button
 									variant="glow"
 									onClick={() =>
-										handleDownload(previewItem.resultUrl, `shenbimaliang-${previewItem.id}.png`)
+										handleDownload(
+											previewItem.resultUrl,
+											`shenbimaliang-${previewItem.id}.png`
+										)
 									}
 								>
 									<Download className="h-4 w-4" />
