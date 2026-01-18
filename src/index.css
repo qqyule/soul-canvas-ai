@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -47,14 +47,26 @@
 		--canvas-stroke: 222 47% 11%;
 
 		/* Gradients */
-		--gradient-primary: linear-gradient(135deg, hsl(192 95% 55%) 0%, hsl(260 80% 60%) 100%);
+		--gradient-primary: linear-gradient(
+			135deg,
+			hsl(192 95% 55%) 0%,
+			hsl(260 80% 60%) 100%
+		);
 		--gradient-glow: linear-gradient(
 			135deg,
 			hsl(192 95% 55% / 0.3) 0%,
 			hsl(260 80% 60% / 0.3) 100%
 		);
-		--gradient-dark: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 3%) 100%);
-		--gradient-card: linear-gradient(145deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
+		--gradient-dark: linear-gradient(
+			180deg,
+			hsl(222 47% 8%) 0%,
+			hsl(222 47% 3%) 100%
+		);
+		--gradient-card: linear-gradient(
+			145deg,
+			hsl(222 47% 10%) 0%,
+			hsl(222 47% 6%) 100%
+		);
 
 		/* Shadows */
 		--shadow-glow: 0 0 40px hsl(192 95% 55% / 0.25);
@@ -79,10 +91,8 @@
 
 	body {
 		@apply bg-background text-foreground antialiased;
-		font-family: "Space Grotesk", system-ui, sans-serif;
-		cursor:
-			url("/cursor-brush.svg") 0 32,
-			auto;
+		font-family: 'Space Grotesk', system-ui, sans-serif;
+		cursor: url('/cursor-brush.svg') 0 32, auto;
 	}
 
 	/* Custom scrollbar */
@@ -108,7 +118,7 @@
 
 @layer utilities {
 	.font-mono {
-		font-family: "JetBrains Mono", monospace;
+		font-family: 'JetBrains Mono', monospace;
 	}
 
 	.text-gradient {
@@ -147,7 +157,7 @@
 	}
 
 	.glow-border::before {
-		content: "";
+		content: '';
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
@@ -166,9 +176,7 @@
 	.canvas-container {
 		background: hsl(var(--canvas-bg));
 		border-radius: var(--radius);
-		box-shadow:
-			0 0 0 1px hsl(var(--border)),
-			var(--shadow-glow-sm);
+		box-shadow: 0 0 0 1px hsl(var(--border)), var(--shadow-glow-sm);
 	}
 
 	/* Animated gradient background */
@@ -218,7 +226,7 @@
 	}
 
 	.shimmer::after {
-		content: "";
+		content: '';
 		position: absolute;
 		inset: 0;
 		background: linear-gradient(
@@ -237,5 +245,184 @@
 		100% {
 			transform: translateX(100%);
 		}
+	}
+
+	/* ==================== Chanimate 风格增强 ==================== */
+
+	/* 梦幻渐变背景 - 粉紫蓝渐变 */
+	.dreamy-gradient {
+		background: linear-gradient(
+			135deg,
+			hsl(330 70% 85% / 0.15) 0%,
+			hsl(260 70% 80% / 0.15) 25%,
+			hsl(220 70% 80% / 0.12) 50%,
+			hsl(280 60% 75% / 0.15) 75%,
+			hsl(340 65% 80% / 0.12) 100%
+		);
+		background-size: 400% 400%;
+		animation: dreamy-shift 20s ease infinite;
+	}
+
+	@keyframes dreamy-shift {
+		0%,
+		100% {
+			background-position: 0% 50%;
+		}
+		25% {
+			background-position: 50% 0%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		75% {
+			background-position: 50% 100%;
+		}
+	}
+
+	/* 浮动粒子容器 */
+	.floating-particles {
+		position: fixed;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	/* 单个粒子样式 */
+	.particle {
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		opacity: 0.6;
+		animation: float-particle 15s ease-in-out infinite;
+	}
+
+	.particle:nth-child(odd) {
+		background: linear-gradient(135deg, hsl(330 80% 75%), hsl(280 70% 70%));
+	}
+
+	.particle:nth-child(even) {
+		background: linear-gradient(135deg, hsl(200 80% 70%), hsl(260 70% 75%));
+	}
+
+	@keyframes float-particle {
+		0%,
+		100% {
+			transform: translateY(0) translateX(0) scale(1);
+			opacity: 0.6;
+		}
+		25% {
+			transform: translateY(-30px) translateX(15px) scale(1.1);
+			opacity: 0.8;
+		}
+		50% {
+			transform: translateY(-60px) translateX(-10px) scale(0.9);
+			opacity: 0.5;
+		}
+		75% {
+			transform: translateY(-30px) translateX(20px) scale(1.05);
+			opacity: 0.7;
+		}
+	}
+
+	/* 按钮魔法发光效果 */
+	.magic-glow {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.magic-glow::before {
+		content: '';
+		position: absolute;
+		inset: -2px;
+		background: linear-gradient(
+			90deg,
+			hsl(330 80% 65%),
+			hsl(260 80% 65%),
+			hsl(200 80% 65%),
+			hsl(330 80% 65%)
+		);
+		background-size: 300% 100%;
+		border-radius: inherit;
+		z-index: -1;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		animation: magic-flow 3s linear infinite;
+	}
+
+	.magic-glow:hover::before {
+		opacity: 0.8;
+	}
+
+	@keyframes magic-flow {
+		0% {
+			background-position: 0% 50%;
+		}
+		100% {
+			background-position: 300% 50%;
+		}
+	}
+
+	/* Logo 悬停辉光效果 */
+	.logo-glow {
+		transition: all 0.3s ease;
+	}
+
+	.logo-glow:hover {
+		filter: drop-shadow(0 0 8px hsl(330 80% 65% / 0.6))
+			drop-shadow(0 0 16px hsl(260 80% 65% / 0.4));
+		transform: scale(1.02);
+	}
+
+	/* 卡片悬浮效果 */
+	.card-float {
+		transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.card-float:hover {
+		transform: translateY(-8px);
+		box-shadow: 0 20px 40px hsl(260 80% 60% / 0.15),
+			0 8px 16px hsl(330 80% 65% / 0.1);
+	}
+
+	/* 视差滚动淡入效果 */
+	.fade-in-up {
+		opacity: 0;
+		transform: translateY(30px);
+		animation: fade-in-up 0.6s ease forwards;
+	}
+
+	@keyframes fade-in-up {
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* 功能卡片渐变边框 */
+	.gradient-border {
+		position: relative;
+		background: hsl(var(--card));
+		border-radius: var(--radius);
+	}
+
+	.gradient-border::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		padding: 1px;
+		border-radius: inherit;
+		background: linear-gradient(
+			135deg,
+			hsl(330 80% 70% / 0.5),
+			hsl(260 80% 70% / 0.5),
+			hsl(200 80% 70% / 0.3)
+		);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box,
+			linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
 	}
 }

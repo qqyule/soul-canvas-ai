@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import ThreeBackground from '@/components/effects/ThreeBackground'
+import ParticleBackground from '@/components/effects/ParticleBackground'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { Toaster } from '@/components/ui/toaster'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -12,6 +13,7 @@ import SignUpPage from './pages/auth/SignUp'
 import CommunityPage from './pages/Community'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
+import StorybookReader from './pages/StorybookReader'
 
 const queryClient = new QueryClient()
 
@@ -29,6 +31,7 @@ const AppContent = () => {
 	return (
 		<TooltipProvider>
 			<ThreeBackground />
+			<ParticleBackground count={15} />
 			<Toaster />
 			<Sonner />
 			<HashRouter>
@@ -41,6 +44,9 @@ const AppContent = () => {
 
 					{/* 用户资料 */}
 					<Route path="/user/:userId" element={<CommunityPage />} />
+
+					{/* 有声书阅读器 */}
+					<Route path="/storybook/:storybookId" element={<StorybookReader />} />
 
 					{/* 认证路由 */}
 					<Route path="/auth" element={<AuthLayout />}>

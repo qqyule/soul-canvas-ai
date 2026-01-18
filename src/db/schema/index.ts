@@ -19,6 +19,12 @@ export {
 	generationLogs,
 	type NewGenerationLog,
 } from './generation-logs'
+export {
+	type NewStorybook,
+	type Storybook,
+	type StorybookPageData,
+	storybooks,
+} from './storybooks'
 export { type NewUser, type User, users } from './users'
 
 // ==================== Zod 验证 Schema ====================

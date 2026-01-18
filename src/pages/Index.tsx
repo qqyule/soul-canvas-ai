@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
-import { Github, HelpCircle, History, Sparkles } from 'lucide-react'
+import { HelpCircle, History, Sparkles } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BatchSelector from '@/components/canvas/BatchSelector'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
@@ -12,12 +12,26 @@ import StyleSelector from '@/components/canvas/StyleSelector'
 import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
 import Header from '@/components/layout/Header'
 import PageTransition from '@/components/layout/page-transition'
+import {
+	FeaturesSection,
+	HowItWorksSection,
+	StyleGallerySection,
+	TestimonialsSection,
+	FAQSection,
+	CTASection,
+	Footer,
+} from '@/components/landing'
 import OnboardingTour from '@/components/OnboardingTour'
 import MaLiangIntroduction from '@/components/story/MaLiangIntroduction'
 import { Input } from '@/components/ui/input'
 import { MorphingAnimalIcon } from '@/components/ui/morphing-animal-icon'
 import { MotionButton } from '@/components/ui/motion-button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { slideUp, staggerChildren } from '@/config/animations'
 import { useDailyLimit } from '@/hooks/use-daily-limit'
 import { useDrafts } from '@/hooks/use-drafts'
@@ -28,7 +42,11 @@ import type { Draft } from '@/lib/draft-db'
 import { animatePathsDrawing } from '@/lib/inspiration-animation'
 import type { InspirationConfig } from '@/lib/inspiration-generator'
 import { generateRandomInspiration } from '@/lib/inspiration-generator'
-import { AUTHENTICATED_DAILY_LIMIT, GITHUB_REPO_URL, STARRED_DAILY_LIMIT } from '@/lib/storage'
+import {
+	AUTHENTICATED_DAILY_LIMIT,
+	GITHUB_REPO_URL,
+	STARRED_DAILY_LIMIT,
+} from '@/lib/storage'
 import {
 	type GenerationResult,
 	type GenerationStatus,
@@ -37,7 +55,9 @@ import {
 } from '@/types/canvas'
 
 const Index = () => {
-	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(STYLE_PRESETS[0])
+	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(
+		STYLE_PRESETS[0]
+	)
 	const [status, setStatus] = useState<GenerationStatus>('idle')
 	const [results, setResults] = useState<GenerationResult[] | null>(null)
 	const [batchSize, setBatchSize] = useState(1)
@@ -55,7 +75,8 @@ const Index = () => {
 
 	const { toast } = useToast()
 	const { isSignedIn } = useUser()
-	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } = useDailyLimit()
+	const { remainingCount, dailyLimit, isLimitReached, consumeGeneration } =
+		useDailyLimit()
 	const {
 		history,
 		filteredHistory,
@@ -105,12 +126,16 @@ const Index = () => {
 				'pattern', // 20%
 				'geometric', // 10%
 			]
-			const category = weightedCategories[Math.floor(Math.random() * weightedCategories.length)]
+			const category =
+				weightedCategories[
+					Math.floor(Math.random() * weightedCategories.length)
+				]
 
 			const complexities = ['simple', 'medium', 'complex'] as const
 			const config: InspirationConfig = {
 				category,
-				complexity: complexities[Math.floor(Math.random() * complexities.length)],
+				complexity:
+					complexities[Math.floor(Math.random() * complexities.length)],
 				canvasWidth: 800,
 				canvasHeight: 400,
 			}
@@ -120,7 +145,11 @@ const Index = () => {
 
 			// 清空画布并加载新路径
 			sketchCanvasRef.current?.clearCanvas()
-			await animatePathsDrawing(sketchCanvasRef, result.paths, result.animationDuration)
+			await animatePathsDrawing(
+				sketchCanvasRef,
+				result.paths,
+				result.animationDuration
+			)
 
 			// 填充推荐提示词
 			if (result.suggestedPrompts.length > 0) {
@@ -270,7 +299,9 @@ const Index = () => {
 
 				// 根据错误类型显示不同的提示
 				const errorMessage =
-					error instanceof AIServiceError ? error.message : '请检查网络连接后重试'
+					error instanceof AIServiceError
+						? error.message
+						: '请检查网络连接后重试'
 
 				toast({
 					title: '生成失败',
@@ -305,7 +336,7 @@ const Index = () => {
 	}, [])
 
 	return (
-		<div className="min-h-screen animated-gradient">
+		<div className="min-h-screen animated-gradient dreamy-gradient">
 			<OnboardingTour />
 			<Header onLogoClick={() => setShowStory(true)} />
 
@@ -432,14 +463,17 @@ const Index = () => {
 												{isSignedIn ? (
 													<p>
 														每日享有 {dailyLimit} 次生成机会
-														{dailyLimit < STARRED_DAILY_LIMIT && ' (Star 项目可解锁 1000 次)'}
+														{dailyLimit < STARRED_DAILY_LIMIT &&
+															' (Star 项目可解锁 1000 次)'}
 													</p>
 												) : (
 													<p>
 														当前为游客模式 (每日 {dailyLimit} 次)
 														<br />
-														<span className="font-bold text-primary">登录</span> 立即升级至每日{' '}
-														{AUTHENTICATED_DAILY_LIMIT} 次！
+														<span className="font-bold text-primary">
+															登录
+														</span>{' '}
+														立即升级至每日 {AUTHENTICATED_DAILY_LIMIT} 次！
 													</p>
 												)}
 											</TooltipContent>
@@ -517,7 +551,9 @@ const Index = () => {
 								<SketchCanvas
 									ref={sketchCanvasRef}
 									onExport={handleGenerate}
-									isGenerating={status === 'analyzing' || status === 'generating'}
+									isGenerating={
+										status === 'analyzing' || status === 'generating'
+									}
 									onCanvasChange={handleCanvasChange}
 									onInspirationClick={handleRandomInspiration}
 								/>
@@ -527,7 +563,10 @@ const Index = () => {
 						{/* Style Selector */}
 						<motion.div variants={slideUp} className="lg:col-span-1">
 							<div id="tour-style">
-								<StyleSelector selectedStyle={selectedStyle} onSelectStyle={setSelectedStyle} />
+								<StyleSelector
+									selectedStyle={selectedStyle}
+									onSelectStyle={setSelectedStyle}
+								/>
 							</div>
 
 							{/* Tips Section */}
@@ -561,20 +600,14 @@ const Index = () => {
 				</div>
 			</PageTransition>
 
-			<footer className="pt-6 pb-24 md:py-6 text-center space-y-4">
-				<p className="text-sm text-muted-foreground/60">大模型版本：Google Nano Banana Pro</p>
-				<div className="flex justify-center">
-					<a
-						href={GITHUB_REPO_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 text-sm text-muted-foreground/80 hover:text-foreground transition-colors"
-					>
-						<Github className="h-4 w-4" />
-						<span>GitHub</span>
-					</a>
-				</div>
-			</footer>
+			{/* 着陆页新增区域 */}
+			<FeaturesSection />
+			<HowItWorksSection />
+			<StyleGallerySection />
+			<TestimonialsSection />
+			<FAQSection />
+			<CTASection />
+			<Footer />
 
 			{/* Generation Result Modal */}
 			<GenerationResultView
@@ -615,7 +648,10 @@ const Index = () => {
 			/>
 
 			{/* 神笔马良故事弹窗 */}
-			<MaLiangIntroduction open={showStory} onClose={() => setShowStory(false)} />
+			<MaLiangIntroduction
+				open={showStory}
+				onClose={() => setShowStory(false)}
+			/>
 		</div>
 	)
 }
