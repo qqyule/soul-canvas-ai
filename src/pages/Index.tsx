@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
-import { Github, HelpCircle, History, Sparkles } from 'lucide-react'
+import { HelpCircle, History, Sparkles } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BatchSelector from '@/components/canvas/BatchSelector'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
@@ -12,6 +12,15 @@ import StyleSelector from '@/components/canvas/StyleSelector'
 import DraftRecoveryDialog from '@/components/drafts/DraftRecoveryDialog'
 import Header from '@/components/layout/Header'
 import PageTransition from '@/components/layout/page-transition'
+import {
+	FeaturesSection,
+	HowItWorksSection,
+	StyleGallerySection,
+	TestimonialsSection,
+	FAQSection,
+	CTASection,
+	Footer,
+} from '@/components/landing'
 import OnboardingTour from '@/components/OnboardingTour'
 import MaLiangIntroduction from '@/components/story/MaLiangIntroduction'
 import { Input } from '@/components/ui/input'
@@ -591,22 +600,14 @@ const Index = () => {
 				</div>
 			</PageTransition>
 
-			<footer className="pt-6 pb-24 md:py-6 text-center space-y-4">
-				<p className="text-sm text-muted-foreground/60">
-					大模型版本：Google Nano Banana Pro
-				</p>
-				<div className="flex justify-center">
-					<a
-						href={GITHUB_REPO_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 text-sm text-muted-foreground/80 hover:text-foreground transition-colors"
-					>
-						<Github className="h-4 w-4" />
-						<span>GitHub</span>
-					</a>
-				</div>
-			</footer>
+			{/* 着陆页新增区域 */}
+			<FeaturesSection />
+			<HowItWorksSection />
+			<StyleGallerySection />
+			<TestimonialsSection />
+			<FAQSection />
+			<CTASection />
+			<Footer />
 
 			{/* Generation Result Modal */}
 			<GenerationResultView
