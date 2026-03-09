@@ -18,6 +18,8 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .claude
+.agents
+.codex
 drizzle
 .DS_Store
 *.suo

@@ -4,6 +4,7 @@
  */
 
 import type { APINode, NodeHealth, NodeSelectionStrategy } from '@/types/api-node'
+import { getKieImageModel } from './kie-client'
 
 // ==================== 默认配置 ====================
 
@@ -31,7 +32,7 @@ export function getNodeConfigs(): APINode[] {
 			priority: 1, // 主节点，优先级最高
 			enabled: !!import.meta.env.VITE_KIE_API_KEY,
 			mode: 'async',
-			model: 'google/nano-banana-edit',
+			model: getKieImageModel(),
 		},
 		{
 			id: 'openrouter',

@@ -102,7 +102,7 @@ v2.5 版本在 v2.0 的基础上，进一步拓展了**多模态交互**与**工
 
 ### AI 服务 (2.0 升级)
 
-- **Primary**: [Kie.ai](https://kie.ai/) - Nano Banana Edit 模型，异步任务模式
+- **Primary**: [Kie.ai](https://kie.ai/) - 默认异步任务模式，支持 `edit` / `nano-banana-2` 灰度切换
 - **Fallback**: [OpenRouter](https://openrouter.ai/) - 多模型聚合，确保高可用
 
 ### 动画与 3D (2.0 新增)
@@ -129,11 +129,29 @@ pnpm install
 
 ### 3. 配置环境
 
-复制环境变量文件并填入配置（如 OpenRouter API Key）：
+在项目根目录创建 `.env.local`，至少配置以下变量：
 
-```bash
-cp .env.example .env.local
+```env
+VITE_KIE_API_KEY=your-kie-api-key
+VITE_KIE_IMAGE_API_VARIANT=edit
+# 可选：覆盖默认模型。未配置时，edit -> google/nano-banana-edit，nano-banana-2 -> nano-banana-2
+# 注意：如果设置了 VITE_KIE_IMAGE_MODEL，它必须与 VITE_KIE_IMAGE_API_VARIANT 匹配
+# VITE_KIE_IMAGE_MODEL=
+
+VITE_OPENROUTER_API_KEY=your-openrouter-api-key
+
+# kie 图片生成需要先把草图上传成公开 URL
+VITE_S3_REGION=your-region
+VITE_S3_BUCKET=your-bucket
+VITE_S3_ACCESS_KEY_ID=your-access-key
+VITE_S3_SECRET_ACCESS_KEY=your-secret-key
+# 可选：兼容 R2 等 S3 服务
+# VITE_S3_ENDPOINT=
+# VITE_S3_URL=
 ```
+
+如果要灰度切换到 `nano-banana-2`，将 `VITE_KIE_IMAGE_API_VARIANT` 改为 `nano-banana-2` 即可。
+当前默认会使用 `resolution=1K` 调用 `nano-banana-2`。
 
 ### 4. 启动开发
 

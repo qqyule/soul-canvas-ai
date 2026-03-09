@@ -10,6 +10,12 @@ import type {
 	KieCreateTaskResponse,
 	KieTaskResultResponse,
 } from '@/types/api-node'
+import {
+	extractKieResultUrls,
+	isKieTaskFailure,
+	isKieTaskPending,
+	isKieTaskSuccess,
+} from './kie-task'
 
 // ==================== 配置 ====================
 
@@ -220,6 +226,10 @@ async function pollTTSResult(
 ): Promise<string> {
 	const startTime = Date.now()
 
+	if (signal?.aborted) {
+		throw new DOMException('请求已取消', 'AbortError')
+	}
+
 	// 首次延迟
 	await delay(POLL_CONFIG.initialDelay)
 
@@ -237,31 +247,36 @@ async function pollTTSResult(
 
 		// 查询任务状态
 		const result = await getTTSTaskResult(taskId, signal)
+		const { state, failMsg, resultJson } = result.data
 
-		if (result.data.state === 'success') {
-			// 从 resultJson 中提取音频 URL
-			if (result.data.resultJson) {
-				try {
-					const parsed = JSON.parse(result.data.resultJson) as {
-						resultUrls?: string[]
-						audioUrl?: string
-					}
-					// 尝试多种可能的返回格式
-					const audioUrl = parsed.audioUrl || parsed.resultUrls?.[0]
-					if (audioUrl) {
-						return audioUrl
-					}
-				} catch (e) {
-					console.warn('[TTS] 解析 resultJson 失败:', e)
-				}
+		if (isKieTaskSuccess(state)) {
+			if (!resultJson) {
+				throw new Error('TTS 任务完成但未返回音频 URL')
 			}
 
-			throw new Error('TTS 任务完成但未返回音频 URL')
+			try {
+				const parsed = JSON.parse(resultJson) as {
+					resultUrls?: string[]
+					audioUrl?: string
+				}
+				const audioUrl = parsed.audioUrl || extractKieResultUrls(result)[0]
+				if (audioUrl) {
+					return audioUrl
+				}
+			} catch {
+				try {
+					return extractKieResultUrls(result)[0]
+				} catch {
+					throw new Error('TTS 任务完成但未返回音频 URL')
+				}
+			}
 		}
 
-		if (result.data.state === 'failed') {
-			throw new Error(`TTS 任务失败: ${result.data.failMsg || '未知错误'}`)
+		if (isKieTaskFailure(state)) {
+			throw new Error(`TTS 任务失败: ${failMsg || '未知错误'}`)
 		}
+
+		isKieTaskPending(state)
 
 		// 等待后继续轮询
 		await delay(POLL_CONFIG.interval)

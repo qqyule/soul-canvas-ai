@@ -5,6 +5,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 /**
@@ -31,17 +32,22 @@ const LOADING_MESSAGES = [
 
 interface PaintingLoadingProps {
 	className?: string
+	isComplete?: boolean
 }
+
+const PROGRESS_DURATION_MS = 60000
+const PROGRESS_TICK_MS = 200
 
 /**
  * 画笔作画加载动画
  * @param props - 组件属性
  * @returns 加载动画组件
  */
-const PaintingLoading = ({ className }: PaintingLoadingProps) => {
+const PaintingLoading = ({ className, isComplete = false }: PaintingLoadingProps) => {
 	const [messageIndex, setMessageIndex] = useState(
 		Math.floor(Math.random() * LOADING_MESSAGES.length)
 	)
+	const [progress, setProgress] = useState(0)
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -50,6 +56,22 @@ const PaintingLoading = ({ className }: PaintingLoadingProps) => {
 
 		return () => clearInterval(interval)
 	}, [])
+
+	useEffect(() => {
+		if (isComplete) {
+			setProgress(100)
+			return
+		}
+
+		const startTime = Date.now()
+		const interval = setInterval(() => {
+			const elapsed = Date.now() - startTime
+			const nextProgress = Math.min((elapsed / PROGRESS_DURATION_MS) * 100, 95)
+			setProgress(nextProgress)
+		}, PROGRESS_TICK_MS)
+
+		return () => clearInterval(interval)
+	}, [isComplete])
 
 	return (
 		<div className={cn('flex flex-col items-center gap-4', className)}>
@@ -206,23 +228,25 @@ const PaintingLoading = ({ className }: PaintingLoadingProps) => {
 				</AnimatePresence>
 			</div>
 
-			{/* 进度点动画 */}
-			<div className="flex gap-1">
-				{[0, 1, 2].map((i) => (
-					<motion.div
-						key={i}
-						className="w-1.5 h-1.5 rounded-full bg-primary/60"
-						animate={{
-							scale: [1, 1.3, 1],
-							opacity: [0.4, 1, 0.4],
-						}}
-						transition={{
-							duration: 1,
-							repeat: Infinity,
-							delay: i * 0.2,
-						}}
-					/>
-				))}
+			<div className="w-full max-w-xs space-y-3">
+				<Progress value={progress} className="h-2.5 bg-primary/10" />
+				<div className="flex justify-center gap-1">
+					{[0, 1, 2].map((i) => (
+						<motion.div
+							key={i}
+							className="w-1.5 h-1.5 rounded-full bg-primary/60"
+							animate={{
+								scale: [1, 1.3, 1],
+								opacity: [0.4, 1, 0.4],
+							}}
+							transition={{
+								duration: 1,
+								repeat: Infinity,
+								delay: i * 0.2,
+							}}
+						/>
+					))}
+				</div>
 			</div>
 		</div>
 	)

@@ -65,6 +65,38 @@ export interface NodeManagerConfig {
 
 // ==================== kie.ai 相关类型 ====================
 
+export type KieImageVariant = 'edit' | 'nano-banana-2'
+
+export type KieAspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4'
+
+export type KieResolution = '1K' | '2K' | '4K'
+
+export interface KieEditTaskInput {
+	/** 提示词 */
+	prompt: string
+	/** 输入图像 URL 列表 */
+	image_urls: string[]
+	/** 输出格式 */
+	output_format?: 'png' | 'jpeg' | 'webp'
+	/** 图像尺寸比例 */
+	image_size?: KieAspectRatio
+}
+
+export interface KieNanoBanana2TaskInput {
+	/** 提示词 */
+	prompt: string
+	/** 输入图像 URL 列表 */
+	image_input: string[]
+	/** 输出格式 */
+	output_format?: 'png' | 'jpeg' | 'webp'
+	/** 图像尺寸比例 */
+	aspect_ratio?: KieAspectRatio
+	/** 输出分辨率 */
+	resolution?: KieResolution
+	/** 是否启用 Google 搜索增强 */
+	google_search?: boolean
+}
+
 /**
  * kie.ai 异步任务创建请求
  */
@@ -74,16 +106,7 @@ export interface KieCreateTaskRequest {
 	/** 可选回调 URL */
 	callBackUrl?: string
 	/** 输入参数 */
-	input: {
-		/** 提示词 */
-		prompt: string
-		/** 输入图像 URL 列表 */
-		image_urls: string[]
-		/** 输出格式 */
-		output_format?: 'png' | 'jpeg' | 'webp'
-		/** 图像尺寸比例 */
-		image_size?: '1:1' | '16:9' | '9:16' | '4:3' | '3:4'
-	}
+	input: KieEditTaskInput | KieNanoBanana2TaskInput
 }
 
 /**
@@ -104,7 +127,15 @@ export interface KieCreateTaskResponse {
 /**
  * kie.ai 任务状态
  */
-export type KieTaskState = 'pending' | 'processing' | 'success' | 'failed'
+export type KieTaskState =
+	| 'waiting'
+	| 'queuing'
+	| 'generating'
+	| 'pending'
+	| 'processing'
+	| 'success'
+	| 'fail'
+	| 'failed'
 
 /**
  * kie.ai 任务结果响应
