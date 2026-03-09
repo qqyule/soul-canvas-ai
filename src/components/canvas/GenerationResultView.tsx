@@ -42,6 +42,7 @@ const GenerationResultView = ({
 	const [publishedIds, setPublishedIds] = useState<Set<number>>(new Set())
 	const [showHeroCardEditor, setShowHeroCardEditor] = useState(false)
 	const [showStorybookCreator, setShowStorybookCreator] = useState(false)
+	const [showLoadingState, setShowLoadingState] = useState(false)
 	const { toast } = useToast()
 	const { publish, isPublishing } = usePublishArtwork()
 
@@ -52,6 +53,22 @@ const GenerationResultView = ({
 			setPublishedIds(new Set())
 		}
 	}, [results])
+
+	useEffect(() => {
+		if (status === 'analyzing' || status === 'generating') {
+			setShowLoadingState(true)
+			return
+		}
+
+		if (status === 'complete') {
+			const timeout = window.setTimeout(() => {
+				setShowLoadingState(false)
+			}, 300)
+			return () => window.clearTimeout(timeout)
+		}
+
+		setShowLoadingState(false)
+	}, [status])
 
 	const activeResult = results ? results[selectedIndex] : null
 
@@ -142,9 +159,12 @@ const GenerationResultView = ({
 
 						{/* Content */}
 						<div className="p-6 flex-1 overflow-y-auto">
-							{status === 'analyzing' || status === 'generating' ? (
+							{showLoadingState ? (
 								<div className="flex flex-col items-center justify-center py-10 gap-8">
-									<PaintingLoading className="scale-125" />
+									<PaintingLoading
+										className="scale-125"
+										isComplete={status === 'complete'}
+									/>
 
 									{/* Progress Steps */}
 									<div className="flex items-center gap-4 mt-8 opacity-80 scale-90">

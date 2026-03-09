@@ -2,26 +2,34 @@
  * kie.ai API 客户端
  * 封装异步任务模式的图像生成 API
  *
- * 官方文档: https://docs.kie.ai/market/google/nano-banana-edit
+ * 官方文档:
+ * - https://docs.kie.ai/cn/market/google/nano-banana-edit
+ * - https://docs.kie.ai/cn/market/google/nano-banana-2
  */
 
 import { buildFinalPrompt } from '@/prompts'
 import type {
 	APIClient,
 	ImageGenerationParams,
+	KieAspectRatio,
 	KieCreateTaskRequest,
 	KieCreateTaskResponse,
+	KieImageVariant,
+	KieResolution,
 	KieTaskResultResponse,
 } from '@/types/api-node'
 import { isS3Configured, uploadImageToS3 } from './s3-upload'
+import {
+	extractKieResultUrls,
+	isKieTaskFailure,
+	isKieTaskPending,
+	isKieTaskSuccess,
+} from './kie-task'
 
 // ==================== 配置 ====================
 
 /** kie.ai API 基础 URL */
 const KIE_BASE_URL = import.meta.env.VITE_KIE_BASE_URL || 'https://api.kie.ai/api/v1'
-
-/** 默认模型 */
-const KIE_MODEL = import.meta.env.VITE_KIE_IMAGE_MODEL || 'google/nano-banana-edit'
 
 /** 轮询配置 */
 const POLL_CONFIG = {
@@ -30,7 +38,7 @@ const POLL_CONFIG = {
 	/** 轮询间隔（ms） */
 	interval: 3000,
 	/** 最大轮询时间（ms） */
-	maxTimeout: 60000,
+	maxTimeout: 180000,
 }
 
 // ==================== 工具函数 ====================
@@ -50,6 +58,63 @@ const getKieApiKey = (): string => {
  * 延迟函数
  */
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 获取 Kie 图片变体
+ */
+export const getKieImageVariant = (): KieImageVariant => {
+	return import.meta.env.VITE_KIE_IMAGE_API_VARIANT === 'nano-banana-2' ? 'nano-banana-2' : 'edit'
+}
+
+/**
+ * 获取 Kie 图片模型
+ */
+export const getKieImageModel = (variant = getKieImageVariant()): string => {
+	const configuredModel = import.meta.env.VITE_KIE_IMAGE_MODEL
+	if (configuredModel) {
+		return configuredModel
+	}
+
+	return variant === 'nano-banana-2' ? 'nano-banana-2' : 'google/nano-banana-edit'
+}
+
+const DEFAULT_ASPECT_RATIO: KieAspectRatio = '1:1'
+const DEFAULT_RESOLUTION: KieResolution = '1K'
+
+/**
+ * 构建 Kie 图像生成请求
+ */
+export const buildKieImageRequest = (
+	imageUrl: string,
+	prompt: string,
+	variant = getKieImageVariant()
+): KieCreateTaskRequest => {
+	const model = getKieImageModel(variant)
+
+	if (variant === 'nano-banana-2') {
+		return {
+			model,
+			input: {
+				prompt,
+				image_input: [imageUrl],
+				aspect_ratio: DEFAULT_ASPECT_RATIO,
+				resolution: DEFAULT_RESOLUTION,
+				output_format: 'png',
+				google_search: false,
+			},
+		}
+	}
+
+	return {
+		model,
+		input: {
+			prompt,
+			image_urls: [imageUrl],
+			output_format: 'png',
+			image_size: DEFAULT_ASPECT_RATIO,
+		},
+	}
+}
 
 /**
  * 将 Base64 图像上传到 S3 并返回公开 URL
@@ -159,6 +224,10 @@ async function getTaskResult(taskId: string, signal?: AbortSignal): Promise<KieT
 async function pollTaskResult(taskId: string, signal?: AbortSignal): Promise<string> {
 	const startTime = Date.now()
 
+	if (signal?.aborted) {
+		throw new DOMException('请求已取消', 'AbortError')
+	}
+
 	// 首次延迟
 	await delay(POLL_CONFIG.initialDelay)
 
@@ -176,27 +245,24 @@ async function pollTaskResult(taskId: string, signal?: AbortSignal): Promise<str
 
 		// 查询任务状态
 		const result = await getTaskResult(taskId, signal)
+		const { state, failMsg } = result.data
 
-		if (result.data.state === 'success') {
-			// 从 resultJson 中提取图片 URL
-			if (result.data.resultJson) {
-				try {
-					const parsed = JSON.parse(result.data.resultJson) as {
-						resultUrls?: string[]
-					}
-					if (parsed.resultUrls && parsed.resultUrls.length > 0) {
-						return parsed.resultUrls[0]
-					}
-				} catch (e) {
-					console.warn('[kie.ai] 解析 resultJson 失败:', e)
-				}
+		if (isKieTaskSuccess(state)) {
+			try {
+				return extractKieResultUrls(result)[0]
+			} catch (error) {
+				throw new KieAPIError(
+					error instanceof Error ? error.message.replace('结果 URL', '图像') : '任务完成但未返回图像'
+				)
 			}
-
-			throw new KieAPIError('任务完成但未返回图像')
 		}
 
-		if (result.data.state === 'failed') {
-			throw new KieAPIError(`任务失败: ${result.data.failMsg || '未知错误'}`)
+		if (isKieTaskFailure(state)) {
+			throw new KieAPIError(`任务失败: ${failMsg || '未知错误'}`)
+		}
+
+		if (!isKieTaskPending(state)) {
+			throw new KieAPIError(`任务状态未知: ${state}`)
 		}
 
 		// 等待后继续轮询
@@ -248,15 +314,7 @@ export function createKieClient(): APIClient {
 			const fullPrompt = buildFinalPrompt(stylePrompt, userPrompt)
 
 			// 创建任务请求
-			const request: KieCreateTaskRequest = {
-				model: KIE_MODEL,
-				input: {
-					prompt: fullPrompt,
-					image_urls: [imageUrl],
-					output_format: 'png',
-					image_size: '1:1',
-				},
-			}
+			const request = buildKieImageRequest(imageUrl, fullPrompt)
 
 			// 创建任务
 			const taskId = await createTask(request, signal)
