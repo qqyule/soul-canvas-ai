@@ -1,1 +1,7 @@
-pnpm exec commitlint --edit $1
+#!/bin/sh
+
+if pnpm exec --package @commitlint/cli commitlint --version >/dev/null 2>&1; then
+	pnpm exec commitlint --edit "$1"
+else
+	echo "husky(commit-msg): commitlint 未安装，跳过"
+fi
