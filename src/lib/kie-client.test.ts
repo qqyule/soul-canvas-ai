@@ -69,6 +69,15 @@ describe('kie-client', () => {
 		})
 	})
 
+	it('throws when configured model and variant do not match', () => {
+		vi.stubEnv('VITE_KIE_IMAGE_API_VARIANT', 'nano-banana-2')
+		vi.stubEnv('VITE_KIE_IMAGE_MODEL', 'google/nano-banana-edit')
+
+		expect(() =>
+			buildKieImageRequest('https://example.com/input.png', 'draw a fox', 'nano-banana-2')
+		).toThrow('Kie 图片模型与 variant 不匹配')
+	})
+
 	it('createTask returns task id on success', async () => {
 		;(global.fetch as any).mockResolvedValue({
 			ok: true,
@@ -167,6 +176,41 @@ describe('kie-client', () => {
 
 		await expect(promise).resolves.toBe('https://example.com/output.png')
 		expect(global.fetch).toHaveBeenCalledTimes(3)
+	})
+
+	it('pollTaskResult treats unknown states as pending and keeps polling', async () => {
+		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		;(global.fetch as any)
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					code: 200,
+					msg: 'ok',
+					data: { taskId: 'task-unknown', state: 'queued' as any },
+				}),
+			})
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					code: 200,
+					msg: 'ok',
+					data: {
+						taskId: 'task-unknown',
+						state: 'success',
+						resultJson: JSON.stringify({
+							resultUrls: ['https://example.com/output.png'],
+						}),
+					},
+				}),
+			})
+
+		const promise = pollTaskResult('task-unknown')
+		await vi.advanceTimersByTimeAsync(5000)
+
+		await expect(promise).resolves.toBe('https://example.com/output.png')
+		expect(warnSpy).toHaveBeenCalledWith(
+			'[kie-task] 遇到未识别的任务状态，按 pending 继续轮询: queued'
+		)
 	})
 
 	it('pollTaskResult throws on fail state', async () => {

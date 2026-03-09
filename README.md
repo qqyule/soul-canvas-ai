@@ -135,6 +135,7 @@ pnpm install
 VITE_KIE_API_KEY=your-kie-api-key
 VITE_KIE_IMAGE_API_VARIANT=edit
 # 可选：覆盖默认模型。未配置时，edit -> google/nano-banana-edit，nano-banana-2 -> nano-banana-2
+# 注意：如果设置了 VITE_KIE_IMAGE_MODEL，它必须与 VITE_KIE_IMAGE_API_VARIANT 匹配
 # VITE_KIE_IMAGE_MODEL=
 
 VITE_OPENROUTER_API_KEY=your-openrouter-api-key

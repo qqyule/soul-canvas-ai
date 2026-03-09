@@ -19,7 +19,16 @@ export function isKieTaskFailure(state: KieTaskState): boolean {
 }
 
 export function isKieTaskPending(state: KieTaskState): boolean {
-	return KIE_PENDING_STATES.has(state)
+	if (KIE_PENDING_STATES.has(state)) {
+		return true
+	}
+
+	if (!isKieTaskSuccess(state) && !isKieTaskFailure(state)) {
+		console.warn(`[kie-task] 遇到未识别的任务状态，按 pending 继续轮询: ${state}`)
+		return true
+	}
+
+	return false
 }
 
 export function extractKieResultUrls(result: KieTaskResultResponse): string[] {

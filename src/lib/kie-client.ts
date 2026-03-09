@@ -66,12 +66,29 @@ export const getKieImageVariant = (): KieImageVariant => {
 	return import.meta.env.VITE_KIE_IMAGE_API_VARIANT === 'nano-banana-2' ? 'nano-banana-2' : 'edit'
 }
 
+const isNanoBanana2Model = (model: string): boolean => model.toLowerCase().includes('nano-banana-2')
+
+const assertModelVariantCompatibility = (model: string, variant: KieImageVariant): void => {
+	if (variant === 'nano-banana-2' && !isNanoBanana2Model(model)) {
+		throw new KieAPIError(
+			`Kie 图片模型与 variant 不匹配：当前 variant=${variant}，但 VITE_KIE_IMAGE_MODEL=${model}。请改为 nano-banana-2 或移除该环境变量。`
+		)
+	}
+
+	if (variant === 'edit' && isNanoBanana2Model(model)) {
+		throw new KieAPIError(
+			`Kie 图片模型与 variant 不匹配：当前 variant=${variant}，但 VITE_KIE_IMAGE_MODEL=${model}。请将 variant 改为 nano-banana-2。`
+		)
+	}
+}
+
 /**
  * 获取 Kie 图片模型
  */
 export const getKieImageModel = (variant = getKieImageVariant()): string => {
 	const configuredModel = import.meta.env.VITE_KIE_IMAGE_MODEL
 	if (configuredModel) {
+		assertModelVariantCompatibility(configuredModel, variant)
 		return configuredModel
 	}
 
@@ -261,9 +278,7 @@ async function pollTaskResult(taskId: string, signal?: AbortSignal): Promise<str
 			throw new KieAPIError(`任务失败: ${failMsg || '未知错误'}`)
 		}
 
-		if (!isKieTaskPending(state)) {
-			throw new KieAPIError(`任务状态未知: ${state}`)
-		}
+		isKieTaskPending(state)
 
 		// 等待后继续轮询
 		await delay(POLL_CONFIG.interval)

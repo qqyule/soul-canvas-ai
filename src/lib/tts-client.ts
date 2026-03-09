@@ -276,9 +276,7 @@ async function pollTTSResult(
 			throw new Error(`TTS 任务失败: ${failMsg || '未知错误'}`)
 		}
 
-		if (!isKieTaskPending(state)) {
-			throw new Error(`TTS 任务状态未知: ${state}`)
-		}
+		isKieTaskPending(state)
 
 		// 等待后继续轮询
 		await delay(POLL_CONFIG.interval)

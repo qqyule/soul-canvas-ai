@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if pnpm exec --package lint-staged lint-staged --version >/dev/null 2>&1; then
+if [ -x "./node_modules/.bin/lint-staged" ]; then
 	pnpm exec lint-staged
 else
 	echo "husky(pre-commit): lint-staged 未安装，跳过"

@@ -83,4 +83,48 @@ describe('tts-client Kie state compatibility', () => {
 		await vi.advanceTimersByTimeAsync(1000)
 		await promise
 	})
+
+	it('keeps polling when TTS receives an unknown in-progress state', async () => {
+		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		;(global.fetch as any)
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					code: 200,
+					msg: 'ok',
+					data: { taskId: 'tts-task-3' },
+				}),
+			})
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					code: 200,
+					msg: 'ok',
+					data: { taskId: 'tts-task-3', state: 'queued' as any },
+				}),
+			})
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					code: 200,
+					msg: 'ok',
+					data: {
+						taskId: 'tts-task-3',
+						state: 'success',
+						resultJson: JSON.stringify({ audioUrl: 'https://example.com/audio.mp3' }),
+					},
+				}),
+			})
+
+		const promise = generateSpeech({ text: 'hello' })
+		await vi.advanceTimersByTimeAsync(3000)
+
+		await expect(promise).resolves.toEqual({
+			audioUrl: 'https://example.com/audio.mp3',
+			taskId: 'tts-task-3',
+		})
+		expect(warnSpy).toHaveBeenCalledWith(
+			'[kie-task] 遇到未识别的任务状态，按 pending 继续轮询: queued'
+		)
+	})
 })
