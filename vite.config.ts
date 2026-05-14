@@ -16,6 +16,20 @@ const config = {
 			'@': path.resolve(__dirname, './src'),
 		},
 	},
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ['react', 'react-dom', 'react-router-dom'],
+					clerk: ['@clerk/clerk-react'],
+					motion: ['framer-motion'],
+					three: ['three', '@react-three/fiber'],
+					pdf: ['jspdf', 'html2canvas'],
+					db: ['@neondatabase/serverless', 'drizzle-orm', 'drizzle-zod'],
+				},
+			},
+		},
+	},
 	test: {
 		globals: true,
 		environment: 'node',

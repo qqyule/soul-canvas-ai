@@ -8,9 +8,7 @@ import {
 	Sparkles,
 	X,
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { HeroCardEditor } from '@/components/cards'
-import { StorybookCreator } from '@/components/storybook'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { usePublishArtwork } from '@/hooks/use-community'
 import { useToast } from '@/hooks/use-toast'
@@ -31,6 +29,13 @@ const statusMessages: Record<GenerationStatus, string> = {
 	complete: '✨ 生成完成!',
 	error: '❌ 生成失败，请重试',
 }
+
+const HeroCardEditor = lazy(() =>
+	import('@/components/cards/HeroCardEditor').then((module) => ({ default: module.default }))
+)
+const StorybookCreator = lazy(() =>
+	import('@/components/storybook/StorybookCreator').then((module) => ({ default: module.default }))
+)
 
 const GenerationResultView = ({
 	results,
@@ -394,24 +399,30 @@ const GenerationResultView = ({
 			)}
 
 			{/* 英雄卡片编辑器 */}
-			{activeResult && (
-				<HeroCardEditor
-					key="hero-card-editor"
-					open={showHeroCardEditor}
-					onClose={() => setShowHeroCardEditor(false)}
-					imageUrl={activeResult.generatedImageUrl}
-					styleId={activeResult.style.id}
-					styleName={activeResult.style.nameZh}
-				/>
+			{activeResult && showHeroCardEditor && (
+				<Suspense fallback={null}>
+					<HeroCardEditor
+						key="hero-card-editor"
+						open={showHeroCardEditor}
+						onClose={() => setShowHeroCardEditor(false)}
+						imageUrl={activeResult.generatedImageUrl}
+						styleId={activeResult.style.id}
+						styleName={activeResult.style.nameZh}
+					/>
+				</Suspense>
 			)}
 
 			{/* 绘本创作器 */}
-			<StorybookCreator
-				key="storybook-creator"
-				open={showStorybookCreator}
-				onClose={() => setShowStorybookCreator(false)}
-				artworkImages={activeResult ? [activeResult.generatedImageUrl] : []}
-			/>
+			{showStorybookCreator && (
+				<Suspense fallback={null}>
+					<StorybookCreator
+						key="storybook-creator"
+						open={showStorybookCreator}
+						onClose={() => setShowStorybookCreator(false)}
+						artworkImages={activeResult ? [activeResult.generatedImageUrl] : []}
+					/>
+				</Suspense>
+			)}
 		</AnimatePresence>
 	)
 }

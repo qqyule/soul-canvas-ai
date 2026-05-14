@@ -1,10 +1,9 @@
 import { useUser } from '@clerk/clerk-react'
 import { motion } from 'framer-motion'
 import { HelpCircle, History, Sparkles } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import BatchSelector from '@/components/canvas/BatchSelector'
 import GenerationResultView from '@/components/canvas/GenerationResultView'
-import HistoryPanel from '@/components/canvas/HistoryPanel'
 import LimitExceededDialog from '@/components/canvas/LimitExceededDialog'
 import type { SketchCanvasRef } from '@/components/canvas/SketchCanvas'
 import SketchCanvas from '@/components/canvas/SketchCanvas'
@@ -44,6 +43,8 @@ import {
 	STYLE_PRESETS,
 	type StylePreset,
 } from '@/types/canvas'
+
+const HistoryPanel = lazy(() => import('@/components/canvas/HistoryPanel'))
 
 const Index = () => {
 	const [selectedStyle, setSelectedStyle] = useState<StylePreset>(STYLE_PRESETS[0])
@@ -595,18 +596,22 @@ const Index = () => {
 			/>
 
 			{/* 历史记录面板 */}
-			<HistoryPanel
-				open={showHistory}
-				onClose={() => setShowHistory(false)}
-				history={history}
-				filteredHistory={filteredHistory}
-				filter={filter}
-				onFilterChange={setFilter}
-				availableStyles={availableStyles}
-				onDelete={deleteFromHistory}
-				onDeleteMultiple={deleteMultiple}
-				onClearAll={clearAllHistory}
-			/>
+			{showHistory && (
+				<Suspense fallback={null}>
+					<HistoryPanel
+						open={showHistory}
+						onClose={() => setShowHistory(false)}
+						history={history}
+						filteredHistory={filteredHistory}
+						filter={filter}
+						onFilterChange={setFilter}
+						availableStyles={availableStyles}
+						onDelete={deleteFromHistory}
+						onDeleteMultiple={deleteMultiple}
+						onClearAll={clearAllHistory}
+					/>
+				</Suspense>
+			)}
 
 			{/* 草稿恢复对话框 */}
 			<DraftRecoveryDialog
