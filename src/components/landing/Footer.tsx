@@ -1,4 +1,4 @@
-import { Github, Heart } from 'lucide-react'
+import { Github } from 'lucide-react'
 import { GITHUB_REPO_URL } from '@/lib/storage'
 
 /**
@@ -33,9 +33,7 @@ export const Footer = () => {
 							<span>GitHub</span>
 						</a>
 						<span className="hidden sm:inline">·</span>
-						<span className="hidden sm:inline">
-							大模型：Google Nano Banana Pro
-						</span>
+						<span className="hidden sm:inline">大模型：Google Nano Banana Pro</span>
 					</div>
 
 					{/* 右侧：版权 */}

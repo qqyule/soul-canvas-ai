@@ -53,7 +53,7 @@ const ParticleNetwork = () => {
 	// 动画状态管理
 	const [animState, setAnimState] = useState<AnimationState>('IDLE')
 	const stateTimerRef = useRef(0)
-	const currentAnimalRef = useRef<AnimalType>('DRAGON')
+	const currentAnimalRef = useRef<AnimalType>('HORSE')
 
 	// 预计算所有动物的粒子位置
 	const animalShapes = useMemo(() => {

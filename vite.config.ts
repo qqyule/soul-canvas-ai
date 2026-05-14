@@ -2,10 +2,14 @@
 
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, type UserConfig } from 'vite'
+
+type UserConfigWithTest = UserConfig & {
+	test: Record<string, unknown>
+}
 
 // https://vite.dev/config/
-export default defineConfig({
+const config = {
 	plugins: [react()],
 	resolve: {
 		alias: {
@@ -22,4 +26,6 @@ export default defineConfig({
 			include: ['src/db/**/*.ts'],
 		},
 	},
-})
+} satisfies UserConfigWithTest
+
+export default defineConfig(config)

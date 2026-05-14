@@ -33,3 +33,6 @@ workers/.dev.vars
 
 # Vitest coverage
 coverage/
+
+# TypeScript build cache
+*.tsbuildinfo

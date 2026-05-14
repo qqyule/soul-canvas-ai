@@ -7,7 +7,6 @@ import { motion, AnimatePresence, type PanInfo } from 'framer-motion'
 import {
 	ArrowLeft,
 	ArrowRight,
-	ChevronLeft,
 	Loader2,
 	Pause,
 	Play,
@@ -22,11 +21,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { db, schema } from '@/db'
 import { eq } from 'drizzle-orm'
-import {
-	getGenreConfig,
-	type StorybookData,
-	type StoryPage,
-} from '@/types/storybook'
+import { getGenreConfig, type StorybookData, type StoryPage } from '@/types/storybook'
 import { cn } from '@/lib/utils'
 
 /**
@@ -103,11 +98,7 @@ const StorybookReader = () => {
 	 * 获取当前页面数据
 	 */
 	const getCurrentPageData = useCallback((): StoryPage | null => {
-		if (
-			!storybook ||
-			currentPage < 0 ||
-			currentPage >= storybook.pages.length
-		) {
+		if (!storybook || currentPage < 0 || currentPage >= storybook.pages.length) {
 			return null
 		}
 		return storybook.pages[currentPage]
@@ -145,7 +136,7 @@ const StorybookReader = () => {
 				audioRef.current.pause()
 			}
 		}
-	}, [currentPage, getCurrentPageData, autoPlay, isMuted])
+	}, [getCurrentPageData, autoPlay, isMuted])
 
 	/**
 	 * 切换播放/暂停
@@ -307,11 +298,7 @@ const StorybookReader = () => {
 								onClick={handleTogglePlay}
 								className="text-white hover:bg-white/20"
 							>
-								{isPlaying ? (
-									<Pause className="w-5 h-5" />
-								) : (
-									<Play className="w-5 h-5" />
-								)}
+								{isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
 							</Button>
 							<Button
 								variant="ghost"
@@ -319,11 +306,7 @@ const StorybookReader = () => {
 								onClick={handleToggleMute}
 								className="text-white hover:bg-white/20"
 							>
-								{isMuted ? (
-									<VolumeX className="w-5 h-5" />
-								) : (
-									<Volume2 className="w-5 h-5" />
-								)}
+								{isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
 							</Button>
 						</>
 					)}
@@ -373,9 +356,7 @@ const StorybookReader = () => {
 								transition={{ delay: 0.3 }}
 								className="space-y-3"
 							>
-								<h1 className="text-3xl sm:text-4xl font-bold text-white">
-									{storybook.title}
-								</h1>
+								<h1 className="text-3xl sm:text-4xl font-bold text-white">{storybook.title}</h1>
 								<div className="flex items-center justify-center gap-2 text-white/70">
 									<span className="text-xl">{genreConfig.icon}</span>
 									<span>{genreConfig.nameZh}</span>
@@ -434,9 +415,7 @@ const StorybookReader = () => {
 							key={i}
 							className={cn(
 								'w-2 h-2 rounded-full transition-all',
-								currentPage === i - 1
-									? 'bg-white w-4'
-									: 'bg-white/40 hover:bg-white/60'
+								currentPage === i - 1 ? 'bg-white w-4' : 'bg-white/40 hover:bg-white/60'
 							)}
 							onClick={() => setCurrentPage(i - 1)}
 							role="button"

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 /**
@@ -30,7 +31,7 @@ const AnimatedLogo = ({ size = 'md', animated = true, className }: AnimatedLogoP
 	const config = sizeConfig[size]
 
 	// 节点脉冲动画配置
-	const pulseVariants = {
+	const pulseVariants: Variants = {
 		idle: {
 			scale: 1,
 			opacity: 0.8,
@@ -47,7 +48,7 @@ const AnimatedLogo = ({ size = 'md', animated = true, className }: AnimatedLogoP
 	}
 
 	// 连线流动动画配置
-	const lineVariants = {
+	const lineVariants: Variants = {
 		idle: {
 			pathLength: 1,
 			opacity: 0.6,
@@ -64,7 +65,7 @@ const AnimatedLogo = ({ size = 'md', animated = true, className }: AnimatedLogoP
 	}
 
 	// 笔尖渐变动画
-	const penVariants = {
+	const penVariants: Variants = {
 		idle: { rotate: 0 },
 		hover: {
 			rotate: [0, -5, 5, 0],

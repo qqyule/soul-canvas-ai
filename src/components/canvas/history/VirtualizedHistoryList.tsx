@@ -65,7 +65,7 @@ const VirtualizedHistoryList = ({
 		observeElementOffset: (instance, cb) => {
 			if (!instance.scrollElement) return
 			const observer = new ResizeObserver(() => {
-				cb()
+				cb(instance.scrollElement?.scrollTop ?? 0, false)
 			})
 			observer.observe(instance.scrollElement)
 			return () => observer.disconnect()
