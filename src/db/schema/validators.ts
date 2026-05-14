@@ -22,10 +22,10 @@ const { createInsertSchema, createSelectSchema, createUpdateSchema } = createSch
 /** 用户插入验证 Schema */
 export const insertUserSchema = createInsertSchema(users, {
 	id: (schema) => schema.min(1, '用户 ID 不能为空'),
-	email: (schema) => schema.email('请输入有效的邮箱地址'),
+	email: (schema) => schema.pipe(z.email('请输入有效的邮箱地址')),
 	name: (schema) => schema.max(50, '用户名最长50个字符'),
 	provider: z.enum(['clerk', 'github', 'google', 'email']).optional().nullable(),
-	avatarUrl: (schema) => schema.url('请输入有效的 URL'),
+	avatarUrl: (schema) => schema.pipe(z.url('请输入有效的 URL')),
 })
 
 /** 用户查询结果验证 Schema */
@@ -34,7 +34,7 @@ export const selectUserSchema = createSelectSchema(users)
 /** 用户更新验证 Schema */
 export const updateUserSchema = createUpdateSchema(users, {
 	name: (schema) => schema.max(50),
-	avatarUrl: (schema) => schema.url(),
+	avatarUrl: (schema) => schema.pipe(z.url()),
 })
 
 // ==================== Artworks ====================
@@ -44,8 +44,8 @@ export const insertArtworkSchema = createInsertSchema(artworks, {
 	title: (schema) => schema.max(200, '标题最长200个字符'),
 	styleId: (schema) => schema.min(1, '风格ID不能为空'),
 	prompt: (schema) => schema.max(2000, '提示词最长2000个字符'),
-	sketchUrl: (schema) => schema.url('请输入有效的草图 URL'),
-	resultUrl: (schema) => schema.url('请输入有效的结果 URL'),
+	sketchUrl: (schema) => schema.pipe(z.url('请输入有效的草图 URL')),
+	resultUrl: (schema) => schema.pipe(z.url('请输入有效的结果 URL')),
 })
 
 /** 作品查询结果验证 Schema */
@@ -64,7 +64,7 @@ export const insertCustomStyleSchema = createInsertSchema(customStyles, {
 	description: (schema) => schema.max(500, '描述最长500个字符'),
 	promptTemplate: (schema) =>
 		schema.min(1, '提示词模板不能为空').max(2000, '提示词模板最长2000个字符'),
-	referenceImageUrl: (schema) => schema.url('请输入有效的参考图 URL'),
+	referenceImageUrl: (schema) => schema.pipe(z.url('请输入有效的参考图 URL')),
 })
 
 /** 自定义风格查询结果验证 Schema */

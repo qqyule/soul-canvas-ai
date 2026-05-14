@@ -1,19 +1,21 @@
 import { ClerkProvider } from '@clerk/clerk-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { lazy, Suspense } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
-import ThreeBackground from '@/components/effects/ThreeBackground'
 import ParticleBackground from '@/components/effects/ParticleBackground'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { Toaster } from '@/components/ui/toaster'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useUserSync } from '@/hooks/useUserSync'
-import AuthLayout from './components/layout/AuthLayout'
-import Login from './pages/auth/Login'
-import SignUpPage from './pages/auth/SignUp'
-import CommunityPage from './pages/Community'
-import Index from './pages/Index'
-import NotFound from './pages/NotFound'
-import StorybookReader from './pages/StorybookReader'
+
+const ThreeBackground = lazy(() => import('@/components/effects/ThreeBackground'))
+const AuthLayout = lazy(() => import('./components/layout/AuthLayout'))
+const Login = lazy(() => import('./pages/auth/Login'))
+const SignUpPage = lazy(() => import('./pages/auth/SignUp'))
+const CommunityPage = lazy(() => import('./pages/Community'))
+const Index = lazy(() => import('./pages/Index'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+const StorybookReader = lazy(() => import('./pages/StorybookReader'))
 
 const queryClient = new QueryClient()
 
@@ -30,33 +32,37 @@ const AppContent = () => {
 
 	return (
 		<TooltipProvider>
-			<ThreeBackground />
+			<Suspense fallback={null}>
+				<ThreeBackground />
+			</Suspense>
 			<ParticleBackground count={15} />
 			<Toaster />
 			<Sonner />
 			<HashRouter>
-				<Routes>
-					<Route path="/" element={<Index />} />
+				<Suspense fallback={null}>
+					<Routes>
+						<Route path="/" element={<Index />} />
 
-					{/* 社区画廊 */}
-					<Route path="/community" element={<CommunityPage />} />
-					<Route path="/community/:artworkId" element={<CommunityPage />} />
+						{/* 社区画廊 */}
+						<Route path="/community" element={<CommunityPage />} />
+						<Route path="/community/:artworkId" element={<CommunityPage />} />
 
-					{/* 用户资料 */}
-					<Route path="/user/:userId" element={<CommunityPage />} />
+						{/* 用户资料 */}
+						<Route path="/user/:userId" element={<CommunityPage />} />
 
-					{/* 有声书阅读器 */}
-					<Route path="/storybook/:storybookId" element={<StorybookReader />} />
+						{/* 有声书阅读器 */}
+						<Route path="/storybook/:storybookId" element={<StorybookReader />} />
 
-					{/* 认证路由 */}
-					<Route path="/auth" element={<AuthLayout />}>
-						<Route path="sign-in/*" element={<Login />} />
-						<Route path="sign-up/*" element={<SignUpPage />} />
-					</Route>
+						{/* 认证路由 */}
+						<Route path="/auth" element={<AuthLayout />}>
+							<Route path="sign-in/*" element={<Login />} />
+							<Route path="sign-up/*" element={<SignUpPage />} />
+						</Route>
 
-					{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-					<Route path="*" element={<NotFound />} />
-				</Routes>
+						{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</Suspense>
 			</HashRouter>
 		</TooltipProvider>
 	)

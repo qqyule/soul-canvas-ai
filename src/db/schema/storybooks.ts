@@ -3,15 +3,8 @@
  * @description 存储用户创建的有声绘本数据
  */
 
-import {
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-	uuid,
-	varchar,
-} from 'drizzle-orm/pg-core'
-import type { StoryGenre, StoryPage } from '@/types/storybook'
+import { jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import type { StoryGenre } from '@/types/storybook'
 
 /**
  * 绘本页面数据（用于 JSONB 存储）

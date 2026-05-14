@@ -96,7 +96,7 @@ async function createSignatureV4(
 	const encoder = new TextEncoder()
 
 	// 辅助函数：HMAC-SHA256
-	async function hmacSha256(key: ArrayBuffer, message: string): Promise<ArrayBuffer> {
+	async function hmacSha256(key: BufferSource, message: string): Promise<ArrayBuffer> {
 		const cryptoKey = await crypto.subtle.importKey(
 			'raw',
 			key,

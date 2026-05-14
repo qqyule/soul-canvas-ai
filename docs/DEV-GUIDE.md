@@ -111,11 +111,11 @@ docs/<文档内容>       # 文档更新
 pnpm dev
 
 # 数据库生成迁移文件
-npm run db:generate
+pnpm db:generate
 
 # 推送数据库变更
-npm run db:push
+pnpm db:push
 
 # 数据库 Studio
-npm run db:studio
+pnpm db:studio
 ```

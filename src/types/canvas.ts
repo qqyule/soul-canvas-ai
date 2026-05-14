@@ -2,6 +2,8 @@
  * 从 prompts 模块重新导出类型和预设
  * 保持向后兼容性
  */
+import type { StylePreset } from '@/prompts'
+
 export type { StylePreset } from '@/prompts'
 export { STYLE_PRESETS } from '@/prompts'
 

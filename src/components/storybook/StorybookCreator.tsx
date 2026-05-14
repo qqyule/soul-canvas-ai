@@ -4,14 +4,7 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-	BookOpen,
-	ChevronRight,
-	Download,
-	Globe,
-	Mic,
-	Sparkles,
-} from 'lucide-react'
+import { BookOpen, ChevronRight, Globe, Mic, Sparkles } from 'lucide-react'
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db, schema } from '@/db'
@@ -63,11 +56,7 @@ type CreatorStep = 'genre' | 'details' | 'preview'
 /**
  * 绘本创作入口组件
  */
-const StorybookCreator = ({
-	open,
-	onClose,
-	artworkImages = [],
-}: StorybookCreatorProps) => {
+const StorybookCreator = ({ open, onClose, artworkImages = [] }: StorybookCreatorProps) => {
 	const { toast } = useToast()
 	const navigate = useNavigate()
 
@@ -252,16 +241,7 @@ const StorybookCreator = ({
 			setGenerationProgress(0)
 			setGenerationStatus('')
 		}
-	}, [
-		toast,
-		handleClose,
-		navigate,
-		title,
-		selectedGenre,
-		language,
-		artworkImages,
-		enableTTS,
-	])
+	}, [toast, handleClose, navigate, title, selectedGenre, language, artworkImages, enableTTS])
 
 	const genreConfig = GENRE_CONFIGS.find((g) => g.id === selectedGenre)
 
@@ -273,9 +253,7 @@ const StorybookCreator = ({
 						<BookOpen className="w-5 h-5 text-primary" />
 						创作绘本
 					</DialogTitle>
-					<DialogDescription>
-						将您的艺术作品变成一本独特的故事书
-					</DialogDescription>
+					<DialogDescription>将您的艺术作品变成一本独特的故事书</DialogDescription>
 				</DialogHeader>
 
 				{/* 步骤指示器 */}
@@ -288,8 +266,8 @@ const StorybookCreator = ({
 									step === s
 										? 'bg-primary text-primary-foreground'
 										: i < ['genre', 'details', 'preview'].indexOf(step)
-										? 'bg-primary/20 text-primary'
-										: 'bg-muted text-muted-foreground'
+											? 'bg-primary/20 text-primary'
+											: 'bg-muted text-muted-foreground'
 								)}
 							>
 								{i + 1}
@@ -298,9 +276,7 @@ const StorybookCreator = ({
 								<div
 									className={cn(
 										'w-12 h-0.5 mx-1',
-										i < ['genre', 'details', 'preview'].indexOf(step)
-											? 'bg-primary/50'
-											: 'bg-muted'
+										i < ['genre', 'details', 'preview'].indexOf(step) ? 'bg-primary/50' : 'bg-muted'
 									)}
 								/>
 							)}
@@ -406,9 +382,7 @@ const StorybookCreator = ({
 										<span className="text-xl">{genreConfig.icon}</span>
 										<span className="font-medium">{genreConfig.nameZh}</span>
 									</div>
-									<p className="text-sm text-muted-foreground">
-										{genreConfig.description}
-									</p>
+									<p className="text-sm text-muted-foreground">{genreConfig.description}</p>
 								</div>
 							)}
 						</motion.div>
@@ -428,9 +402,7 @@ const StorybookCreator = ({
 									<Sparkles className="w-8 h-8 text-primary" />
 								</div>
 								<h3 className="text-xl font-bold mb-2">准备创作绘本</h3>
-								<p className="text-muted-foreground">
-									AI 将为您的故事生成精美插图和文字
-								</p>
+								<p className="text-muted-foreground">AI 将为您的故事生成精美插图和文字</p>
 							</div>
 
 							{/* 摘要信息 */}
@@ -454,9 +426,7 @@ const StorybookCreator = ({
 								{artworkImages.length > 0 && (
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">素材图片</span>
-										<span className="font-medium">
-											{artworkImages.length} 张
-										</span>
+										<span className="font-medium">{artworkImages.length} 张</span>
 									</div>
 								)}
 							</div>
@@ -465,12 +435,8 @@ const StorybookCreator = ({
 							{isGenerating && (
 								<div className="space-y-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
 									<div className="flex items-center justify-between text-sm">
-										<span className="text-muted-foreground">
-											{generationStatus}
-										</span>
-										<span className="font-mono text-primary">
-											{generationProgress}%
-										</span>
+										<span className="text-muted-foreground">{generationStatus}</span>
+										<span className="font-mono text-primary">{generationProgress}%</span>
 									</div>
 									<Progress value={generationProgress} className="h-2" />
 								</div>
@@ -487,10 +453,7 @@ const StorybookCreator = ({
 
 				{/* 底部操作 */}
 				<div className="flex justify-between pt-4 border-t border-border">
-					<Button
-						variant="ghost"
-						onClick={step === 'genre' ? handleClose : handleBack}
-					>
+					<Button variant="ghost" onClick={step === 'genre' ? handleClose : handleBack}>
 						{step === 'genre' ? '取消' : '上一步'}
 					</Button>
 
@@ -500,11 +463,7 @@ const StorybookCreator = ({
 							<ChevronRight className="w-4 h-4" />
 						</Button>
 					) : (
-						<Button
-							onClick={handleGenerate}
-							disabled={isGenerating}
-							className="gap-2"
-						>
+						<Button onClick={handleGenerate} disabled={isGenerating} className="gap-2">
 							{isGenerating ? (
 								<>
 									<div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

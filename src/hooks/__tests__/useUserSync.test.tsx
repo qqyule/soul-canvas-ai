@@ -62,7 +62,7 @@ describe('useUserSync', () => {
 		expect(usersRepository.upsertByEmail).not.toHaveBeenCalled()
 	})
 
-	it('should sync user if signed in and has email', () => {
+	it('should sync user if signed in and has email', async () => {
 		const mockUser: UserMock = {
 			id: 'user_123',
 			fullName: 'Test User',
@@ -81,13 +81,16 @@ describe('useUserSync', () => {
 
 		renderHook(() => useUserSync())
 
-		expect(usersRepository.upsertByEmail).toHaveBeenCalledTimes(1)
-		expect(usersRepository.upsertByEmail).toHaveBeenCalledWith({
-			email: 'test@example.com',
-			name: 'Test User',
-			avatarUrl: 'https://example.com/avatar.jpg',
-			provider: 'clerk',
-			providerId: 'user_123',
+		await waitFor(() => {
+			expect(usersRepository.upsertByEmail).toHaveBeenCalledTimes(1)
+			expect(usersRepository.upsertByEmail).toHaveBeenCalledWith({
+				id: 'user_123',
+				email: 'test@example.com',
+				name: 'Test User',
+				avatarUrl: 'https://example.com/avatar.jpg',
+				provider: 'clerk',
+				providerId: 'user_123',
+			})
 		})
 	})
 

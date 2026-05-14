@@ -3,7 +3,7 @@
  * @description 全局动效配置 (Framer Motion)
  */
 
-import type { Variants } from 'framer-motion'
+import type { Transition, Variants } from 'framer-motion'
 
 // -----------------------------------------------------------------------------
 // Transition Defaults
@@ -13,13 +13,13 @@ export const SPRING_TRANSITION = {
 	type: 'spring',
 	stiffness: 300,
 	damping: 30,
-}
+} satisfies Transition
 
 export const SMOOTH_TRANSITION = {
 	type: 'tween',
 	duration: 0.3,
 	ease: 'easeInOut',
-}
+} satisfies Transition
 
 // -----------------------------------------------------------------------------
 // Variants

@@ -1,16 +1,15 @@
-# 📚 开发文档索引
+# 开发文档索引
 
-> **神笔马良 2.0 开发文档中心**
-
----
+这里收集 Soul Canvas AI 的开发说明、历史规划和工程记录。新贡献者建议先读根目录 [README](../README.md) 和 [CONTRIBUTING](../CONTRIBUTING.md)。
 
 ## 📁 文档目录
 
 | 文档                                 | 描述                                               | 更新日期   |
 | ------------------------------------ | -------------------------------------------------- | ---------- |
-| [开发路线图](./DEV-ROADMAP.md)       | 2.0 版本全面升级规划，包含所有功能模块的状态追踪   | 2026-01-03 |
-| [P0 阶段开发指南](./P0-DEV-GUIDE.md) | 核心体验阶段的详细开发指南，包含技术要点和验收标准 | 2026-01-03 |
+| [开发指南](./DEV-GUIDE.md)           | 项目技术栈、开发流程和功能模块说明                 | 2026-01-05 |
 | [分支管理](./BRANCH-MANAGEMENT.md)   | 开发分支与功能的对应关系，分支命名规范             | 2026-01-03 |
+| [Neon 数据库 walkthrough](./WALKTHROUGH-NEON-DB.md) | Neon 与 Drizzle 相关配置说明        | -          |
+| [Code Review 记录](./CODE-REVIEW-2.0.md) | 2.0 阶段代码审查记录                         | -          |
 
 ---
 
@@ -18,41 +17,30 @@
 
 ### GitHub
 
-- [Issue #16 - 2.0 版本规划](https://github.com/qqyule/soul-canvas-ai/issues/16)
-- [项目看板](https://github.com/qqyule/soul-canvas-ai/projects)
+- [Issues](https://github.com/qqyule/soul-canvas-ai/issues)
+- [Pull Requests](https://github.com/qqyule/soul-canvas-ai/pulls)
+- [贡献指南](../CONTRIBUTING.md)
+- [安全披露](../SECURITY.md)
 
 ### 技术栈文档
 
-- [React 19 文档](https://react.dev/)
-- [Vite 6 文档](https://vite.dev/)
-- [Tailwind CSS 4 文档](https://tailwindcss.com/)
+- [React 18 文档](https://react.dev/)
+- [Vite 5 文档](https://vite.dev/)
+- [Tailwind CSS 3 文档](https://tailwindcss.com/)
 - [Drizzle ORM 文档](https://orm.drizzle.team/)
 - [Neon 文档](https://neon.tech/docs)
 - [Three.js 文档](https://threejs.org/docs/)
 
 ---
 
-## 📊 开发进度概览
+## 本地质量检查
 
-### P0 阶段 - 核心体验
-
-| #   | 功能            | 状态 | 分支                          |
-| --- | --------------- | ---- | ----------------------------- |
-| 1   | Neon 数据库集成 | 🟡   | `feature/neon-database`       |
-| 2   | 用户认证系统    | 🟡   | `feature/user-auth`           |
-| 3   | AI 执行容错性   | 🟡   | `feature/ai-error-handling`   |
-| 4   | 画板图层系统    | 🟡   | `feature/canvas-layer-system` |
-| 5   | 局部重绘功能    | 🟡   | `feature/inpainting`          |
-| 6   | 草稿自动保存    | 🟡   | `feature/auto-save-draft`     |
-
-### P1 阶段 - 差异化功能
-
-| #   | 功能             | 状态 | 分支                         |
-| --- | ---------------- | ---- | ---------------------------- |
-| 1   | Three.js 3D 效果 | 🟡   | `feature/threejs-effects`    |
-| 2   | 批量生成 & 变体  | 🟡   | `feature/batch-generation`   |
-| 3   | 自定义风格       | 🟡   | `feature/custom-styles`      |
-| 4   | 快捷键系统       | 🟡   | `feature/keyboard-shortcuts` |
+```bash
+pnpm lint:check
+pnpm typecheck
+pnpm test:run
+pnpm build
+```
 
 ---
 
@@ -60,4 +48,5 @@
 
 | 日期       | 更新内容           |
 | ---------- | ------------------ |
+| 2026-05-14 | 更新开源贡献入口与文档索引 |
 | 2026-01-03 | 初始化开发文档索引 |

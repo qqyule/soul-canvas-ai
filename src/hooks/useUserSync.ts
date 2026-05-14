@@ -1,6 +1,5 @@
 import { useUser } from '@clerk/clerk-react'
 import { useEffect, useState } from 'react'
-import { usersRepository } from '@/db/repositories/users'
 import { useToast } from '@/hooks/use-toast'
 
 /**
@@ -27,6 +26,7 @@ export const useUserSync = () => {
 					return
 				}
 
+				const { usersRepository } = await import('@/db/repositories/users')
 				await usersRepository.upsertByEmail({
 					id: user.id, // Clerk User ID 作为主键
 					email,

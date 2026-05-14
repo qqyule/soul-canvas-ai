@@ -17,6 +17,7 @@ describe('用户验证 Schema', () => {
 	describe('insertUserSchema', () => {
 		it('应该验证有效的用户数据', () => {
 			const validUser = {
+				id: 'user_123',
 				email: 'test@example.com',
 				name: '张三',
 				provider: 'github' as const,
@@ -28,6 +29,7 @@ describe('用户验证 Schema', () => {
 
 		it('应该拒绝无效的邮箱格式', () => {
 			const invalidUser = {
+				id: 'user_123',
 				email: 'invalid-email',
 				name: '张三',
 			}
@@ -37,6 +39,7 @@ describe('用户验证 Schema', () => {
 
 		it('应该允许 name 为空', () => {
 			const userWithoutName = {
+				id: 'user_123',
 				email: 'test@example.com',
 			}
 			const result = insertUserSchema.safeParse(userWithoutName)
@@ -45,6 +48,7 @@ describe('用户验证 Schema', () => {
 
 		it('应该拒绝超长的用户名', () => {
 			const userWithLongName = {
+				id: 'user_123',
 				email: 'test@example.com',
 				name: 'a'.repeat(51), // 超过 50 个字符
 			}
@@ -55,11 +59,12 @@ describe('用户验证 Schema', () => {
 		it('应该只接受有效的 provider 值', () => {
 			const validProviders = ['github', 'google', 'email'] as const
 			validProviders.forEach((provider) => {
-				const user = { email: 'test@example.com', provider }
+				const user = { id: `user_${provider}`, email: 'test@example.com', provider }
 				expect(insertUserSchema.safeParse(user).success).toBe(true)
 			})
 
 			const invalidProvider = {
+				id: 'user_123',
 				email: 'test@example.com',
 				provider: 'invalid',
 			}
@@ -68,12 +73,14 @@ describe('用户验证 Schema', () => {
 
 		it('应该验证 avatarUrl 格式', () => {
 			const validUrl = {
+				id: 'user_123',
 				email: 'test@example.com',
 				avatarUrl: 'https://example.com/avatar.png',
 			}
 			expect(insertUserSchema.safeParse(validUrl).success).toBe(true)
 
 			const invalidUrl = {
+				id: 'user_123',
 				email: 'test@example.com',
 				avatarUrl: 'not-a-url',
 			}
@@ -98,17 +105,21 @@ describe('作品验证 Schema', () => {
 	describe('insertArtworkSchema', () => {
 		it('应该验证有效的作品数据', () => {
 			const validArtwork = {
+				userId: 'user_123',
 				styleId: 'anime',
 				title: '测试作品',
 				prompt: '可爱的猫咪',
+				resultUrl: 'https://example.com/result.png',
 			}
 			expect(insertArtworkSchema.safeParse(validArtwork).success).toBe(true)
 		})
 
 		it('应该要求 styleId 不为空', () => {
 			const emptyStyleId = {
+				userId: 'user_123',
 				styleId: '',
 				title: '测试作品',
+				resultUrl: 'https://example.com/result.png',
 			}
 			const result = insertArtworkSchema.safeParse(emptyStyleId)
 			expect(result.success).toBe(false)
@@ -116,8 +127,10 @@ describe('作品验证 Schema', () => {
 
 		it('应该拒绝超长标题', () => {
 			const longTitle = {
+				userId: 'user_123',
 				styleId: 'anime',
 				title: 'a'.repeat(201), // 超过 200 个字符
+				resultUrl: 'https://example.com/result.png',
 			}
 			const result = insertArtworkSchema.safeParse(longTitle)
 			expect(result.success).toBe(false)
@@ -125,8 +138,10 @@ describe('作品验证 Schema', () => {
 
 		it('应该拒绝超长提示词', () => {
 			const longPrompt = {
+				userId: 'user_123',
 				styleId: 'anime',
 				prompt: 'a'.repeat(2001), // 超过 2000 个字符
+				resultUrl: 'https://example.com/result.png',
 			}
 			const result = insertArtworkSchema.safeParse(longPrompt)
 			expect(result.success).toBe(false)
@@ -134,12 +149,15 @@ describe('作品验证 Schema', () => {
 
 		it('应该验证 URL 格式', () => {
 			const invalidUrls = {
+				userId: 'user_123',
 				styleId: 'anime',
 				sketchUrl: 'not-a-url',
+				resultUrl: 'https://example.com/result.png',
 			}
 			expect(insertArtworkSchema.safeParse(invalidUrls).success).toBe(false)
 
 			const validUrls = {
+				userId: 'user_123',
 				styleId: 'anime',
 				sketchUrl: 'https://example.com/sketch.png',
 				resultUrl: 'https://example.com/result.png',
@@ -233,11 +251,11 @@ describe('收藏验证 Schema', () => {
 		})
 
 		it('应该拒绝无效的 UUID', () => {
-			const invalidUserId = {
-				userId: 'not-a-uuid',
-				artworkId: '550e8400-e29b-41d4-a716-446655440001',
+			const invalidArtworkId = {
+				userId: 'user_123',
+				artworkId: 'not-a-uuid',
 			}
-			const result = insertFavoriteSchema.safeParse(invalidUserId)
+			const result = insertFavoriteSchema.safeParse(invalidArtworkId)
 			expect(result.success).toBe(false)
 		})
 	})

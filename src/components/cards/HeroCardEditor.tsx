@@ -3,8 +3,8 @@
  * @description 用于自定义和导出英雄卡片
  */
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { Download, Sparkles, X } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Download, Sparkles } from 'lucide-react'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import html2canvas from 'html2canvas'
 import HeroCard from './HeroCard'
@@ -20,12 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
-import {
-	type CardRarity,
-	type HeroCardData,
-	RARITY_CONFIGS,
-	getRarityConfig,
-} from '@/types/hero-card'
+import { type CardRarity, type HeroCardData, RARITY_CONFIGS } from '@/types/hero-card'
 
 interface HeroCardEditorProps {
 	/** 是否打开 */
@@ -209,10 +204,7 @@ const HeroCardEditor = ({
 			console.error('Export failed:', error)
 			toast({
 				title: '导出失败',
-				description:
-					error instanceof Error
-						? error.message
-						: '无法导出卡片，请检查网络或重试。',
+				description: error instanceof Error ? error.message : '无法导出卡片，请检查网络或重试。',
 				variant: 'destructive',
 			})
 		} finally {
@@ -237,9 +229,7 @@ const HeroCardEditor = ({
 						<Sparkles className="w-5 h-5 text-primary" />
 						制作英雄卡片
 					</DialogTitle>
-					<DialogDescription>
-						为您的艺术作品创建一张独特的收藏卡片
-					</DialogDescription>
+					<DialogDescription>为您的艺术作品创建一张独特的收藏卡片</DialogDescription>
 				</DialogHeader>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
@@ -279,9 +269,7 @@ const HeroCardEditor = ({
 										<div className={cn('text-sm font-bold', config.titleColor)}>
 											★ {config.nameZh} ★
 										</div>
-										<div className="text-xs text-muted-foreground mt-1">
-											{config.name}
-										</div>
+										<div className="text-xs text-muted-foreground mt-1">{config.name}</div>
 										{rarity === config.id && (
 											<motion.div
 												layoutId="rarity-indicator"

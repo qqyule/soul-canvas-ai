@@ -58,7 +58,6 @@ async function loadChineseFont(): Promise<string> {
 			for (let i = 0; i < len; i += chunkSize) {
 				binary += String.fromCharCode.apply(
 					null,
-					// @ts-ignore
 					uint8Array.subarray(i, Math.min(i + chunkSize, len))
 				)
 			}
@@ -172,8 +171,7 @@ function wrapText(doc: jsPDF, text: string, maxWidth: number): string[] {
 	for (const char of words) {
 		const testLine = currentLine + char
 		const textWidth =
-			(doc.getStringUnitWidth(testLine) * PDF_CONFIG.bodyFontSize) /
-			doc.internal.scaleFactor
+			(doc.getStringUnitWidth(testLine) * PDF_CONFIG.bodyFontSize) / doc.internal.scaleFactor
 
 		if (textWidth > maxWidth && currentLine.length > 0) {
 			lines.push(currentLine)
@@ -195,10 +193,7 @@ function wrapText(doc: jsPDF, text: string, maxWidth: number): string[] {
 /**
  * 生成绘本封面页
  */
-async function generateCoverPage(
-	doc: jsPDF,
-	storybook: StorybookData
-): Promise<void> {
+async function generateCoverPage(doc: jsPDF, storybook: StorybookData): Promise<void> {
 	const { pageWidth, pageHeight, margin, titleFontSize } = PDF_CONFIG
 	const genreConfig = getGenreConfig(storybook.genre)
 
@@ -209,12 +204,7 @@ async function generateCoverPage(
 	// 装饰性边框
 	doc.setDrawColor(200, 180, 160)
 	doc.setLineWidth(0.5)
-	doc.rect(
-		margin - 5,
-		margin - 5,
-		pageWidth - 2 * margin + 10,
-		pageHeight - 2 * margin + 10
-	)
+	doc.rect(margin - 5, margin - 5, pageWidth - 2 * margin + 10, pageHeight - 2 * margin + 10)
 
 	// 封面图片
 	if (storybook.coverUrl) {
@@ -240,12 +230,9 @@ async function generateCoverPage(
 	// 类型标签
 	doc.setFontSize(14)
 	doc.setTextColor(120, 100, 80)
-	doc.text(
-		`${genreConfig.icon} ${genreConfig.nameZh}`,
-		pageWidth / 2,
-		titleY + 15,
-		{ align: 'center' }
-	)
+	doc.text(`${genreConfig.icon} ${genreConfig.nameZh}`, pageWidth / 2, titleY + 15, {
+		align: 'center',
+	})
 
 	// 创建日期
 	doc.setFontSize(10)
@@ -271,14 +258,8 @@ async function generateStoryPage(
 	pageIndex: number,
 	totalPages: number
 ): Promise<void> {
-	const {
-		pageWidth,
-		pageHeight,
-		margin,
-		bodyFontSize,
-		pageNumberFontSize,
-		imageHeightRatio,
-	} = PDF_CONFIG
+	const { pageWidth, pageHeight, margin, bodyFontSize, pageNumberFontSize, imageHeightRatio } =
+		PDF_CONFIG
 
 	// 页面背景
 	doc.setFillColor(255, 255, 255)
@@ -323,12 +304,9 @@ async function generateStoryPage(
 	// 页码
 	doc.setFontSize(pageNumberFontSize)
 	doc.setTextColor(150, 150, 150)
-	doc.text(
-		`- ${pageIndex + 1} / ${totalPages} -`,
-		pageWidth / 2,
-		pageHeight - margin + 5,
-		{ align: 'center' }
-	)
+	doc.text(`- ${pageIndex + 1} / ${totalPages} -`, pageWidth / 2, pageHeight - margin + 5, {
+		align: 'center',
+	})
 }
 
 // ==================== 公开 API ====================

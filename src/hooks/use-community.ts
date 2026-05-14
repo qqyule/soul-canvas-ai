@@ -6,12 +6,6 @@
 import { useUser } from '@clerk/clerk-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import {
-	getArtworkDetail,
-	getCommunityFeed,
-	publishArtwork,
-	toggleArtworkLike,
-} from '@/lib/community-service'
 import type {
 	ArtworkCardData,
 	ArtworkDetailData,
@@ -73,6 +67,7 @@ export const useCommunityFeed = (options: UseCommunityFeedOptions = {}): UseComm
 			setError(null)
 
 			try {
+				const { getCommunityFeed } = await import('@/lib/community-service')
 				const response = await getCommunityFeed({
 					page,
 					limit: pageSize,
@@ -174,6 +169,7 @@ export const useArtworkDetail = (artworkId: string): UseArtworkDetailReturn => {
 		setError(null)
 
 		try {
+			const { getArtworkDetail } = await import('@/lib/community-service')
 			const detail = await getArtworkDetail(artworkId, user?.id)
 			setArtwork(detail)
 		} catch (err) {
@@ -230,6 +226,7 @@ export const usePublishArtwork = (): UsePublishArtworkReturn => {
 			setIsPublishing(true)
 
 			try {
+				const { publishArtwork } = await import('@/lib/community-service')
 				const result = await publishArtwork(user.id, params)
 				toast({
 					title: '发布成功！🎉',
@@ -290,6 +287,7 @@ export const useLikeArtwork = (): UseLikeArtworkReturn => {
 			setLikingIds((prev) => new Set(prev).add(artworkId))
 
 			try {
+				const { toggleArtworkLike } = await import('@/lib/community-service')
 				const result = await toggleArtworkLike(user.id, artworkId)
 				return result
 			} catch (err) {
