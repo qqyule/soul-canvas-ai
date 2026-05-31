@@ -59,7 +59,7 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 		setIsLimitReached(checkLimitReached(currentLimit))
 	}, [getCurrentLimit])
 
-	// 当登录状态变化时，自动刷新
+	// 当登录状态变化或组件挂载时刷新状态（兼顾跨日期情况）
 	useEffect(() => {
 		refresh()
 	}, [refresh])
@@ -104,11 +104,6 @@ export const useDailyLimit = (): UseDailyLimitReturn => {
 		},
 		[remainingCount, refresh, getCurrentLimit]
 	)
-
-	// 组件挂载时刷新状态（处理跨日期情况）
-	useEffect(() => {
-		refresh()
-	}, [refresh])
 
 	return {
 		remainingCount,
