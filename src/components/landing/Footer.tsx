@@ -33,7 +33,15 @@ export const Footer = () => {
 							<span>GitHub</span>
 						</a>
 						<span className="hidden sm:inline">·</span>
-						<span className="hidden sm:inline">大模型：Google Nano Banana Pro</span>
+						<span className="hidden sm:inline-flex items-center gap-1.5 text-emerald-400">
+							<span>⚡</span>
+							<span>由</span>
+							<span className="font-semibold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+								GPT-Image-2
+							</span>
+							<span>最新生图模型驱动</span>
+							<span className="px-1 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-400 font-bold">NEW</span>
+						</span>
 					</div>
 
 					{/* 右侧：版权 */}

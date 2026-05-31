@@ -342,6 +342,20 @@ const Index = () => {
 							<span>草图即灵感，AI 来绘制</span>
 						</motion.div>
 
+						{/* GPT 最新生图模型提示横幅 */}
+						<motion.div
+							initial={{ opacity: 0, y: 10 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.5, delay: 0.15 }}
+							className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 text-sm font-semibold bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-500/20 border border-emerald-400/40 text-emerald-300 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-shadow"
+						>
+							<span className="text-base">⚡</span>
+							<span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+								由 GPT-Image-2 最新生图模型驱动
+							</span>
+							<span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/30 text-emerald-300 font-bold tracking-wider">NEW</span>
+						</motion.div>
+
 						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">
 							<motion.span
 								initial={{ opacity: 0, y: 20 }}

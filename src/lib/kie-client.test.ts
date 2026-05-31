@@ -69,6 +69,40 @@ describe('kie-client', () => {
 		})
 	})
 
+	it('builds gpt-image-2 payload with image_urls and quality fields', () => {
+		vi.stubEnv('VITE_KIE_IMAGE_API_VARIANT', 'gpt-image-2')
+
+		expect(
+			buildKieImageRequest('https://example.com/input.png', 'draw a fox', 'gpt-image-2')
+		).toEqual({
+			model: 'gpt-image-2-image-to-image',
+			input: {
+				prompt: 'draw a fox',
+				image_urls: ['https://example.com/input.png'],
+				output_format: 'png',
+				image_size: '1:1',
+				quality: 'high',
+			},
+		})
+	})
+
+	it('uses gpt-image-2 as default variant when no env set', () => {
+		vi.stubEnv('VITE_KIE_IMAGE_API_VARIANT', '')
+
+		expect(
+			buildKieImageRequest('https://example.com/input.png', 'draw a fox')
+		).toEqual({
+			model: 'gpt-image-2-image-to-image',
+			input: {
+				prompt: 'draw a fox',
+				image_urls: ['https://example.com/input.png'],
+				output_format: 'png',
+				image_size: '1:1',
+				quality: 'high',
+			},
+		})
+	})
+
 	it('throws when configured model and variant do not match', () => {
 		vi.stubEnv('VITE_KIE_IMAGE_API_VARIANT', 'nano-banana-2')
 		vi.stubEnv('VITE_KIE_IMAGE_MODEL', 'google/nano-banana-edit')
