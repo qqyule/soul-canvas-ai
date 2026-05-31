@@ -3,6 +3,7 @@
  * 封装异步任务模式的图像生成 API
  *
  * 官方文档:
+ * - https://docs.kie.ai/market/gpt/gpt-image-2-image-to-image （默认：GPT-Image-2 图生图）
  * - https://docs.kie.ai/cn/market/google/nano-banana-edit
  * - https://docs.kie.ai/cn/market/google/nano-banana-2
  */
@@ -61,12 +62,19 @@ const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 
 /**
  * 获取 Kie 图片变体
+ * 默认使用 gpt-image-2（GPT 最新生图模型）
  */
 export const getKieImageVariant = (): KieImageVariant => {
-	return import.meta.env.VITE_KIE_IMAGE_API_VARIANT === 'nano-banana-2' ? 'nano-banana-2' : 'edit'
+	const env = import.meta.env.VITE_KIE_IMAGE_API_VARIANT
+	if (env === 'nano-banana-2') return 'nano-banana-2'
+	if (env === 'edit') return 'edit'
+	return 'gpt-image-2' // 默认使用 GPT-Image-2 最新模型
 }
 
 const isNanoBanana2Model = (model: string): boolean => model.toLowerCase().includes('nano-banana-2')
+
+const isGptImage2Model = (model: string): boolean =>
+	model.toLowerCase().includes('gpt-image-2')
 
 const assertModelVariantCompatibility = (model: string, variant: KieImageVariant): void => {
 	if (variant === 'nano-banana-2' && !isNanoBanana2Model(model)) {
@@ -75,15 +83,22 @@ const assertModelVariantCompatibility = (model: string, variant: KieImageVariant
 		)
 	}
 
-	if (variant === 'edit' && isNanoBanana2Model(model)) {
+	if (variant === 'edit' && (isNanoBanana2Model(model) || isGptImage2Model(model))) {
 		throw new KieAPIError(
-			`Kie 图片模型与 variant 不匹配：当前 variant=${variant}，但 VITE_KIE_IMAGE_MODEL=${model}。请将 variant 改为 nano-banana-2。`
+			`Kie 图片模型与 variant 不匹配：当前 variant=${variant}，但 VITE_KIE_IMAGE_MODEL=${model}。请将 variant 改为对应值。`
+		)
+	}
+
+	if (variant === 'gpt-image-2' && !isGptImage2Model(model)) {
+		throw new KieAPIError(
+			`Kie 图片模型与 variant 不匹配：当前 variant=${variant}，但 VITE_KIE_IMAGE_MODEL=${model}。请改为 gpt-image-2-image-to-image 或移除该环境变量。`
 		)
 	}
 }
 
 /**
  * 获取 Kie 图片模型
+ * 默认优先使用 gpt-image-2-image-to-image（GPT 最新生图模型）
  */
 export const getKieImageModel = (variant = getKieImageVariant()): string => {
 	const configuredModel = import.meta.env.VITE_KIE_IMAGE_MODEL
@@ -92,7 +107,9 @@ export const getKieImageModel = (variant = getKieImageVariant()): string => {
 		return configuredModel
 	}
 
-	return variant === 'nano-banana-2' ? 'nano-banana-2' : 'google/nano-banana-edit'
+	if (variant === 'nano-banana-2') return 'nano-banana-2'
+	if (variant === 'gpt-image-2') return 'gpt-image-2-image-to-image'
+	return 'google/nano-banana-edit'
 }
 
 const DEFAULT_ASPECT_RATIO: KieAspectRatio = '1:1'
@@ -122,6 +139,21 @@ export const buildKieImageRequest = (
 		}
 	}
 
+	if (variant === 'gpt-image-2') {
+		// GPT-Image-2 图生图模式，参数结构与 edit 相同
+		return {
+			model,
+			input: {
+				prompt,
+				image_urls: [imageUrl],
+				output_format: 'png',
+				image_size: DEFAULT_ASPECT_RATIO,
+				quality: 'high',
+			},
+		}
+	}
+
+	// edit variant（google/nano-banana-edit）
 	return {
 		model,
 		input: {

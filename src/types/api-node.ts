@@ -65,7 +65,7 @@ export interface NodeManagerConfig {
 
 // ==================== kie.ai 相关类型 ====================
 
-export type KieImageVariant = 'edit' | 'nano-banana-2'
+export type KieImageVariant = 'edit' | 'nano-banana-2' | 'gpt-image-2'
 
 export type KieAspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4'
 
@@ -80,6 +80,25 @@ export interface KieEditTaskInput {
 	output_format?: 'png' | 'jpeg' | 'webp'
 	/** 图像尺寸比例 */
 	image_size?: KieAspectRatio
+}
+
+/**
+ * GPT-Image-2 图生图任务输入参数
+ * 对应 gpt-image-2-image-to-image 模型
+ */
+export interface KieGptImage2TaskInput {
+	/** 提示词 */
+	prompt: string
+	/** 输入图像 URL 列表 */
+	image_urls: string[]
+	/** 输出格式 */
+	output_format?: 'png' | 'jpeg' | 'webp'
+	/** 图像尺寸比例 */
+	image_size?: KieAspectRatio
+	/** 图像质量：low | medium | high | auto */
+	quality?: 'low' | 'medium' | 'high' | 'auto'
+	/** 生成数量（1-10）*/
+	n?: number
 }
 
 export interface KieNanoBanana2TaskInput {
@@ -106,7 +125,7 @@ export interface KieCreateTaskRequest {
 	/** 可选回调 URL */
 	callBackUrl?: string
 	/** 输入参数 */
-	input: KieEditTaskInput | KieNanoBanana2TaskInput
+	input: KieEditTaskInput | KieNanoBanana2TaskInput | KieGptImage2TaskInput
 }
 
 /**
